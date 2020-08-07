@@ -140,14 +140,31 @@ namespace HitomiViewer.Processor
             HttpResponseMessage response = await client.GetAsync(url);
             return await response.Content.ReadAsStringAsync();
         }
+        public async Task<string> LoadRange(int start, int end, string url = null)
+        {
+            url = url ?? this.url;
+            if (url.Last() == '/') url = url.Remove(url.Length - 1);
+            HttpClient client = new HttpClient();
+            client.DefaultRequestHeaders.Range = new System.Net.Http.Headers.RangeHeaderValue(start, end);
+            HttpResponseMessage response = await client.GetAsync(url);
+            return await response.Content.ReadAsStringAsync();
+        }
+        public async Task<byte[]> LoadRangeByte(int start, int end, string url = null)
+        {
+            url = url ?? this.url;
+            if (url.Last() == '/') url = url.Remove(url.Length - 1);
+            HttpClient client = new HttpClient();
+            client.DefaultRequestHeaders.Range = new System.Net.Http.Headers.RangeHeaderValue(start, end);
+            HttpResponseMessage response = await client.GetAsync(url);
+            return await response.Content.ReadAsByteArrayAsync();
+        }
         public int[] ByteArrayToIntArray(byte[] arr)
         {
             List<int> intarr = new List<int>();
             int co = arr.Length / 4;
             for (var i = 0; i < co; i++)
             {
-                byte[] iarr = new byte[4];
-                iarr = arr.ToList().Skip(i * 4).Take(4).ToArray();
+                byte[] iarr = arr.ToList().Skip(i * 4).Take(4).ToArray();
                 intarr.Add(BitConverter.ToInt32(iarr.Reverse().ToArray(), 0));
             }
             return intarr.ToArray();

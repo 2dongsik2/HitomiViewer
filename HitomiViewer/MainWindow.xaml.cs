@@ -49,6 +49,7 @@ namespace HitomiViewer
         public MainWindow()
         {
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(ResolveAssembly);
+            new InternetP().LoadQuery("kr");
             new LoginClass().Run();
             new Config().GetConfig().Save();
             InitializeComponent();
@@ -494,14 +495,6 @@ namespace HitomiViewer
             hitomi.FastDefault();
             hitomi.FastParser();
         }
-        private void Hitomi_Search_Text_KeyDown(object sender, KeyEventArgs e)
-        {
-
-        }
-        public void Hitomi_Search_Button_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
         private void OpenSetting_Click(object sender, RoutedEventArgs e)
         {
             new Settings().Show();
@@ -638,6 +631,72 @@ namespace HitomiViewer
             }
         }
 
+        private void Hitomi_Search_Text_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter) Task.Factory.StartNew(() =>
+            {
+                Thread.Sleep(500);
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => Hitomi_Search_Button_Click(null, null)));
+            });
+        }
+        public void Hitomi_Search_Button_Click(object sender, RoutedEventArgs e)
+        {
+            string[] tags = Hitomi_Search_Text.Text.Split(' ');
+            List<int> idlist = new List<int>();
+            int index = GetPage();
+            int compcount = 0;
+            List<Task> tasks = new List<Task>();
+            label.Content = "0/" + tags.Length;
+            label.Visibility = Visibility.Visible;
+            foreach (string tag in tags)
+            {
+                Thread th = new Thread(new ThreadStart(async () =>
+                {
+                    if (HiyobiTags.Tags.Select(y => y.name).Contains(tag))
+                    {
+                        InternetP parser = new InternetP();
+                        parser.url = $"https://ltn.hitomi.la/tag/{tag}-all.nozomi";
+                        parser.index = index - 1;
+                        parser.count = (int)1000;
+                        int[] ids = parser.ByteArrayToIntArray(await parser.LoadNozomi());
+                        Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => 
+                            idlist = idlist.Concat(ids).ToList()));
+                    }
+                    else
+                    {
+                        InternetP parser = new InternetP();
+                        int[] ids = await parser.LoadQuery(tag);
+                        Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
+                            idlist = idlist.Concat(ids).ToList()));
+                        Console.WriteLine("Completed");
+                    }
+                    compcount++;
+                    Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
+                        label.Content = $"{compcount}/{tags.Length}"));
+                }));
+                th.Start();
+            }
+            int PageCount = (int)Page_itemCount;
+            Task.Factory.StartNew(() =>
+            {
+                while (compcount != tags.Length) { }
+                List<int> new_idlist = new List<int>();
+                for (int i = 0; i < idlist.Count; i++)
+                {
+                    int count = idlist.Count(y => y == idlist[i]);
+                    if (count == tags.Length) new_idlist.Add(idlist[i]);
+                    if (new_idlist.Count >= PageCount) break;
+                }
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+                {
+                    MainPanel.Children.Clear();
+                    LabelSetup();
+                    HitomiLoader hitomi = new HitomiLoader();
+                    hitomi.FastDefault();
+                    hitomi.FastParser(new_idlist.ToArray());
+                }));
+            });
+        }
         private void Hitomi_Search_TagOnly_Text_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter) Task.Factory.StartNew(() =>

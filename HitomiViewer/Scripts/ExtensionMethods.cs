@@ -176,6 +176,7 @@ namespace ExtensionMethods
         #endregion
 
         public static async void TaskCallback<T>(this Task<T> Task, Action<T> callback) where T : class => callback(await Task);
+        public static async void then<T>(this Task<T> Task, Action<T> callback) where T : class => callback(await Task);
         public static bool ToBool(this int i) => Convert.ToBoolean(i);
         public static void RemoveAllEvents(this EventHandler events)
         {
