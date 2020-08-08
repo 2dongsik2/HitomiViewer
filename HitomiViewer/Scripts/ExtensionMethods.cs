@@ -115,7 +115,7 @@ namespace ExtensionMethods
             int res;
             if (config == null) return null;
             if (!config.ContainsKey(path)) return null;
-            if (int.TryParse(config[path].ToString(), out res)) return null;
+            if (!int.TryParse(config[path].ToString(), out res)) return null;
             return res;
         }
         public static double? DoubleValue(this JObject config, string path)
@@ -150,7 +150,7 @@ namespace ExtensionMethods
             int res;
             if (config == null) return null;
             if (config[path] == null) return null;
-            if (int.TryParse(config[path].ToString(), out res)) return null;
+            if (!int.TryParse(config[path].ToString(), out res)) return null;
             return res;
         }
         public static double? DoubleValue(this JToken config, string path)

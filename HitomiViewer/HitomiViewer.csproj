@@ -303,9 +303,6 @@
     <Resource Include="Resources\hitomi.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="FunctionList.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\Updater.exe" />
   </ItemGroup>
   <ItemGroup>

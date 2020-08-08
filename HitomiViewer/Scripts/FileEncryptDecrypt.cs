@@ -42,9 +42,17 @@ namespace HitomiViewer.Scripts
             }
         }
         public static void DownloadAsync(string url, string path) => DownloadAsync(new Uri(url), path);
-        public static void DownloadAsync(Uri url, string path)
+        public static void DownloadAsync(Uri url, string path, bool hitomi = false)
         {
             WebClient wc = new WebClient();
+            if (hitomi) wc.Headers.Add("referer", "https://hitomi.la/");
+            wc.DownloadDataAsync(url, path);
+            Console.WriteLine(url.OriginalString);
+            wc.DownloadDataCompleted += (object sender2, DownloadDataCompletedEventArgs e2)
+                => File.WriteAllBytes(e2.UserState.ToString(), Encrypt(e2.Result, FilePassword.Password));
+        }
+        public static void DownloadAsync(WebClient wc, Uri url, string path)
+        {
             wc.DownloadDataAsync(url, path);
             wc.DownloadDataCompleted += (object sender2, DownloadDataCompletedEventArgs e2)
                 => File.WriteAllBytes(e2.UserState.ToString(), Encrypt(e2.Result, FilePassword.Password));
@@ -99,7 +107,7 @@ namespace HitomiViewer.Scripts
     }
     class FilePassword
     {
-        public static string Password => Default(Global.OrginPassword);
+        public static string Password => Default(Global.OriginPassword);
         public static string Default(string org) => SHA256.Hash(org);
     }
 }

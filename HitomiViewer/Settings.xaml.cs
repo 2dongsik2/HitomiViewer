@@ -76,7 +76,7 @@ namespace HitomiViewer
             CheckPassword(ref config);
             CheckTitle(ref config);
             CheckTags(ref config);
-            if (Global.OrginPassword == null)
+            if (Global.OriginPassword == null)
                 new LoginClass().Run();
             if (SafeData.IsChecked ?? false)
                 Global.Password = FilePassword.Password;
@@ -129,7 +129,10 @@ namespace HitomiViewer
             if (Password.IsChecked.Value)
             {
                 if (!config.ContainsKey(password))
-                    config[password] = SHA256.Hash(new InputBox("비밀번호를 입력해주세요.", "비밀번호 설정", "").ShowDialog());
+                {
+                    Global.OriginPassword = new InputBox("비밀번호를 입력해주세요.", "비밀번호 설정", "").ShowDialog();
+                    config[password] = SHA256.Hash(Global.OriginPassword);
+                }
                 config[file_encrypt] = FileEncrypt.IsChecked.Value;
                 if (FileEncrypt.IsChecked.Value == true)
                     config[download_file_encrypt] = AutoEncryption.IsChecked.Value;
@@ -216,7 +219,7 @@ namespace HitomiViewer
                 }
             }
             MessageBox.Show("복호화 완료");
-            config["pw"] = SHA256.Hash(new InputBox("비밀번호를 입력해주세요.", "비밀번호 설정", "").ShowDialog());
+            config[password] = FilePassword.Default(new InputBox("비밀번호를 입력해주세요.", "비밀번호 설정", "").ShowDialog());
             cfg.Save(config);
             foreach (string file in decs)
             {

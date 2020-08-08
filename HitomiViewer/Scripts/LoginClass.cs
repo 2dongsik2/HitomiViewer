@@ -40,7 +40,7 @@ namespace HitomiViewer.Scripts
                 {
                     byte[] Decrypt = FileDecrypt.Decrypt(BOrigin, FilePassword.Default(lw.Password.Password));
                     string SOrigin = Encoding.UTF8.GetString(Decrypt);
-                    Global.OrginPassword = lw.Password.Password;
+                    Global.OriginPassword = lw.Password.Password;
                 }
                 catch { Environment.Exit(0); }
             }
@@ -58,7 +58,7 @@ namespace HitomiViewer.Scripts
                 LoginWindow lw = new LoginWindow();
                 lw.CheckPassword = CheckPassword2;
                 if (!lw.ShowDialog().Value) Environment.Exit(0);
-                Global.OrginPassword = lw.Password.Password;
+                Global.OriginPassword = lw.Password.Password;
             }
         }
 

@@ -28,7 +28,7 @@ namespace HitomiViewer
         public const int RandomStringLength = 16;
         //[Obsolete("Password is deprecated, please use OriginPassword instead.", true)]
         public static string Password = null;
-        public static string OrginPassword = null;
+        public static string OriginPassword = null;
         public static string DownloadFolder = null;
         public static bool FileEn = false;
         public static bool AutoFileEn = false;

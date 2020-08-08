@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -19,6 +20,7 @@ namespace HitomiViewer.Processor
         private string index_dir = "tagindex";
         private string galleries_index_dir = "galleriesindex";
         private int max_node_size = 464;
+        private bool adapose = false;
 
         public async Task<Hitomi> HitomiData()
         {
@@ -117,7 +119,10 @@ namespace HitomiViewer.Processor
             List<string> files = new List<string>();
             foreach (JToken tag1 in jObject["files"])
             {
-                files.Add($"https://aa.hitomi.la/webp/{HitomiFullPath(tag1["hash"].ToString())}.webp");
+                string name = tag1.StringValue("name");
+                string hash = tag1.StringValue("hash");
+                bool haswebp = Convert.ToBoolean(tag1.IntValue("haswebp") ?? 0);
+                files.Add(ImageUrlFromImage(name, hash, haswebp, false));
             }
             return files;
         }
@@ -194,7 +199,6 @@ namespace HitomiViewer.Processor
         {
             Node node = new Node();
             var pos = 0;
-            //if (BitConverter.IsLittleEndian) data = data.Reverse().ToArray();
 
             var number_of_keys = GetBigEndian32(data, pos);
             pos += 4;
@@ -231,16 +235,17 @@ namespace HitomiViewer.Processor
 
             var number_of_subnode_addresses = 16 + 1;
             var subnode_addresses = new List<int>();
-            for (var i = 0; i<number_of_subnode_addresses; i++) {
-                    var subnode_address = GetBigEndian64(data, pos);
-                    pos += 8;
-                    subnode_addresses.Add(subnode_address);
+            for (var i = 0; i < number_of_subnode_addresses; i++)
+            {
+                var subnode_address = GetBigEndian64(data, pos);
+                pos += 8;
+                subnode_addresses.Add(subnode_address);
             }
 
             node.keys = keys;
             node.datas = datas;
             node.subnode_addresses = subnode_addresses;
-        
+
             return node;
         }
         public async Task<int[]> B_search(string field, byte[] key, Node node)
@@ -294,6 +299,85 @@ namespace HitomiViewer.Processor
                 }
             }
             return galleryids.ToArray();
+        }
+
+        public string ImageUrlFromImage(string name, string hash, bool haswebp, bool no_webp)
+        {
+            string webp = null;
+            if (hash != null && haswebp && !no_webp)
+            {
+                webp = "webp";
+            }
+
+            return UrlFromUrl(UrlFromHash(name, hash, webp));
+        }
+        public string UrlFromHash(string name, string hash, string dir = null, string ext = null)
+        {
+            ext = ext ?? dir ?? name.Split('.').Last();
+            dir = dir ?? "images";
+
+            return "https://a.hitomi.la/" + dir + "/" + FullPathFromHash(hash) + "." + ext;
+        }
+        public string FullPathFromHash(string hash)
+        {
+            if (hash.Length < 3)
+            {
+                return hash;
+            }
+            return Regex.Replace(hash, @"^.*(..)(.)$", @"$2/$1/" + hash);
+        }
+        public string UrlFromUrl(string url, string base1 = null)
+        {
+            return Regex.Replace(url, @"\/\/..?\.hitomi\.la\/", "//" + SubdomainFromUrl(url, base1) + ".hitomi.la/");
+        }
+        public string SubdomainFromUrl(string url, string base1 = null)
+        {
+            var retval = "a";
+            if (base1 != null)
+            {
+                retval = base1;
+            }
+
+            var number_of_frontends = 3;
+            var b = 16;
+
+            var r = @"\/[0-9a-f]\/([0-9a-f]{2})\/";
+            var m = Regex.Match(url, r);
+            if (m == null)
+            {
+                return retval;
+            }
+            string m1 = m.Groups[1].Value;
+
+            try
+            {
+                var g = Convert.ToInt32(m1, b);
+
+                if (g < 0x30)
+                {
+                    number_of_frontends = 2;
+                }
+                if (g < 0x09)
+                {
+                    g = 1;
+                }
+                return SubdomainFromGalleryId(g, number_of_frontends) + retval;
+            }
+            catch
+            {
+                return retval;
+            }
+        }
+        public char SubdomainFromGalleryId(int g, int number_of_frontends)
+        {
+            if (adapose)
+            {
+                return '0';
+            }
+
+            var o = g % number_of_frontends;
+
+            return Convert.ToChar(97 + o);
         }
 
         public Tuple<bool, int> locate_key(byte[] key, Node node)

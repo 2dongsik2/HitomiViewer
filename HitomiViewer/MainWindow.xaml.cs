@@ -9,6 +9,7 @@ using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -49,7 +50,6 @@ namespace HitomiViewer
         public MainWindow()
         {
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(ResolveAssembly);
-            new InternetP().LoadQuery("kr");
             new LoginClass().Run();
             new Config().GetConfig().Save();
             InitializeComponent();
@@ -676,7 +676,8 @@ namespace HitomiViewer
                 }));
                 th.Start();
             }
-            int PageCount = (int)Page_itemCount;
+            int start = (int)((index - 1) * Page_itemCount);
+            int PageCount = (int)(start + Page_itemCount);
             Task.Factory.StartNew(() =>
             {
                 while (compcount != tags.Length) { }
@@ -687,6 +688,7 @@ namespace HitomiViewer
                     if (count == tags.Length) new_idlist.Add(idlist[i]);
                     if (new_idlist.Count >= PageCount) break;
                 }
+                new_idlist = new_idlist.Skip(start).ToList();
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
                     MainPanel.Children.Clear();

@@ -444,7 +444,7 @@ namespace HitomiViewer.UserControls
                     {
                         h.encrypted = Global.AutoFileEn;
                         if (Global.AutoFileEn)
-                            FileEncrypt.DownloadAsync(new Uri(file), $"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/{i}.jpg.lock");
+                            FileEncrypt.DownloadAsync(wc, new Uri(file), $"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/{i}.jpg.lock");
                         else wc.DownloadFileAsync(new Uri(file), $"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/{i}.jpg");
                     }
                 }
@@ -654,7 +654,7 @@ namespace HitomiViewer.UserControls
                 if (!hiyobi) wc.Headers.Add("referer", "https://hitomi.la/");
                 h.encrypted = Global.AutoFileEn;
                 if (Global.AutoFileEn)
-                    FileEncrypt.DownloadAsync(new Uri(file), $"{folder}/{i}.jpg.lock");
+                    FileEncrypt.DownloadAsync(new Uri(file), $"{folder}/{i}.jpg.lock", !hiyobi);
                 else
                     wc.DownloadFileAsync(new Uri(file), $"{folder}/{i}.jpg");
                 if (i == 0) wc.DownloadFileCompleted += ImageDownloadCompleted;
