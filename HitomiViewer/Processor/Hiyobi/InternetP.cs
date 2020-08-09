@@ -74,7 +74,8 @@ namespace HitomiViewer.Processor
             h.authors = item["artists"].Select(x => x.StringValue("display")).ToArray();
             h.id = item.StringValue("id");
             h.language = item.StringValue("language");
-            h.tags = item["tags"].Select(x => new Tag { name = x.StringValue("display"), types = Tag.ParseTypes(x.StringValue("value")) }).ToList();
+            h.tags = item["tags"].Select(x => Tag.Parse(x.StringValue("display"))).ToList();
+            //h.tags = item["tags"].Select(x => new Tag { name = x.StringValue("display"), types = Tag.ParseTypes(x.StringValue("value")) }).ToList();
             h.name = item.StringValue("title");
             h.designType = DesignTypeFromString(item.StringValue("type"));
             h.thumbpath = $"https://cdn.hiyobi.me/tn/{h.id}.jpg";

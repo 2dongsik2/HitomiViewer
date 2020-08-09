@@ -102,6 +102,7 @@ namespace ExtensionMethods
                 && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
             return result;
         }
+        public static bool isNull(this string s) => s == null;
 
         #region JSON
         public static string StringValue(this JObject config, string path)

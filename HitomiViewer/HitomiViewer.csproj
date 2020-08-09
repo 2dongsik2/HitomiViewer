@@ -125,6 +125,7 @@
     <Compile Include="LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Processor\Cache\Cache.cs" />
     <Compile Include="Processor\Hitomi\InternetP.cs" />
     <Compile Include="Processor\Hiyobi\InternetP.cs" />
     <Compile Include="Processor\Json\InternetP.cs" />
@@ -138,6 +139,7 @@
     <Compile Include="Processor\Internet\CheckUpdate.cs" />
     <Compile Include="Scripts\Config.cs" />
     <Compile Include="Scripts\File.cs" />
+    <Compile Include="Scripts\Invoker.cs" />
     <Compile Include="Scripts\Random.cs" />
     <Compile Include="Processor\Hiyobi\Tags.cs" />
     <Compile Include="UserControls\CountBox.cs" />
@@ -162,6 +164,9 @@
     <Compile Include="Processor\Internet\InternetP.cs" />
     <Compile Include="Scripts\LoginClass.cs" />
     <Compile Include="Structs\Tag.cs" />
+    <Compile Include="UserControls\ProgressBox.xaml.cs">
+      <DependentUpon>ProgressBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\tag.xaml.cs">
       <DependentUpon>tag.xaml</DependentUpon>
     </Compile>
@@ -194,6 +199,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Style\Style1.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\ProgressBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

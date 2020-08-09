@@ -6,6 +6,7 @@ namespace HitomiViewer.Structs
     {
         public Types types { get; set; }
         public string name { get; set; }
+        public string full { get; set; }
         public enum Types
         {
             female,
@@ -18,7 +19,40 @@ namespace HitomiViewer.Structs
             series,
             none
         }
+        public bool Hitomi = true;
 
+        public void FullNameParse(string value)
+        {
+            if (value.Contains(":"))
+            {
+                this.full = value;
+                this.name = NameParse(this.full);
+            }
+            else
+            {
+                this.full = this.types.ToString() + value;
+                this.name = value;
+            }
+        }
+        public void Check()
+        {
+            Hitomi = isHitomi(full);
+        }
+
+        public static Tag Parse(string value)
+        {
+            if (!value.Contains(":")) return null;
+            Tag tag = new Tag();
+            tag.types = ParseTypes(value);
+            tag.Hitomi = isHitomi(value);
+            tag.name = value.Split(':')[1];
+            tag.full = value;
+            return tag;
+        }
+        public static string NameParse(string value)
+        {
+            return value.Split(':')[1];
+        }
         public static Types ParseTypes(string value)
         {
             if (value.Contains(":"))
@@ -48,6 +82,17 @@ namespace HitomiViewer.Structs
             }
             else
                 return Types.tag;
+        }
+        public static bool isHitomi(string value)
+        {
+            if (value == null) return false;
+            if (value.Contains(":"))
+            {
+                Types type;
+                return Enum.TryParse<Types>(value.Split(':')[0], out type);
+            }
+            else
+                return false;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using ExtensionMethods;
 using HitomiViewer.Encryption;
 using HitomiViewer.Processor;
+using HitomiViewer.Processor.Cache;
 using HitomiViewer.Scripts;
 using HitomiViewer.Scripts.Loaders;
 using HitomiViewer.Structs;
@@ -50,6 +51,8 @@ namespace HitomiViewer
         public MainWindow()
         {
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(ResolveAssembly);
+            Global.dispatcher = Dispatcher;
+            //Task.Factory.StartNew(new Cache().TagCache);
             new LoginClass().Run();
             new Config().GetConfig().Save();
             InitializeComponent();
@@ -200,7 +203,8 @@ namespace HitomiViewer
         {
             foreach (HitomiPanel hitomiPanel in MainPanel.Children)
             {
-                HitomiPanel.ChangeColor(hitomiPanel);
+                hitomiPanel.ChangeColor();
+                //HitomiPanel.ChangeColor(hitomiPanel);
             }
         }
         private void SetFolderSort(FolderSorts sorts)
@@ -310,6 +314,7 @@ namespace HitomiViewer
             Global.panelcolor = Color.FromRgb(76, 76, 76);
             Global.fontscolor = Colors.White;
             Global.outlineclr = Colors.White;
+            Global.artistsclr = Colors.SkyBlue;
             this.Background = new SolidColorBrush(Global.background);
             MainMenuBackground.Color = Global.Menuground;
             foreach (MenuItem menuItem in MainMenu.Items)
@@ -333,6 +338,7 @@ namespace HitomiViewer
             Global.panelcolor = Colors.White;
             Global.fontscolor = Colors.Black;
             Global.outlineclr = Colors.Black;
+            Global.artistsclr = Colors.Blue;
             this.Background = new SolidColorBrush(Global.background);
             MainMenuBackground.Color = Global.Menuground;
             foreach (MenuItem menuItem in MainMenu.Items)
@@ -650,9 +656,21 @@ namespace HitomiViewer
             label.Visibility = Visibility.Visible;
             foreach (string tag in tags)
             {
+                if (Global.CacheSearch)
+                {
+                    Tag tag2 = Structs.Tag.Parse(tag);
+                    string path = Path.Combine(rootDir, "Cache", tag2.types.ToString(), tag2.name + "json");
+                    if (File.Exists(path))
+                    {
+                        JArray arr = JArray.Parse(File.ReadAllText(path));
+                        int[] ids = arr.Select(x => int.Parse(x.ToString())).ToArray();
+                        idlist = idlist.Concat(ids).ToList();
+                        continue;
+                    }
+                }
                 Thread th = new Thread(new ThreadStart(async () =>
                 {
-                    if (HiyobiTags.Tags.Select(y => y.name).Contains(tag))
+                    if (HiyobiTags.Tags.Select(y => y.full).Contains(tag))
                     {
                         InternetP parser = new InternetP();
                         parser.url = $"https://ltn.hitomi.la/tag/{tag}-all.nozomi";
@@ -711,7 +729,7 @@ namespace HitomiViewer
         {
             string[] tags = Hitomi_Search_TagOnly_Text.Text.Split(' ');
             string[] tagstart = Enum.GetNames(typeof(Tag.Types));
-            tags = tags.Where(x => HiyobiTags.Tags.Select(y => y.name).Contains(x))
+            tags = tags.Where(x => HiyobiTags.Tags.Select(y => y.full).Contains(x))
                        .Where(x => tagstart.Any(x.ToLower().StartsWith)).ToArray();
             if (tags.Length <= 0)
             {
@@ -722,6 +740,18 @@ namespace HitomiViewer
             int index = GetPage();
             foreach (string tag in tags)
             {
+                if (Global.CacheSearch)
+                {
+                    Tag tag2 = Structs.Tag.Parse(tag);
+                    string path = Path.Combine(rootDir, "Cache", tag2.types.ToString(), tag2.name + "json");
+                    if (File.Exists(path))
+                    {
+                        JArray arr = JArray.Parse(File.ReadAllText(path));
+                        int[] ids2 = arr.Select(x => int.Parse(x.ToString())).ToArray();
+                        idlist = idlist.Concat(ids2).ToList();
+                        continue;
+                    }
+                }
                 InternetP parser = new InternetP();
                 parser.url = $"https://ltn.hitomi.la/tag/{tag}-all.nozomi";
                 parser.index = index - 1;

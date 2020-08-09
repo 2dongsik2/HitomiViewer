@@ -38,6 +38,7 @@ namespace HitomiViewer
         public const string except_tags = "except-tags";
         public const string favorites = "favorites";
         public const string block_tags = "block_tags";
+        public const string cache_search = "cachesearch";
 
         private List<string> ExceptTagList = new List<string>();
 
@@ -53,6 +54,7 @@ namespace HitomiViewer
             InitTitle(config);
             InitTags(config);
             SafeData.IsChecked = (!File.Exists(Global.Config.path)) && File.Exists(Global.Config.encryptpath);
+            CacheSearch.IsChecked = config.BoolValue(cache_search) ?? false;
         }
 
         private void Update()
@@ -80,6 +82,10 @@ namespace HitomiViewer
                 new LoginClass().Run();
             if (SafeData.IsChecked ?? false)
                 Global.Password = FilePassword.Password;
+
+            Global.CacheSearch = CacheSearch.IsChecked ?? false;
+            config[cache_search] = Global.CacheSearch;
+
             cfg.encrypt = SafeData.IsChecked ?? false;
             if (cfg.encrypt) File.Delete(Global.Config.path);
 

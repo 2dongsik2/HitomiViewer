@@ -22,13 +22,15 @@ namespace HitomiViewer.Processor
             {
                 InternetP parser = new InternetP();
                 JArray tags = await parser.HiyobiTags();
-                Tags = tags.Select(x => new Tag { name = x.ToString(), types = Tag.ParseTypes(x.ToString()) }).ToList();
+                Tags = tags.Select(x => Tag.Parse(x.ToString())).ToList();
+                //Tags = tags.Select(x => new Tag { name = x.ToString(), types = Tag.ParseTypes(x.ToString()), Hitomi = Tag.isHitomi(x.ToString()) }).ToList();
                 File.WriteAllText(path, tags.ToString());
             }
             else
             {
                 JArray tags = JArray.Parse(File.ReadAllText(path));
-                Tags = tags.Select(x => new Tag { name = x.ToString(), types = Tag.ParseTypes(x.ToString()) }).ToList();
+                Tags = tags.Select(x => Tag.Parse(x.ToString())).ToList();
+                //Tags = tags.Select(x => new Tag { name = x.ToString(), types = Tag.ParseTypes(x.ToString()), Hitomi = Tag.isHitomi(x.ToString()) }).ToList();
             }
         }
     }

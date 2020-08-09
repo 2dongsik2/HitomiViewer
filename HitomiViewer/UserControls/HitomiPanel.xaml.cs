@@ -113,121 +113,82 @@ namespace HitomiViewer.UserControls
             if (SizePerPage > GB)
                 sizeperpageLabel.Content = Math.Round(SizePerPage / GB, 2) + "GB";
 
-            ChangeColor(this);
             HitomiInfo hInfo = null;
             Uri uriResult;
             bool result = Uri.TryCreate(h.dir, UriKind.Absolute, out uriResult)
                 && ((uriResult.Scheme == Uri.UriSchemeHttp) || (uriResult.Scheme == Uri.UriSchemeHttps));
-            if (h.tags.Count > 0)
+            if (h.tags.Count <= 0)
             {
-                foreach (Tag tag in h.tags)
+                if (File.Exists(System.IO.Path.Combine(h.dir, "info.json")))
                 {
-                    tag tag1 = new tag
-                    {
-                        TagType = tag.types,
-                        TagName = tag.name
-                    };
-                    switch (tag.types)
-                    {
-                        case Structs.Tag.Types.female:
-                            tag1.TagColor = new SolidColorBrush(Color.FromRgb(255, 94, 94));
-                            break;
-                        case Structs.Tag.Types.male:
-                            tag1.TagColor = new SolidColorBrush(Color.FromRgb(65, 149, 244));
-                            break;
-                        case Structs.Tag.Types.tag:
-                        default:
-                            tag1.TagColor = new SolidColorBrush(Color.FromRgb(153, 153, 153));
-                            break;
-                    }
-                    tagPanel.Children.Add(tag1);
-                }
-            }
-            else if (result)
-            {
+                    JObject jobject = JObject.Parse(File.ReadAllText(System.IO.Path.Combine(h.dir, "info.json")));
 
-            }
-            else if (File.Exists(System.IO.Path.Combine(h.dir, "info.json")))
-            {
-                JObject jobject = JObject.Parse(File.ReadAllText(System.IO.Path.Combine(h.dir, "info.json")));
-                
-                h.id = jobject.StringValue("id");
-                h.name = jobject.StringValue("name");
-                HitomiInfoOrg hInfoOrg = new HitomiInfoOrg();
-                foreach (JToken tags in jobject["tags"])
-                {
-                    tag tag = new tag();
-                    tag.TagType = (Tag.Types)int.Parse(tags["types"].ToString());
-                    tag.TagName = tags["name"].ToString();
-                    switch (tag.TagType)
+                    h.id = jobject.StringValue("id");
+                    h.name = jobject.StringValue("name");
+                    HitomiInfoOrg hInfoOrg = new HitomiInfoOrg();
+                    foreach (JToken tags in jobject["tags"])
                     {
-                        case Structs.Tag.Types.female:
-                            tag.TagColor = new SolidColorBrush(Color.FromRgb(255, 94, 94));
-                            break;
-                        case Structs.Tag.Types.male:
-                            tag.TagColor = new SolidColorBrush(Color.FromRgb(65, 149, 244));
-                            break;
-                        case Structs.Tag.Types.tag:
-                        default:
-                            tag.TagColor = new SolidColorBrush(Color.FromRgb(153, 153, 153));
-                            break;
+                        Tag tag = new Tag();
+                        tag.types = (Tag.Types)int.Parse(tags.StringValue("types"));
+                        tag.FullNameParse(tags.StringValue("name"));
+                        h.tags.Add(tag);
                     }
-                    tagPanel.Children.Add(tag);
+                    ftype = (Hitomi.Type)int.Parse(jobject["type"].ToString());
+                    if (jobject.ContainsKey("authors"))
+                        h.authors = jobject["authors"].Select(x => x.ToString()).ToArray();
+                    else if (jobject.ContainsKey("author"))
+                        h.authors = jobject["author"].ToString().Split(new string[] { ", " }, StringSplitOptions.None);
+                    else
+                        h.authors = new string[0];
                 }
-                ftype = (Hitomi.Type)int.Parse(jobject["type"].ToString());
-                if (jobject.ContainsKey("authors"))
-                    h.authors = jobject["authors"].Select(x => x.ToString()).ToArray();
-                else if (jobject.ContainsKey("author"))
-                    h.authors = jobject["author"].ToString().Split(new string[] { ", " }, StringSplitOptions.None);
+                else if (File.Exists(System.IO.Path.Combine(h.dir, "info.txt")))
+                {
+                    HitomiInfoOrg hitomiInfoOrg = new HitomiInfoOrg();
+                    string[] lines = File.ReadAllLines(System.IO.Path.Combine(h.dir, "info.txt")).Where(x => x.Length > 0).ToArray();
+                    foreach (string line in lines)
+                    {
+                        if (line.StartsWith("태그: "))
+                            hitomiInfoOrg.Tags = line.Remove(0, "태그: ".Length);
+                        if (line.StartsWith("작가: "))
+                            hitomiInfoOrg.Author = line.Remove(0, "작가: ".Length);
+                        if (line.StartsWith("갤러리 넘버: "))
+                            hitomiInfoOrg.Number = line.Remove(0, "갤러리 넘버: ".Length);
+                        if (line.StartsWith("제목: "))
+                            hitomiInfoOrg.Title = line.Remove(0, "제목: ".Length);
+                    }
+                    hInfo = HitomiInfo.Parse(hitomiInfoOrg);
+                    h.name = hInfo.Title;
+                    h.id = hInfo.Number.ToString();
+                    h.author = hInfo.Author;
+                    h.authors = hInfo.Author.Split(new string[] { ", " }, StringSplitOptions.None);
+                }
                 else
+                {
                     h.authors = new string[0];
-            }
-            else if (File.Exists(System.IO.Path.Combine(h.dir, "info.txt")))
-            {
-                HitomiInfoOrg hitomiInfoOrg = new HitomiInfoOrg();
-                string[] lines = File.ReadAllLines(System.IO.Path.Combine(h.dir, "info.txt")).Where(x => x.Length > 0).ToArray();
-                foreach (string line in lines)
-                {
-                    if (line.StartsWith("태그: "))
-                        hitomiInfoOrg.Tags = line.Remove(0, "태그: ".Length);
-                    if (line.StartsWith("작가: "))
-                        hitomiInfoOrg.Author = line.Remove(0, "작가: ".Length);
-                    if (line.StartsWith("갤러리 넘버: "))
-                        hitomiInfoOrg.Number = line.Remove(0, "갤러리 넘버: ".Length);
-                    if (line.StartsWith("제목: "))
-                        hitomiInfoOrg.Title = line.Remove(0, "제목: ".Length);
-                }
-                hInfo = HitomiInfo.Parse(hitomiInfoOrg);
-                h.name = hInfo.Title;
-                h.id = hInfo.Number.ToString();
-                h.author = hInfo.Author;
-                h.authors = hInfo.Author.Split(new string[] { ", " }, StringSplitOptions.None);
-                foreach (Tag tag in hInfo.Tags)
-                {
-                    tag tag1 = new tag
-                    {
-                        TagType = tag.types,
-                        TagName = tag.name
-                    };
-                    switch (tag.types)
-                    {
-                        case Structs.Tag.Types.female:
-                            tag1.TagColor = new SolidColorBrush(Color.FromRgb(255, 94, 94));
-                            break;
-                        case Structs.Tag.Types.male:
-                            tag1.TagColor = new SolidColorBrush(Color.FromRgb(65, 149, 244));
-                            break;
-                        case Structs.Tag.Types.tag:
-                        default:
-                            tag1.TagColor = new SolidColorBrush(Color.FromRgb(153, 153, 153));
-                            break;
-                    }
-                    tagPanel.Children.Add(tag1);
                 }
             }
-            else
+
+            foreach (Tag tag in h.tags)
             {
-                h.authors = new string[0];
+                tag tag1 = new tag
+                {
+                    TagType = tag.types,
+                    TagName = tag.name
+                };
+                switch (tag.types)
+                {
+                    case Structs.Tag.Types.female:
+                        tag1.TagColor = new SolidColorBrush(Color.FromRgb(255, 94, 94));
+                        break;
+                    case Structs.Tag.Types.male:
+                        tag1.TagColor = new SolidColorBrush(Color.FromRgb(65, 149, 244));
+                        break;
+                    //case Structs.Tag.Types.tag:
+                    default:
+                        tag1.TagColor = new SolidColorBrush(Color.FromRgb(153, 153, 153));
+                        break;
+                }
+                tagPanel.Children.Add(tag1);
             }
 
             if (large)
@@ -245,7 +206,7 @@ namespace HitomiViewer.UserControls
                     }
                     Label lb = new Label();
                     lb.Content = artist;
-                    lb.Foreground = new SolidColorBrush(Colors.Blue);
+                    lb.Foreground = new SolidColorBrush(Global.artistsclr);
                     lb.Cursor = Cursors.Hand;
                     lb.MouseDown += authorLabel_MouseDown;
                     lb.Padding = new Thickness(0, 5, 0, 5);
@@ -256,6 +217,7 @@ namespace HitomiViewer.UserControls
             nameLabel.Width = panel.Width - border.Width;
             nameLabel.Content = h.name;
             ContextSetup();
+            ChangeColor(this);
         }
 
         private void ContextSetup()
@@ -332,6 +294,23 @@ namespace HitomiViewer.UserControls
             };
             return toolTip;
         }
+        public void ChangeColor()
+        {
+            panel.Background = new SolidColorBrush(Global.background);
+            border.Background = new SolidColorBrush(Global.imagecolor);
+            InfoPanel.Background = new SolidColorBrush(Global.Menuground);
+            bottomPanel.Background = new SolidColorBrush(Global.Menuground);
+            authorsPanel.Background = new SolidColorBrush(Global.Menuground);
+            nameLabel.Foreground = new SolidColorBrush(Global.fontscolor);
+            sizeLabel.Foreground = new SolidColorBrush(Global.fontscolor);
+            pageLabel.Foreground = new SolidColorBrush(Global.fontscolor);
+            sizeperpageLabel.Foreground = new SolidColorBrush(Global.fontscolor);
+            //authorsPanel.Children.Cast<UIElement>().Select(x => (x as Label).Foreground = new SolidColorBrush(Global.artistsclr));
+            foreach (UIElement elem in authorsPanel.Children)
+                (elem as Label).Foreground = new SolidColorBrush(Global.artistsclr);
+            (authorsPanel.Children[0] as Label).Foreground = new SolidColorBrush(Global.fontscolor);
+            tagPanel.Background = new SolidColorBrush(Global.Menuground);
+        }
         public static void ChangeColor(HitomiPanel hpanel)
         {
             DockPanel panel = hpanel.panel as DockPanel;
@@ -340,11 +319,15 @@ namespace HitomiViewer.UserControls
             DockPanel InfoPanel = panel.Children[1] as DockPanel;
 
             StackPanel bottomPanel = InfoPanel.Children[1] as StackPanel;
+            StackPanel authorsStackPanel = InfoPanel.Children[2] as StackPanel;
+
+            DockPanel authorsPanel = authorsStackPanel.Children[0] as DockPanel;
 
             Label nameLabel = InfoPanel.Children[0] as Label;
 
             Label sizeLabel = bottomPanel.Children[0] as Label;
             Label pageLabel = bottomPanel.Children[2] as Label;
+            Label sizeperpageLabel = bottomPanel.Children[4] as Label;
 
             StackPanel tagPanel = InfoPanel.Children[2] as StackPanel;
 
@@ -355,6 +338,8 @@ namespace HitomiViewer.UserControls
             nameLabel.Foreground = new SolidColorBrush(Global.fontscolor);
             sizeLabel.Foreground = new SolidColorBrush(Global.fontscolor);
             pageLabel.Foreground = new SolidColorBrush(Global.fontscolor);
+            sizeperpageLabel.Foreground = new SolidColorBrush(Global.fontscolor);
+            authorsPanel.Children.Cast<UIElement>().Select(x => (x as Label).Foreground = new SolidColorBrush(Global.artistsclr));
             tagPanel.Background = new SolidColorBrush(Global.Menuground);
         }
 

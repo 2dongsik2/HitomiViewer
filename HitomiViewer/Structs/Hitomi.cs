@@ -139,6 +139,7 @@ namespace HitomiViewer
                     Tag tag = new Tag();
                     if (item.Contains(":"))
                     {
+                        tag.full = item;
                         tag.types = (Tag.Types)Enum.Parse(typeof(Tag.Types), item.Split(':')[0]);
                         tag.name = string.Join(":", item.Split(':').Skip(1));
                     }
@@ -147,6 +148,7 @@ namespace HitomiViewer
                         tag.types = Tag.Types.tag;
                         tag.name = item;
                     }
+                    tag.Check();
 
                     tags.Add(tag);
                 }

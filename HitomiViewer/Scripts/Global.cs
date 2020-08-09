@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace HitomiViewer
 {
@@ -24,6 +25,7 @@ namespace HitomiViewer
         public static Color panelcolor = Colors.White;
         public static Color fontscolor = Colors.Black;
         public static Color outlineclr = Colors.Black;
+        public static Color artistsclr = Colors.Blue;
         public const int Magnif = 4;
         public const int RandomStringLength = 16;
         //[Obsolete("Password is deprecated, please use OriginPassword instead.", true)]
@@ -34,6 +36,8 @@ namespace HitomiViewer
         public static bool AutoFileEn = false;
         public static bool EncryptTitle = false;
         public static bool RandomTitle = false;
+        public static bool CacheSearch = false;
+        public static Dispatcher dispatcher;
 
         public class Config
         {

@@ -16,6 +16,8 @@ namespace HitomiViewer.Processor
 {
     partial class InternetP
     {
+        private string nozomiextension = ".nozomi";
+        private string compressed_nozomi_prefix = "";
         private string domain = "ltn.hitomi.la";
         private string index_dir = "tagindex";
         private string galleries_index_dir = "galleriesindex";
@@ -30,7 +32,6 @@ namespace HitomiViewer.Processor
             doc.LoadHtml(html);
             Hitomi h = new Hitomi();
             h.dir = $"https://hitomi.la/reader/{index}.html";
-            //h.dir = url;
             HtmlNode name = doc.DocumentNode.SelectSingleNode("//h1[@class=\"lillie\"]");
             h.name = name.InnerText;
             HtmlNode image = doc.DocumentNode.SelectSingleNode("//div[@class=\"dj-img1\"]/img");
@@ -38,7 +39,6 @@ namespace HitomiViewer.Processor
             h.thumbpath = image.GetAttributeValue("src", "");
             if (h.thumbpath == "")
                 h.thumbpath = image.GetDataAttribute("src").Value;
-            //HtmlNode artist = doc.DocumentNode.SelectSingleNode("//div[@class=\"artist-list\"]/ul");
             HtmlNodeCollection artists = doc.DocumentNode.SelectNodes("//div[@class=\"artist-list\"]/ul/li");
             if (artists != null)
             {
@@ -98,18 +98,29 @@ namespace HitomiViewer.Processor
             h.Json = info;
             return await HitomiGalleryData(h);
         }
-        public List<Tag> HitomiTags(JObject jObject)
+        public List<Tag> HitomiTags(JObject jObject) //반환값 변경으로 인한 코드 수정
         {
             List<Tag> tags = new List<Tag>();
             foreach (JToken tag1 in jObject["tags"])
             {
                 Tag tag = new Tag();
                 tag.types = Tag.Types.tag;
-                if (tag1.SelectToken("female") != null && tag1["female"].ToString() == "1")
-                    tag.types = Tag.Types.female;
-                if (tag1.SelectToken("male") != null && tag1["male"].ToString() == "1")
-                    tag.types = Tag.Types.male;
-                tag.name = tag1["tag"].ToString();
+                if (tag1["female"] != null || tag1["male"] != null)
+                {
+                    if (tag1.SelectToken("female") != null && tag1["female"].ToString() == "1")
+                        tag.types = Tag.Types.female;
+                    if (tag1.SelectToken("male") != null && tag1["male"].ToString() == "1")
+                        tag.types = Tag.Types.male;
+                    tag.full = tag.types.ToString() + tag1.StringValue("tag");
+                    tag.name = tag1.StringValue("tag");
+                }
+                else
+                {
+                    string org = tag1.StringValue("url");
+                    string type = org.Split('/').Skip(1).First();
+                    tag.name = tag1.StringValue("tag");
+                    tag.full = type + tag.name;
+                }
                 tags.Add(tag);
             }
             return tags;
@@ -136,6 +147,22 @@ namespace HitomiViewer.Processor
             var pageContents = await response.Content.ReadAsByteArrayAsync();
             return pageContents;
         }
+        public async Task<byte[]> LoadNozomiTag(string type, string tag, bool range = true)
+        {
+            tag = tag.Replace("_", "%20");
+            string url = $"https://ltn.hitomi.la/{type}/{tag}-all.nozomi";
+            if (url.Last() == '/') url = url.Remove(url.Length - 1);
+            HttpClient client = new HttpClient();
+            if (range)
+                client.DefaultRequestHeaders.Range = new System.Net.Http.Headers.RangeHeaderValue(index * 4, (index + count) * 4 - 1);
+            var response = await client.GetAsync(url);
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                throw new Exception("NotFound");
+            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+                throw new Exception("Not 200");
+            var pageContents = await response.Content.ReadAsByteArrayAsync();
+            return pageContents;
+        }
         public async Task<byte[]> LoadNozomiMax(string url = null)
         {
             url = url ?? this.url ?? "https://ltn.hitomi.la/index-all.nozomi";
@@ -147,11 +174,9 @@ namespace HitomiViewer.Processor
         }
         public async Task<byte[]> LoadNozomi(string area, string tag, string language)
         {
-            string nozomiextension = ".nozomi";
-            string domain = "ltn.hitomi.la";
-            string compressed_nozomi_prefix = "";
             string subtag = string.Join("-", new string[]{tag, language});
-            var nozomi_address = "//" + string.Join("/", new string[] { domain, compressed_nozomi_prefix, subtag }) + nozomiextension;
+            string suburl = string.Join("/", new string[] { domain, compressed_nozomi_prefix, subtag }.Where(x => !x.isNull()));
+            string nozomi_address = "//" + suburl + nozomiextension;
             return await LoadNozomi(nozomi_address);
         }
         public async Task<int[]> LoadQuery(string query)
