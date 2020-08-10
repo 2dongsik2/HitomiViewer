@@ -111,7 +111,7 @@ namespace HitomiViewer.Processor
                         tag.types = Tag.Types.female;
                     if (tag1.SelectToken("male") != null && tag1["male"].ToString() == "1")
                         tag.types = Tag.Types.male;
-                    tag.full = tag.types.ToString() + tag1.StringValue("tag");
+                    tag.full = tag.types.ToString() + ":" + tag1.StringValue("tag");
                     tag.name = tag1.StringValue("tag");
                 }
                 else
@@ -119,7 +119,7 @@ namespace HitomiViewer.Processor
                     string org = tag1.StringValue("url");
                     string type = org.Split('/').Skip(1).First();
                     tag.name = tag1.StringValue("tag");
-                    tag.full = type + tag.name;
+                    tag.full = type + ":" + tag.name;
                 }
                 tags.Add(tag);
             }
@@ -147,14 +147,21 @@ namespace HitomiViewer.Processor
             var pageContents = await response.Content.ReadAsByteArrayAsync();
             return pageContents;
         }
-        public async Task<byte[]> LoadNozomiTag(string type, string tag, bool range = true)
+        public async Task<byte[]> LoadNozomiTag(string type, string tag, bool range = true, int? start = null, int? end = null)
         {
+            start = start ?? index * 4;
+            end = end ?? (index + count) * 4 - 1;
             tag = tag.Replace("_", "%20");
-            string url = $"https://ltn.hitomi.la/{type}/{tag}-all.nozomi";
+            string url;
+            if (type == "female" || type == "male")
+                url = $"https://ltn.hitomi.la/tag/{type}:{tag}-all.nozomi";
+            else
+                url = $"https://ltn.hitomi.la/{type}/{tag}-all.nozomi";
             if (url.Last() == '/') url = url.Remove(url.Length - 1);
             HttpClient client = new HttpClient();
+            client.Timeout = TimeSpan.FromMinutes(30);
             if (range)
-                client.DefaultRequestHeaders.Range = new System.Net.Http.Headers.RangeHeaderValue(index * 4, (index + count) * 4 - 1);
+                client.DefaultRequestHeaders.Range = new System.Net.Http.Headers.RangeHeaderValue(start, end);
             var response = await client.GetAsync(url);
             if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 throw new Exception("NotFound");

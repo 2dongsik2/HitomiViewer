@@ -23,7 +23,15 @@ namespace HitomiViewer.Processor
         public List<string> keyword { get; set; }
         public int index { get; set; }
         public int count { get; set; }
+        /// <summary>
+        /// 0. Hitomi => class Hitomi
+        /// 1. int => index
+        /// 2. int => count
+        /// </summary>
         public Action<Hitomi, int, int> update = null;
+        /// <summary>
+        /// int => count
+        /// </summary>
         public Action<int> start = null;
         public Action end = null;
 
@@ -166,6 +174,17 @@ namespace HitomiViewer.Processor
             {
                 byte[] iarr = arr.ToList().Skip(i * 4).Take(4).ToArray();
                 intarr.Add(BitConverter.ToInt32(iarr.Reverse().ToArray(), 0));
+            }
+            return intarr.ToArray();
+        }
+        public int[] ByteArrayToIntArrayBig(byte[] arr)
+        {
+            List<int> intarr = new List<int>();
+            int co = arr.Length / 4;
+            for (var i = 0; i < co; i++)
+            {
+                byte[] iarr = arr.ToList().Skip(i * 4).Take(4).ToArray();
+                intarr.Add(BitConverter.ToInt32(iarr.ToArray(), 0));
             }
             return intarr.ToArray();
         }

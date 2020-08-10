@@ -139,36 +139,26 @@
                                             <ColumnDefinition Width="8*" />
                                             <ColumnDefinition Width="2*" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBox x:Name="Hitomi_Search_Text" Keyboard.KeyDown="Hitomi_Search_Text_KeyDown"></TextBox>
-                                        <Button Grid.Column="1" Content="검색" Click="Hitomi_Search_Button_Click" x:Name="Hitomi_Search_Button"/>
-                                    </Grid>
-                                </MenuItem.Header>
-                            </MenuItem>
-                            <MenuItem>
-                                <MenuItem.Icon>
-                                    <Image Source="{StaticResource HitomiIcon}"/>
-                                </MenuItem.Icon>
-                                <MenuItem.Header>
-                                    <Grid Width="200">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="8*" />
-                                            <ColumnDefinition Width="2*" />
-                                        </Grid.ColumnDefinitions>
                                         <wpf:AutoCompleteTextBox VerticalAlignment="Top"
                                                                  Grid.Column="0"
                                                                  Height="20"
-                                                                 Watermark="태그 검색"
+                                                                 Watermark="검색"
                                                                  Provider="{StaticResource ResourceKey=fsp}"
                                                                  Background="White"
-                                                                 Keyboard.KeyDown="Hitomi_Search_TagOnly_Text_KeyDown"
-                                                                 x:Name="Hitomi_Search_TagOnly_Text">
+                                                                 Keyboard.KeyDown="Hitomi_Search_Text_KeyDown"
+                                                                 x:Name="Hitomi_Search_Text">
                                             <wpf:AutoCompleteTextBox.LoadingContent>
                                                 <TextBlock Text="Loading..."/>
                                             </wpf:AutoCompleteTextBox.LoadingContent>
                                         </wpf:AutoCompleteTextBox>
-                                        <Button Grid.Column="1" Content="검색" Click="Hitomi_Search_TagOnly_Button_Click" x:Name="Hitomi_Search_TagOnly_Button"/>
+                                        <Button Grid.Column="1" Content="검색" Click="Hitomi_Search_Button_Click" x:Name="Hitomi_Search_Button"/>
                                     </Grid>
                                 </MenuItem.Header>
+                            </MenuItem>
+                            <MenuItem Header="캐시 다운로드" Click="CacheDownload_Click">
+                                <MenuItem.Icon>
+                                    <Image Source="{StaticResource HitomiIcon}" />
+                                </MenuItem.Icon>
                             </MenuItem>
                         </MenuItem>
                     </MenuItem>

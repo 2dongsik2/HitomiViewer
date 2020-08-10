@@ -78,7 +78,7 @@ namespace HitomiViewer.UserControls
                 thumbNail.BitmapEffect = new BlurBitmapEffect { Radius = 5, KernelType = KernelType.Gaussian };
             Config config = new Config();
             config.Load();
-            if (config.ArrayValue<string>(Settings.except_tags).Any(x => h.tags.Select(y => y.name).Contains(x)))
+            if (config.ArrayValue<string>(Settings.except_tags).Any(x => h.tags.Select(y => y.full).Contains(x)))
             {
                 if (config.BoolValue(Settings.block_tags) ?? false)
                 {
@@ -372,6 +372,18 @@ namespace HitomiViewer.UserControls
                 this.nameLabel.Content = h.name;
                 Init();
             }
+            Config config = new Config();
+            config.Load();
+            if (config.ArrayValue<string>(Settings.except_tags).Any(x => h.tags.Select(y => y.full).Contains(x.Replace("_", " "))))
+            {
+                if (config.BoolValue(Settings.block_tags) ?? false)
+                {
+                    MainWindow.MainPanel.Children.Remove(this);
+                    return;
+                }
+                else
+                    thumbNail.BitmapEffect = new BlurBitmapEffect { Radius = 5, KernelType = KernelType.Gaussian };
+            }
         }
 
         private void Folder_Remove_Click(object sender, RoutedEventArgs e)
@@ -555,14 +567,18 @@ namespace HitomiViewer.UserControls
             bool result = await new InternetP(index: int.Parse(h.id)).isHiyobi();
             Label lbsender = sender as Label;
             string author = lbsender.Content.ToString();
+            MainWindow.MainPanel.Children.Clear();
             if (result)
             {
-                Global.MainWindow.Hiyobi_Search_Text.Text = "artist:" + author;
-                Global.MainWindow.Hiyobi_Search_Button_Click(this, null);
+                MainWindow.LabelSetup();
+                InternetP parser = new InternetP(keyword: new string[] { "artist:" + author }.ToList(), index: 1);
+                HiyobiLoader hiyobi = new HiyobiLoader();
+                hiyobi.FastDefault();
+                parser.HiyobiSearch(data => new InternetP(data: data).ParseJObject(hiyobi.FastParser));
             }
             else
             {
-                Global.MainWindow.Hitomi_Search_TagOnly_Text.Text = "artist:" + author;
+                Global.MainWindow.Hitomi_Search_Text.Text = "artist:" + author;
                 Global.MainWindow.Hitomi_Search_Button_Click(this, null);
             }
         }
@@ -577,7 +593,7 @@ namespace HitomiViewer.UserControls
             if (hiyobi)
             {
                 Hitomi h2 = await new HiyobiLoader(text: h.id).Parser();
-                if (h2.name == "정보없음" && h2.id == "0")
+                if (h2 == null || (h2.name == "정보없음" && h2.id == "0"))
                 {
                     MessageBox.Show("데이터를 받아오는데 실패했습니다.");
                     return;

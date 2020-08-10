@@ -129,6 +129,7 @@
     <Compile Include="Processor\Hitomi\InternetP.cs" />
     <Compile Include="Processor\Hiyobi\InternetP.cs" />
     <Compile Include="Processor\Json\InternetP.cs" />
+    <Compile Include="Processor\Search\Hitomi.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -316,6 +317,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\WebPTest.exe" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\libwebp_x64.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\libwebp_x86.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -31,33 +31,35 @@ namespace HitomiViewer.Scripts.Loaders
             this.end = end ?? this.end;
         }
 
-        public void Default()
+        public HiyobiLoader Default()
         {
             this.start = (int count) =>
             {
                 Global.MainWindow.label.Content = "0/" + count;
                 Global.MainWindow.label.Visibility = System.Windows.Visibility.Visible;
+                Global.MainWindow.Searching(true);
             };
             this.update = (Hitomi h, int index, int max) =>
             {
                 Global.MainWindow.label.Content = $"{index}/{max}";
                 Global.MainWindow.MainPanel.Children.Add(new UserControls.HitomiPanel(h, Global.MainWindow, true));
             };
-            this.end = () => Global.MainWindow.label.Visibility = System.Windows.Visibility.Collapsed;
-        }
-        public void FastDefault()
-        {
-            this.start = (int count) =>
+            this.end = () =>
             {
-                Global.MainWindow.label.Content = "0/" + count;
-                Global.MainWindow.label.Visibility = System.Windows.Visibility.Visible;
+                Global.MainWindow.label.Visibility = System.Windows.Visibility.Collapsed;
+                Global.MainWindow.Searching(false);
             };
+            return this;
+        }
+        public HiyobiLoader FastDefault()
+        {
+            Default();
             this.update = (Hitomi h, int index, int max) =>
             {
                 Global.MainWindow.label.Content = $"{index}/{max}";
                 Global.MainWindow.MainPanel.Children.Add(new UserControls.HitomiPanel(h, Global.MainWindow, true, true));
             };
-            this.end = () => Global.MainWindow.label.Visibility = System.Windows.Visibility.Collapsed;
+            return this;
         }
 
         public async void Parser(JObject jobject)
@@ -174,33 +176,35 @@ namespace HitomiViewer.Scripts.Loaders
         public Action<int> start = null;
         public Action end = null;
 
-        public void FastDefault()
+        public HitomiLoader FastDefault()
         {
-            this.start = (int count) =>
-            {
-                Global.MainWindow.label.Content = "0/" + count;
-                Global.MainWindow.label.Visibility = System.Windows.Visibility.Visible;
-            };
+            Default();
             this.update = (Hitomi h, int index, int max) =>
             {
                 Global.MainWindow.label.Content = $"{index}/{max}";
                 Global.MainWindow.MainPanel.Children.Add(new UserControls.HitomiPanel(h, Global.MainWindow, true, true));
             };
-            this.end = () => Global.MainWindow.label.Visibility = System.Windows.Visibility.Collapsed;
+            return this;
         }
-        public void Default()
+        public HitomiLoader Default()
         {
             this.start = (int count) =>
             {
                 Global.MainWindow.label.Content = "0/" + count;
                 Global.MainWindow.label.Visibility = System.Windows.Visibility.Visible;
+                Global.MainWindow.Searching(true);
             };
             this.update = (Hitomi h, int index, int max) =>
             {
                 Global.MainWindow.label.Content = $"{index}/{max}";
                 Global.MainWindow.MainPanel.Children.Add(new UserControls.HitomiPanel(h, Global.MainWindow, true));
             };
-            this.end = () => Global.MainWindow.label.Visibility = System.Windows.Visibility.Collapsed;
+            this.end = () =>
+            {
+                Global.MainWindow.label.Visibility = System.Windows.Visibility.Collapsed;
+                Global.MainWindow.Searching(false);
+            };
+            return this;
         }
 
         public async void FastParser()

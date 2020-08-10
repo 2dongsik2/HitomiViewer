@@ -236,7 +236,7 @@ namespace HitomiViewer.Processor
                 bi.EndInit();
                 return bi;
             }
-            catch
+            catch (Exception ex)
             {
                 return null;
             }

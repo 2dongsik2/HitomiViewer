@@ -261,7 +261,7 @@ namespace HitomiViewer
         }
         private void ExceptTagsBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (!HiyobiTags.Tags.Select(x => x.name).Contains(ExceptTagsText.Text)) return;
+            if (!HiyobiTags.Tags.Select(x => x.full).Contains(ExceptTagsText.Text)) return;
             ExceptTagList.Add(ExceptTagsText.Text);
             ExceptTagsText.Text = "";
             TagList2ListBox();
