@@ -41,7 +41,8 @@ namespace HitomiViewer.Structs
 
         public static Tag Parse(string value)
         {
-            if (!value.Contains(":")) return null;
+            if (!value.Contains(":"))
+                value = "tag:" + value;
             Tag tag = new Tag();
             tag.types = ParseTypes(value);
             tag.Hitomi = isHitomi(value);

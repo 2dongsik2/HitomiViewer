@@ -289,6 +289,7 @@ namespace HitomiViewer
         }
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            new Config().GetConfig().Save();
             LabelSetup();
             this.Background = new SolidColorBrush(Global.background);
             MainPanel.Children.Clear();
@@ -490,7 +491,7 @@ namespace HitomiViewer
         {
             MainPanel.Children.Clear();
             LabelSetup();
-            InternetP parser = new InternetP(keyword: Hiyobi_Search_Text.Text.Split(' ').ToList(), index: 1);
+            InternetP parser = new InternetP(keyword: Hiyobi_Search_Text.Text.Split(' ').ToList(), index: GetPage());
             HiyobiLoader hiyobi = new HiyobiLoader();
             hiyobi.FastDefault();
             parser.HiyobiSearch(data => new InternetP(data: data).ParseJObject(hiyobi.FastParser));

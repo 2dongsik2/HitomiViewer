@@ -32,10 +32,13 @@
                 <CheckBox.ToolTip>기본적으로 차단된 태그는 블러 처리되서 보이지만 이 기능을 키면 아예 안보이게 됩니다.</CheckBox.ToolTip>
             </CheckBox>
             <CheckBox x:Name="SafeData">안전한 데이터 저장
-                <CheckBox.ToolTip>기본적으로 차단된 태그는 블러 처리되서 보이지만 이 기능을 키면 아예 안보이게 됩니다.</CheckBox.ToolTip>
+                <CheckBox.ToolTip>설정 데이터를 암호화해서 저장합니다.</CheckBox.ToolTip>
             </CheckBox>
             <CheckBox x:Name="CacheSearch">캐시에서 검색
                 <CheckBox.ToolTip>캐시에서 검색을 하면 태그 검색 속도가 빨라집니다. 캐시 데이터를 업데이트 하지 않으면 검색 데이터가 업데이트 되지 않습니다.</CheckBox.ToolTip>
+            </CheckBox>
+            <CheckBox x:Name="UpgradeThumbnail">원본화질의 썸네일
+                <CheckBox.ToolTip>인터넷에서 받아올 때 썸네일의 화질을 원본화질로 변경합니다. 로딩 속도에는 영향을 주지 않습니다.</CheckBox.ToolTip>
             </CheckBox>
             <Button Click="Button_Click">저장</Button>
             <Button Click="ChangePassword_Click">비밀번호 변경</Button>

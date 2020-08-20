@@ -39,6 +39,7 @@ namespace HitomiViewer
         public const string favorites = "favorites";
         public const string block_tags = "block_tags";
         public const string cache_search = "cachesearch";
+        public const string origin_thumb = "originalthumbnail";
 
         private List<string> ExceptTagList = new List<string>();
 
@@ -55,6 +56,7 @@ namespace HitomiViewer
             InitTags(config);
             SafeData.IsChecked = (!File.Exists(Global.Config.path)) && File.Exists(Global.Config.encryptpath);
             CacheSearch.IsChecked = config.BoolValue(cache_search) ?? false;
+            UpgradeThumbnail.IsChecked = config.BoolValue(origin_thumb) ?? false;
         }
 
         private void Update()
@@ -84,7 +86,9 @@ namespace HitomiViewer
                 Global.Password = FilePassword.Password;
 
             Global.CacheSearch = CacheSearch.IsChecked ?? false;
+            Global.OriginThumb = UpgradeThumbnail.IsChecked ?? false;
             config[cache_search] = Global.CacheSearch;
+            config[origin_thumb] = Global.OriginThumb;
 
             cfg.encrypt = SafeData.IsChecked ?? false;
             if (cfg.encrypt) File.Delete(Global.Config.path);
@@ -147,16 +151,11 @@ namespace HitomiViewer
             {
                 config.Remove(password);
             }
-            if (config[password] == null)
-            {
-                Global.MainWindow.Encrypt.Visibility = Visibility.Collapsed;
-                Global.MainWindow.Decrypt.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                Global.MainWindow.Encrypt.Visibility = Visibility.Visible;
-                Global.MainWindow.Decrypt.Visibility = Visibility.Visible;
-            }
+            Visibility visibility = Visibility.Visible;
+            if (config[password] == null || config.BoolValue(file_encrypt) == false)
+                visibility = Visibility.Collapsed;
+            Global.MainWindow.Encrypt.Visibility = visibility;
+            Global.MainWindow.Decrypt.Visibility = visibility;
         }
         private void CheckTitle(ref JObject config)
         {

@@ -37,10 +37,11 @@ namespace HitomiViewer.UserControls
         private BitmapImage thumb;
         private MainWindow MainWindow;
         private Hitomi.Type ftype = Hitomi.Type.Folder;
+        private FrameworkElementFactory ToolTipImage = null;
         private bool large;
         private bool afterLoad;
         private bool blur;
-        public HitomiPanel(Hitomi h, MainWindow sender, bool large = false, bool afterLoad = false, bool blur = false)
+        public HitomiPanel(Hitomi h, MainWindow sender, bool large = true, bool afterLoad = false, bool blur = false)
         {
             this.large = large;
             this.afterLoad = afterLoad;
@@ -68,7 +69,7 @@ namespace HitomiViewer.UserControls
                 h.thumb = ImageProcessor.FromResource("NoImage.jpg");
             thumbNail.Source = h.thumb;
             thumbBrush.ImageSource = h.thumb;
-            thumbNail.ToolTip = GetToolTip(panel.Height);
+            //thumbNail.ToolTip = GetToolTip(panel.Height);
 
             authorsPanel.Children.Clear();
             authorsPanel.Children.Add(new Label { Content = "작가 :" });
@@ -162,10 +163,6 @@ namespace HitomiViewer.UserControls
                     h.author = hInfo.Author;
                     h.authors = hInfo.Author.Split(new string[] { ", " }, StringSplitOptions.None);
                 }
-                else
-                {
-                    h.authors = new string[0];
-                }
             }
 
             foreach (Tag tag in h.tags)
@@ -256,7 +253,7 @@ namespace HitomiViewer.UserControls
                 Folder_Hiyobi_Search.Visibility = Visibility.Visible;
             Config cfg = new Config();
             JObject obj = cfg.Load();
-            List<string> favs = cfg.ArrayValue<string>("fav").ToList();
+            List<string> favs = cfg.ArrayValue<string>(Settings.favorites).ToList();
             if (favs.Contains(h.dir))
             {
                 Favorite.Visibility = Visibility.Collapsed;
@@ -266,14 +263,22 @@ namespace HitomiViewer.UserControls
 
         private ToolTip GetToolTip(double height)
         {
-            double b = height / h.thumb.Width;
+            //b = 비율
+            //Magnif = 배율
+            double b = height / h.thumb.Height;
+            double top = thumbNail.PointToScreen(new Point(0, 0)).Y;
+            double bottom = top + thumbNail.ActualHeight;
+            double WorkHeight = SystemParameters.WorkArea.Bottom;
+            double MagnifSize = b * h.thumb.Height * Global.Magnif;
+            double VisualMaxSize = WorkHeight - bottom;
+            double size = MagnifSize > VisualMaxSize ? VisualMaxSize : MagnifSize; //보여지는 크기보다 배율된 크기가 클 시에는 보여지는 크기로 결정
             FrameworkElementFactory image = new FrameworkElementFactory(typeof(Image));
             {
-                image.SetValue(Image.WidthProperty, b * h.thumb.Width * Global.Magnif);
-                image.SetValue(Image.HeightProperty, b * h.thumb.Height * Global.Magnif);
+                image.SetValue(Image.HeightProperty, size);
                 image.SetValue(Image.HorizontalAlignmentProperty, HorizontalAlignment.Left);
                 image.SetValue(Image.SourceProperty, h.thumb);
             }
+            ToolTipImage = image;
             FrameworkElementFactory elemborder = new FrameworkElementFactory(typeof(Border));
             {
                 elemborder.SetValue(Border.BorderThicknessProperty, new Thickness(1));
@@ -345,20 +350,22 @@ namespace HitomiViewer.UserControls
 
         private async void HitomiPanel_Loaded(object sender, RoutedEventArgs e)
         {
+            thumbNail.ToolTip = GetToolTip(panel.Height);
             if (!afterLoad) return;
+            this.nameLabel.Content = h.name + " (로딩중)";
             if (h.type == Hitomi.Type.Hiyobi)
             {
-                this.nameLabel.Content = h.name + " (로딩중)";
                 h.files = new string[0];
                 InternetP parser = new InternetP(index: int.Parse(h.id));
                 this.h.files = (await parser.HiyobiFiles()).Select(x => x.url).ToArray();
+                if (Global.OriginThumb && h.files != null && h.files[0] != null)
+                    h.thumb = await ImageProcessor.ProcessEncryptAsync(h.files[0]);
                 this.h.page = h.files.Length;
                 this.nameLabel.Content = h.name;
                 Init();
             }
             if (h.type == Hitomi.Type.Hitomi)
             {
-                this.nameLabel.Content = h.name + " (로딩중)";
                 InternetP parser = new InternetP();
                 parser.url = $"https://ltn.hitomi.la/galleries/{h.id}.js";
                 JObject info = await parser.HitomiGalleryInfo();
@@ -366,24 +373,30 @@ namespace HitomiViewer.UserControls
                 h.tags = parser.HitomiTags(info);
                 h.files = parser.HitomiFiles(info).ToArray();
                 h.page = h.files.Length;
-                h.thumb = ImageProcessor.LoadWebImage("https:" + h.thumbpath);
+                if (Global.OriginThumb && h.files != null && h.files[0] != null)
+                    h.thumb = await ImageProcessor.ProcessEncryptAsync(h.files[0]);
+                else
+                    h.thumb = ImageProcessor.LoadWebImage("https:" + h.thumbpath);
                 h.Json = info;
                 h = await parser.HitomiGalleryData(h);
                 this.nameLabel.Content = h.name;
                 Init();
             }
-            Config config = new Config();
-            config.Load();
-            if (config.ArrayValue<string>(Settings.except_tags).Any(x => h.tags.Select(y => y.full).Contains(x.Replace("_", " "))))
+            Invoker.Invoke(() =>
             {
-                if (config.BoolValue(Settings.block_tags) ?? false)
+                Config config = new Config();
+                config.Load();
+                if (config.ArrayValue<string>(Settings.except_tags).Any(x => h.tags.Select(y => y.full).Contains(x.Replace("_", " "))))
                 {
-                    MainWindow.MainPanel.Children.Remove(this);
-                    return;
+                    if (config.BoolValue(Settings.block_tags) ?? false)
+                    {
+                        MainWindow.MainPanel.Children.Remove(this);
+                        return;
+                    }
+                    else
+                        thumbNail.BitmapEffect = new BlurBitmapEffect { Radius = 5, KernelType = KernelType.Gaussian };
                 }
-                else
-                    thumbNail.BitmapEffect = new BlurBitmapEffect { Radius = 5, KernelType = KernelType.Gaussian };
-            }
+            });
         }
 
         private void Folder_Remove_Click(object sender, RoutedEventArgs e)
@@ -571,10 +584,17 @@ namespace HitomiViewer.UserControls
             if (result)
             {
                 MainWindow.LabelSetup();
-                InternetP parser = new InternetP(keyword: new string[] { "artist:" + author }.ToList(), index: 1);
+                int index = MainWindow.GetPage();
+                int count = (int)MainWindow.Page_itemCount;
+                InternetP parser = new InternetP(keyword: new string[] { "artist:" + author }.ToList(), index: index);
                 HiyobiLoader hiyobi = new HiyobiLoader();
                 hiyobi.FastDefault();
                 parser.HiyobiSearch(data => new InternetP(data: data).ParseJObject(hiyobi.FastParser));
+                parser.index = index - 1;
+                parser.count = count;
+                int[] ids = parser.ByteArrayToIntArray(await parser.LoadNozomiTag("artist", author, true));
+                HitomiLoader hitomi = new HitomiLoader();
+                hitomi.FastDefault().FastParser(ids);
             }
             else
             {

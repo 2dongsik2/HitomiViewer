@@ -119,7 +119,11 @@ namespace HitomiViewer.Processor
                             ids = await parser.LoadQuery(tag);
                         }
                         if (Global.CacheSearch && !File.Exists(path))
+                        {
+                            if (!Directory.Exists(Path.GetDirectoryName(path)))
+                                Directory.CreateDirectory(Path.GetDirectoryName(path));
                             File.WriteAllText(path, JArray.FromObject(ids).ToString());
+                        }
                         dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
                                 idlist = idlist.Concat(ids).ToList()));
                         compcount++;

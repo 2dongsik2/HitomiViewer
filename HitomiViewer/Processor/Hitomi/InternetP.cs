@@ -165,7 +165,7 @@ namespace HitomiViewer.Processor
             var response = await client.GetAsync(url);
             if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 throw new Exception("NotFound");
-            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            if (response.StatusCode != System.Net.HttpStatusCode.OK && response.StatusCode != System.Net.HttpStatusCode.PartialContent)
                 throw new Exception("Not 200");
             var pageContents = await response.Content.ReadAsByteArrayAsync();
             return pageContents;

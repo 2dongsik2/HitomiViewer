@@ -82,7 +82,7 @@ namespace HitomiViewer.Scripts.Loaders
                     files = imgs.ToList().Select(x => $"https://cdn.hiyobi.me/data/{tk["id"]}/{x["name"]}").ToArray(),
                     author = string.Join(", ", tk["artists"].Select(x => x["display"].ToString())),
                     authors = tk["artists"].Select(x => x["display"].ToString()).ToArray(),
-                    Json = tk//tk.ToString()
+                    Json = tk
                 };
                 foreach (JToken tags in tk["tags"])
                 {
@@ -110,7 +110,7 @@ namespace HitomiViewer.Scripts.Loaders
                 h.type = Hitomi.Type.Hiyobi;
                 Config config = new Config();
                 config.Load();
-                if (!config.ArrayValue<string>(Settings.except_tags).Any(x => h.tags.Select(y => y.name).Contains(x)) || !(config.BoolValue(Settings.block_tags) ?? false))
+                if (!config.ArrayValue<string>(Settings.except_tags).Any(x => h.tags.Select(y => y.full).Contains(x)) || !(config.BoolValue(Settings.block_tags) ?? false))
                     update(h, i, arr.Count);
             }
             end();

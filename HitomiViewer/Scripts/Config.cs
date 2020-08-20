@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace HitomiViewer.Scripts
 {
@@ -67,7 +68,15 @@ namespace HitomiViewer.Scripts
             Global.EncryptTitle = BoolValue(Settings.encrypt_title) ?? false;
             Global.RandomTitle = BoolValue(Settings.random_title) ?? false;
             Global.CacheSearch = BoolValue(Settings.cache_search) ?? false;
+            Global.OriginThumb = BoolValue(Settings.origin_thumb) ?? false;
             if (Global.DownloadFolder == "") Global.DownloadFolder = "hitomi_downloaded";
+            if (Global.MainWindow != null){
+                Visibility visibility = Visibility.Visible;
+                if (StringValue(Settings.password) == null || BoolValue(Settings.file_encrypt) == false)
+                    visibility = Visibility.Collapsed;
+                Global.MainWindow.Encrypt.Visibility = visibility;
+                Global.MainWindow.Decrypt.Visibility = visibility;
+            }
             string path = encrypt ? Global.Config.encryptpath : Global.Config.path;
             byte[] bytes = Encoding.UTF8.GetBytes(config.ToString());
             if (encrypt)

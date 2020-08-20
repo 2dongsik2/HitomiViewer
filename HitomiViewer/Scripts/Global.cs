@@ -37,6 +37,7 @@ namespace HitomiViewer
         public static bool EncryptTitle = false;
         public static bool RandomTitle = false;
         public static bool CacheSearch = false;
+        public static bool OriginThumb = false;
         public static Dispatcher dispatcher;
 
         public class Config
