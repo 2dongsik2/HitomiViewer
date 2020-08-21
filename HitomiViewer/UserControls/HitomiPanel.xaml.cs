@@ -269,9 +269,15 @@ namespace HitomiViewer.UserControls
             double top = thumbNail.PointToScreen(new Point(0, 0)).Y;
             double bottom = top + thumbNail.ActualHeight;
             double WorkHeight = SystemParameters.WorkArea.Bottom;
-            double MagnifSize = b * h.thumb.Height * Global.Magnif;
-            double VisualMaxSize = WorkHeight - bottom;
-            double size = MagnifSize > VisualMaxSize ? VisualMaxSize : MagnifSize; //보여지는 크기보다 배율된 크기가 클 시에는 보여지는 크기로 결정
+            double MagnifSize = height * Global.Magnif;
+            double Len = WorkHeight / 2 - (bottom - thumbNail.ActualHeight / 2);
+            bool up = Len <= 0;
+            double VisualMaxSize = 0;
+            if (up)
+                VisualMaxSize = top;
+            else
+                VisualMaxSize = WorkHeight - bottom;
+            double size = MagnifSize > VisualMaxSize ? VisualMaxSize : MagnifSize;
             FrameworkElementFactory image = new FrameworkElementFactory(typeof(Image));
             {
                 image.SetValue(Image.HeightProperty, size);
@@ -299,6 +305,7 @@ namespace HitomiViewer.UserControls
             };
             return toolTip;
         }
+
         public void ChangeColor()
         {
             panel.Background = new SolidColorBrush(Global.background);
@@ -351,6 +358,7 @@ namespace HitomiViewer.UserControls
         private async void HitomiPanel_Loaded(object sender, RoutedEventArgs e)
         {
             thumbNail.ToolTip = GetToolTip(panel.Height);
+            thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
             if (!afterLoad) return;
             this.nameLabel.Content = h.name + " (로딩중)";
             if (h.type == Hitomi.Type.Hiyobi)
