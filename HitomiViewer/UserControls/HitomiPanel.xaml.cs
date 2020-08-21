@@ -122,25 +122,29 @@ namespace HitomiViewer.UserControls
             {
                 if (File.Exists(System.IO.Path.Combine(h.dir, "info.json")))
                 {
-                    JObject jobject = JObject.Parse(File.ReadAllText(System.IO.Path.Combine(h.dir, "info.json")));
-
-                    h.id = jobject.StringValue("id");
-                    h.name = jobject.StringValue("name");
-                    HitomiInfoOrg hInfoOrg = new HitomiInfoOrg();
-                    foreach (JToken tags in jobject["tags"])
+                    string org = File.ReadAllText(System.IO.Path.Combine(h.dir, "info.json"));
+                    if (!string.IsNullOrWhiteSpace(org))
                     {
-                        Tag tag = new Tag();
-                        tag.types = (Tag.Types)int.Parse(tags.StringValue("types"));
-                        tag.FullNameParse(tags.StringValue("name"));
-                        h.tags.Add(tag);
+                        JObject jobject = JObject.Parse(org);
+
+                        h.id = jobject.StringValue("id");
+                        h.name = jobject.StringValue("name");
+                        HitomiInfoOrg hInfoOrg = new HitomiInfoOrg();
+                        foreach (JToken tags in jobject["tags"])
+                        {
+                            Tag tag = new Tag();
+                            tag.types = (Tag.Types)int.Parse(tags.StringValue("types"));
+                            tag.FullNameParse(tags.StringValue("name"));
+                            h.tags.Add(tag);
+                        }
+                        ftype = (Hitomi.Type)int.Parse(jobject["type"].ToString());
+                        if (jobject.ContainsKey("authors"))
+                            h.authors = jobject["authors"].Select(x => x.ToString()).ToArray();
+                        else if (jobject.ContainsKey("author"))
+                            h.authors = jobject["author"].ToString().Split(new string[] { ", " }, StringSplitOptions.None);
+                        else
+                            h.authors = new string[0];
                     }
-                    ftype = (Hitomi.Type)int.Parse(jobject["type"].ToString());
-                    if (jobject.ContainsKey("authors"))
-                        h.authors = jobject["authors"].Select(x => x.ToString()).ToArray();
-                    else if (jobject.ContainsKey("author"))
-                        h.authors = jobject["author"].ToString().Split(new string[] { ", " }, StringSplitOptions.None);
-                    else
-                        h.authors = new string[0];
                 }
                 else if (File.Exists(System.IO.Path.Combine(h.dir, "info.txt")))
                 {
@@ -191,23 +195,26 @@ namespace HitomiViewer.UserControls
             if (large)
             {
                 panel.Height = 150;
-                authorsStackPanel.Visibility = Visibility.Visible;
-                foreach (string artist in h.authors)
+                if (h.authors != null)
                 {
-                    if (h.authors.ToList().IndexOf(artist) != 0)
+                    authorsStackPanel.Visibility = Visibility.Visible;
+                    foreach (string artist in h.authors)
                     {
-                        Label dot = new Label();
-                        dot.Content = ", ";
-                        dot.Padding = new Thickness(0, 5, 2.5, 5);
-                        authorsPanel.Children.Add(dot);
+                        if (h.authors.ToList().IndexOf(artist) != 0)
+                        {
+                            Label dot = new Label();
+                            dot.Content = ", ";
+                            dot.Padding = new Thickness(0, 5, 2.5, 5);
+                            authorsPanel.Children.Add(dot);
+                        }
+                        Label lb = new Label();
+                        lb.Content = artist;
+                        lb.Foreground = new SolidColorBrush(Global.artistsclr);
+                        lb.Cursor = Cursors.Hand;
+                        lb.MouseDown += authorLabel_MouseDown;
+                        lb.Padding = new Thickness(0, 5, 0, 5);
+                        authorsPanel.Children.Add(lb);
                     }
-                    Label lb = new Label();
-                    lb.Content = artist;
-                    lb.Foreground = new SolidColorBrush(Global.artistsclr);
-                    lb.Cursor = Cursors.Hand;
-                    lb.MouseDown += authorLabel_MouseDown;
-                    lb.Padding = new Thickness(0, 5, 0, 5);
-                    authorsPanel.Children.Add(lb);
                 }
             }
 

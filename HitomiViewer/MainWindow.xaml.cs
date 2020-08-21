@@ -166,8 +166,8 @@ namespace HitomiViewer
                         page = innerFiles.Length,
                         files = innerFiles,
                         type = Hitomi.Type.Folder,
-                        FolderByte = File2.GetFolderByte(folder),
-                        SizePerPage = File2.GetSizePerPage(folder)
+                        FolderByte = File2.GetFilesByte(innerFiles),
+                        SizePerPage = File2.GetSizePerPage(folder, allowedExtensions)
                     };
                     if (innerFiles.Length <= 0)
                     {
@@ -218,7 +218,32 @@ namespace HitomiViewer
                 case FolderSorts.Name:
                     FolderSort = (string[] arr) =>
                     {
-                        return arr.ESort().ToArray();
+                        Dictionary<string, string> Match = new Dictionary<string, string>();
+                        for (int i = 0; i < arr.Length; i++)
+                        {
+                            string item = arr[i];
+                            if (File.Exists(Path.Combine(item, "info.json")))
+                            {
+                                string org = File.ReadAllText(Path.Combine(item, "info.json"));
+                                if (!string.IsNullOrWhiteSpace(org))
+                                {
+                                    JObject jobject = JObject.Parse(org);
+                                    string s = jobject.StringValue("name");
+                                    if (s != null)
+                                    {
+                                        arr[i] = s;
+                                        Match.Add(s, item);
+                                    }
+                                    else
+                                        Match.Add(Path.GetFileName(item), item);
+                                }
+                                else
+                                    Match.Add(Path.GetFileName(item), item);
+                            }
+                            else
+                                Match.Add(Path.GetFileName(item), item);
+                        }
+                        return arr.StringSort().Select(x => Match.Keys.Contains(x) ? Match[x] : x).ToArray();
                     };
                     break;
                 case FolderSorts.Creation:

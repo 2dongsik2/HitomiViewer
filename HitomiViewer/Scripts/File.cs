@@ -17,11 +17,25 @@ namespace HitomiViewer.Scripts
             double FolderByte = info.EnumerateFiles().Sum(f => f.Length);
             return FolderByte;
         }
+        public static double GetFilesByte(string[] files)
+        {
+            IEnumerable<FileInfo> fileinfos = files.Select(file => new FileInfo(file));
+            double FolderByte = fileinfos.Sum(f => f.Length);
+            return FolderByte;
+        }
         public static double GetSizePerPage(string dir)
         {
             DirectoryInfo info = new DirectoryInfo(dir);
             double FolderByte = info.EnumerateFiles().Sum(f => f.Length);
             double SizePerPage = FolderByte / info.GetFiles().Length;
+            return SizePerPage;
+        }
+        public static double GetSizePerPage(string dir, string[] allow)
+        {
+            DirectoryInfo info = new DirectoryInfo(dir);
+            IEnumerable<FileInfo> files = info.EnumerateFiles().Where(file => allow.Any(file.FullName.ToLower().EndsWith));
+            double FolderByte = files.Sum(f => f.Length);
+            double SizePerPage = FolderByte / files.Count();
             return SizePerPage;
         }
         public static string[] GetImages(string dir)

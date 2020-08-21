@@ -48,7 +48,7 @@ namespace ExtensionMethods
                 string name = (((child.panel as DockPanel).Children[1] as DockPanel).Children[0] as Label).Content as string;
                 panelKey.Add(name, child);
             }
-            string[] names = panelKey.Select(k => Path.Combine(Global.MainWindow.path, k.Key)).IEESort();
+            string[] names = panelKey.Select(k => Path.Combine(Global.MainWindow.path, k.Key)).ESort();
             for (int i = 0; i < names.Length; i++)
             {
                 string name = names[i].Split(Path.DirectorySeparatorChar).Last();
@@ -66,7 +66,7 @@ namespace ExtensionMethods
                 string name = h.dir;
                 hitomiKey.Add(name, h);
             }
-            string[] names = hitomiKey.Select(h => h.Key).IEESort();
+            string[] names = hitomiKey.Select(h => h.Key).ESort();
             List<Hitomi> hitomis = new List<Hitomi>();
             for (int i = 0; i < names.Length; i++)
             {
@@ -75,17 +75,18 @@ namespace ExtensionMethods
             }
             return hitomis.ToArray();
         }
-        public static string[] ESort(this string[] list)
-        {
-            return list.Select(f => new FileInfo(f)).ToArray().ExplorerSort().Select(f => f.FullName).ToArray();
-        }
-        public static string[] IEESort(this IEnumerable<string> list)
+        public static string[] ESort(this IEnumerable<string> list)
         {
             return list.Select(f => new FileInfo(f)).ToArray().ExplorerSort().Select(f => f.FullName).ToArray();
         }
         public static FileInfo[] ExplorerSort(this FileInfo[] list)
         {
             Array.Sort(list, delegate (FileInfo x, FileInfo y) { return StrCmpLogicalW(x.Name, y.Name); });
+            return list;
+        }
+        public static string[] StringSort(this string[] list)
+        {
+            Array.Sort(list, delegate (string x, string y) { return StrCmpLogicalW(x, y); });
             return list;
         }
         #endregion
