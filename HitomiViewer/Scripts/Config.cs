@@ -11,7 +11,7 @@ using System.Windows;
 
 namespace HitomiViewer.Scripts
 {
-    class Config
+    class Config : IDisposable
     {
         private readonly string path = Global.Config.path;
         private readonly string encryptpath = Global.Config.encryptpath;
@@ -88,6 +88,11 @@ namespace HitomiViewer.Scripts
         {
             this.config = data;
             return Save();
+        }
+
+        public void Dispose()
+        {
+            config = null;
         }
     }
 }

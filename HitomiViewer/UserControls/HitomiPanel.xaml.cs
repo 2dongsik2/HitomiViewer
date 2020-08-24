@@ -26,6 +26,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Path = System.IO.Path;
 
+#pragma warning disable CS0618 // 형식 또는 멤버는 사용되지 않습니다.
 namespace HitomiViewer.UserControls
 {
     /// <summary>
@@ -74,7 +75,6 @@ namespace HitomiViewer.UserControls
             authorsPanel.Children.Clear();
             authorsPanel.Children.Add(new Label { Content = "작가 :" });
             tagPanel.Children.Clear();
-#pragma warning disable CS0618 // 형식 또는 멤버는 사용되지 않습니다.
             if (blur)
                 thumbNail.BitmapEffect = new BlurBitmapEffect { Radius = 5, KernelType = KernelType.Gaussian };
             Config config = new Config();
@@ -89,7 +89,6 @@ namespace HitomiViewer.UserControls
                 else
                     thumbNail.BitmapEffect = new BlurBitmapEffect { Radius = 5, KernelType = KernelType.Gaussian };
             }
-#pragma warning restore CS0618 // 형식 또는 멤버는 사용되지 않습니다.
 
             pageLabel.Content = h.page + "p";
 
@@ -373,11 +372,7 @@ namespace HitomiViewer.UserControls
                 h.files = new string[0];
                 InternetP parser = new InternetP(index: int.Parse(h.id));
                 this.h.files = (await parser.HiyobiFiles()).Select(x => x.url).ToArray();
-                if (Global.OriginThumb && h.files != null && h.files[0] != null)
-                    h.thumb = await ImageProcessor.ProcessEncryptAsync(h.files[0]);
                 this.h.page = h.files.Length;
-                this.nameLabel.Content = h.name;
-                Init();
             }
             if (h.type == Hitomi.Type.Hitomi)
             {
@@ -388,18 +383,16 @@ namespace HitomiViewer.UserControls
                 h.tags = parser.HitomiTags(info);
                 h.files = parser.HitomiFiles(info).ToArray();
                 h.page = h.files.Length;
-                if (Global.OriginThumb && h.files != null && h.files[0] != null)
-                    h.thumb = await ImageProcessor.ProcessEncryptAsync(h.files[0]);
-                else
-                    h.thumb = ImageProcessor.LoadWebImage("https:" + h.thumbpath);
+                if (!(Global.OriginThumb && h.files != null && h.files[0] != null))
+                    h.thumb = await ImageProcessor.ProcessEncryptAsync("https:" + h.thumbpath);
                 h.Json = info;
                 h = await parser.HitomiGalleryData(h);
-                this.nameLabel.Content = h.name;
-                Init();
             }
-            Invoker.Invoke(() =>
-            {
-                Config config = new Config();
+            if (Global.OriginThumb && h.files != null && h.files[0] != null)
+                h.thumb = await ImageProcessor.ProcessEncryptAsync(h.files[0]);
+            this.nameLabel.Content = h.name;
+            Init();
+            using (Config config = new Config()) {
                 config.Load();
                 if (config.ArrayValue<string>(Settings.except_tags).Any(x => h.tags.Select(y => y.full).Contains(x.Replace("_", " "))))
                 {
@@ -411,7 +404,7 @@ namespace HitomiViewer.UserControls
                     else
                         thumbNail.BitmapEffect = new BlurBitmapEffect { Radius = 5, KernelType = KernelType.Gaussian };
                 }
-            });
+            }
         }
 
         private void Folder_Remove_Click(object sender, RoutedEventArgs e)
@@ -705,3 +698,4 @@ namespace HitomiViewer.UserControls
         }
     }
 }
+#pragma warning restore CS0618 // 형식 또는 멤버는 사용되지 않습니다.

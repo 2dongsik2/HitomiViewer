@@ -58,13 +58,10 @@ namespace HitomiViewer.Processor
         public async Task<string> HiyobiSearch()
         {
             HttpClient client = new HttpClient();
-            List<KeyValuePair<string, string>> body = new List<KeyValuePair<string, string>>();
-            foreach (var key in this.keyword)
-            {
-                body.Add(new KeyValuePair<string, string>("search[]", key));
-            }
-            body.Add(new KeyValuePair<string, string>("paging", this.index.ToString()));
-            var response = await client.PostAsync("https://api.hiyobi.me/search", new FormUrlEncodedContent(body));
+            JObject body = new JObject();
+            body.Add("search", JToken.FromObject(this.keyword));
+            body.Add("paging", this.index);
+            var response = await client.PostAsync("https://api.hiyobi.me/search", new StringContent(body.ToString(), Encoding.UTF8, "application/json"));
             var pageContents = await response.Content.ReadAsStringAsync();
             return pageContents;
         }
