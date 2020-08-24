@@ -363,6 +363,7 @@ namespace HitomiViewer.UserControls
 
         private async void HitomiPanel_Loaded(object sender, RoutedEventArgs e)
         {
+            if (!thumbNail.IsVisible) return;
             thumbNail.ToolTip = GetToolTip(panel.Height);
             thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
             if (!afterLoad) return;

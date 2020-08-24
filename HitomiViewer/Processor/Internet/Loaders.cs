@@ -1,12 +1,15 @@
 ﻿using ExtensionMethods;
 using HitomiViewer.Processor;
 using HitomiViewer.Structs;
+using HitomiViewer.UserControls;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using Hitomi = HitomiViewer.Hitomi;
 
@@ -20,6 +23,8 @@ namespace HitomiViewer.Scripts.Loaders
         public int index;
         public Action<Hitomi, int, int> update = null;
         public Action<int> start = null;
+        public Action<int> search = null;
+        public Action<int> pagination = null;
         public Action end = null;
 
         public HiyobiLoader(string text = null, int? index = null, Action<Hitomi, int, int> update = null, Action<int> start = null, Action end = null)
@@ -58,6 +63,20 @@ namespace HitomiViewer.Scripts.Loaders
             {
                 Global.MainWindow.label.Content = $"{index}/{max}";
                 Global.MainWindow.MainPanel.Children.Add(new UserControls.HitomiPanel(h, Global.MainWindow, true, true));
+            };
+            return this;
+        }
+        public HiyobiLoader Pagination(int page)
+        {
+            pagination = (int pages) =>
+            {
+                Pagination pagination = new Pagination(page, pages);
+                pagination.btnFirs_Clk = (object sender, RoutedEventArgs e) => search(1);
+                pagination.btnPrev_Clk = (object sender, RoutedEventArgs e) => search(page - 1);
+                pagination.btnNext_Clk = (object sender, RoutedEventArgs e) => search(page + 1);
+                pagination.btnLast_Clk = (object sender, RoutedEventArgs e) => search(pages);
+                pagination.cbNumberOfRecords_SelectionChanged1 = (object sender, SelectionChangedEventArgs e) => search((int)e.AddedItems[0]);
+                Global.MainWindow.MainPanel.Children.Add(pagination);
             };
             return this;
         }
@@ -113,7 +132,9 @@ namespace HitomiViewer.Scripts.Loaders
                 if (!config.ArrayValue<string>(Settings.except_tags).Any(x => h.tags.Select(y => y.full).Contains(x)) || !(config.BoolValue(Settings.block_tags) ?? false))
                     update(h, i, arr.Count);
             }
+            int pages = (int)Math.Ceiling((jobject.IntValue("count") ?? 0) / ((double)arr.Count));
             end();
+            pagination?.Invoke(pages);
         }
         public async Task<Hitomi> Parser()
         {

@@ -165,6 +165,9 @@
     <Compile Include="Processor\Internet\InternetP.cs" />
     <Compile Include="Scripts\LoginClass.cs" />
     <Compile Include="Structs\Tag.cs" />
+    <Compile Include="UserControls\Pagination.xaml.cs">
+      <DependentUpon>Pagination.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\ProgressBox.xaml.cs">
       <DependentUpon>ProgressBox.xaml</DependentUpon>
     </Compile>
@@ -200,6 +203,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Style\Style1.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\Pagination.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -499,9 +499,20 @@ namespace HitomiViewer
         {
             MainPanel.Children.Clear();
             LabelSetup();
-            InternetP parser = new InternetP(url: "https://api.hiyobi.me/list/" + GetPage());
+            HiyobiMain(GetPage());
+        }
+        private void HiyobiMain(int index)
+        {
+            InternetP parser = new InternetP(url: "https://api.hiyobi.me/list/" + index);
             HiyobiLoader hiyobi = new HiyobiLoader();
             hiyobi.FastDefault();
+            hiyobi.search = (int i) =>
+            {
+                MainPanel.Children.Clear();
+                LabelSetup();
+                HiyobiMain(i);
+            };
+            hiyobi.Pagination(index);
             parser.LoadJObject(hiyobi.FastParser);
         }
         private void Hiyobi_Search_Text_KeyDown(object sender, KeyEventArgs e)
@@ -516,9 +527,20 @@ namespace HitomiViewer
         {
             MainPanel.Children.Clear();
             LabelSetup();
-            InternetP parser = new InternetP(keyword: Hiyobi_Search_Text.Text.Split(' ').ToList(), index: GetPage());
+            HiyobiSearch(keyword: Hiyobi_Search_Text.Text.Split(' ').ToList(), index: GetPage());
+        }
+        private void HiyobiSearch(List<string> keyword, int index)
+        {
+            InternetP parser = new InternetP(keyword: keyword, index: index);
             HiyobiLoader hiyobi = new HiyobiLoader();
             hiyobi.FastDefault();
+            hiyobi.search = (int i) =>
+            {
+                MainPanel.Children.Clear();
+                LabelSetup();
+                HiyobiSearch(keyword, i);
+            };
+            hiyobi.Pagination(index);
             parser.HiyobiSearch(data => new InternetP(data: data).ParseJObject(hiyobi.FastParser));
         }
         private void MenuHitomi_Click(object sender, RoutedEventArgs e)
