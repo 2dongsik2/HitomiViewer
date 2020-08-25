@@ -205,9 +205,10 @@ namespace HitomiViewer
 
         private void SetColor()
         {
-            foreach (HitomiPanel hitomiPanel in MainPanel.Children)
+            foreach (UIElement hitomiPanel in MainPanel.Children)
             {
-                hitomiPanel.ChangeColor();
+                if ((hitomiPanel as HitomiPanel) != null)
+                    (hitomiPanel as HitomiPanel).ChangeColor();
                 //HitomiPanel.ChangeColor(hitomiPanel);
             }
         }
