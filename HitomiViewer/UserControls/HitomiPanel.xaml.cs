@@ -52,6 +52,7 @@ namespace HitomiViewer.UserControls
             this.MainWindow = sender;
             InitializeComponent();
             Init();
+            this.nameLabel.Content = h.name;
             InitEvent();
         }
 
@@ -63,6 +64,7 @@ namespace HitomiViewer.UserControls
                 if (!reader.IsClosed)
                     reader.Show();
             };
+            thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
         }
         private void Init()
         {
@@ -218,7 +220,7 @@ namespace HitomiViewer.UserControls
             }
 
             nameLabel.Width = panel.Width - border.Width;
-            nameLabel.Content = h.name;
+            //nameLabel.Content = h.name;
             ContextSetup();
             ChangeColor(this);
         }
@@ -269,6 +271,7 @@ namespace HitomiViewer.UserControls
 
         private ToolTip GetToolTip(double height)
         {
+            if (!thumbNail.IsVisible) return null;
             //b = 비율
             //Magnif = 배율
             double b = height / h.thumb.Height;
@@ -363,9 +366,6 @@ namespace HitomiViewer.UserControls
 
         private async void HitomiPanel_Loaded(object sender, RoutedEventArgs e)
         {
-            if (!thumbNail.IsVisible) return;
-            thumbNail.ToolTip = GetToolTip(panel.Height);
-            thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
             if (!afterLoad) return;
             this.nameLabel.Content = h.name + " (로딩중)";
             if (h.type == Hitomi.Type.Hiyobi)
@@ -384,24 +384,29 @@ namespace HitomiViewer.UserControls
                 h.tags = parser.HitomiTags(info);
                 h.files = parser.HitomiFiles(info).ToArray();
                 h.page = h.files.Length;
-                if (!(Global.OriginThumb && h.files != null && h.files[0] != null))
-                    h.thumb = await ImageProcessor.ProcessEncryptAsync("https:" + h.thumbpath);
                 h.Json = info;
                 h = await parser.HitomiGalleryData(h);
+                if (!(Global.OriginThumb && h.files != null && h.files[0] != null))
+                    h.thumb = await ImageProcessor.ProcessEncryptAsync("https:" + h.thumbpath);
             }
             if (Global.OriginThumb && h.files != null && h.files[0] != null)
-                h.thumb = await ImageProcessor.ProcessEncryptAsync(h.files[0]);
-            this.nameLabel.Content = h.name;
+            {
+                this.nameLabel.Content = h.name + " (썸네일 로딩중)";
+                ImageProcessor.ProcessEncryptAsync(h.files[0]).then((BitmapImage image) =>
+                {
+                    h.thumb = image;
+                    this.nameLabel.Content = h.name;
+                });
+            }
+            else
+                this.nameLabel.Content = h.name;
             Init();
             using (Config config = new Config()) {
                 config.Load();
                 if (config.ArrayValue<string>(Settings.except_tags).Any(x => h.tags.Select(y => y.full).Contains(x.Replace("_", " "))))
                 {
                     if (config.BoolValue(Settings.block_tags) ?? false)
-                    {
                         MainWindow.MainPanel.Children.Remove(this);
-                        return;
-                    }
                     else
                         thumbNail.BitmapEffect = new BlurBitmapEffect { Radius = 5, KernelType = KernelType.Gaussian };
                 }
@@ -415,7 +420,7 @@ namespace HitomiViewer.UserControls
         }
         private void Folder_Open_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start(h.dir);
+            Process.Start(h.dir);
         }
         private void CopyNumber_Click(object sender, RoutedEventArgs e) => Clipboard.SetText(h.id);
         private void Hiyobi_Download_Click(object sender, RoutedEventArgs e)
