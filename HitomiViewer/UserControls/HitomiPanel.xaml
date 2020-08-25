@@ -45,9 +45,11 @@
                     <Label>작가 :</Label>
                 </DockPanel>
             </StackPanel>
-            <StackPanel x:Name="tagPanel" DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Stretch" FlowDirection="LeftToRight">
+            <ScrollViewer x:Name="tagScroll" PreviewMouseWheel="tagScroll_MouseWheel">
+                <WrapPanel x:Name="tagPanel" DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Stretch" FlowDirection="LeftToRight">
 
-            </StackPanel>
+                </WrapPanel>
+            </ScrollViewer>
         </DockPanel>
     </DockPanel>
 </UserControl>

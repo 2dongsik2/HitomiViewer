@@ -1,8 +1,8 @@
 ﻿using ExtensionMethods;
 using HitomiViewer.Encryption;
 using HitomiViewer.Processor;
+using HitomiViewer.Processor.Loaders;
 using HitomiViewer.Scripts;
-using HitomiViewer.Scripts.Loaders;
 using HitomiViewer.Structs;
 using Newtonsoft.Json.Linq;
 using System;
@@ -66,10 +66,15 @@ namespace HitomiViewer.UserControls
             };
             thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
         }
-        private void Init()
+        private async void Init()
         {
             if (h.thumb == null)
-                h.thumb = ImageProcessor.FromResource("NoImage.jpg");
+            {
+                if (h.thumbpath == null)
+                    h.thumb = ImageProcessor.FromResource("NoImage.jpg");
+                else
+                    h.thumb = await ImageProcessor.ProcessEncryptAsync(h.thumbpath);
+            }
             thumbNail.Source = h.thumb;
             thumbBrush.ImageSource = h.thumb;
             //thumbNail.ToolTip = GetToolTip(panel.Height);
@@ -396,6 +401,8 @@ namespace HitomiViewer.UserControls
                 {
                     h.thumb = image;
                     this.nameLabel.Content = h.name;
+                    if (h.type != Hitomi.Type.Hiyobi)
+                        thumbNail.Source = image;
                 });
             }
             else
@@ -592,11 +599,15 @@ namespace HitomiViewer.UserControls
         private async void authorLabel_MouseDown(object sender, MouseButtonEventArgs e)
         {
             bool result = await new InternetP(index: int.Parse(h.id)).isHiyobi();
+            result = false; //디버깅용
             Label lbsender = sender as Label;
             string author = lbsender.Content.ToString();
             MainWindow.MainPanel.Children.Clear();
             if (result)
             {
+                Global.MainWindow.Hiyobi_Search_Text.Text = "artist:" + author;
+                Global.MainWindow.Hiyobi_Search_Button_Click(this, null);
+                /*
                 MainWindow.LabelSetup();
                 int index = MainWindow.GetPage();
                 int count = (int)MainWindow.Page_itemCount;
@@ -609,6 +620,7 @@ namespace HitomiViewer.UserControls
                 int[] ids = parser.ByteArrayToIntArray(await parser.LoadNozomiTag("artist", author, true));
                 HitomiLoader hitomi = new HitomiLoader();
                 hitomi.FastDefault().FastParser(ids);
+                */
             }
             else
             {
@@ -701,6 +713,16 @@ namespace HitomiViewer.UserControls
             h.thumbpath = h.files.First();
             h.thumb = await ImageProcessor.ProcessEncryptAsync(h.thumbpath);
             Init();
+        }
+        private void tagScroll_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            ScrollViewer scroll = Global.MainWindow.MainScroll;
+            double offset = 0.45;
+            if (e.Delta > 0)
+                scroll.ScrollToVerticalOffset(scroll.VerticalOffset - (offset * e.Delta));
+            else
+                scroll.ScrollToVerticalOffset(scroll.VerticalOffset - (offset * e.Delta));
+            e.Handled = true;
         }
     }
 }

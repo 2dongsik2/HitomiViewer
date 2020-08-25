@@ -37,6 +37,8 @@ namespace HitomiViewer.Processor
             HtmlNode image = doc.DocumentNode.SelectSingleNode("//div[@class=\"dj-img1\"]/img");
             image = image ?? doc.DocumentNode.SelectSingleNode("//div[@class=\"cg-img1\"]/img");
             h.thumbpath = image.GetAttributeValue("src", "");
+            if (!(h.thumbpath.StartsWith("https:") || h.thumbpath.StartsWith("http:")))
+                h.thumbpath = "https:" + h.thumbpath;
             if (h.thumbpath == "")
                 h.thumbpath = image.GetDataAttribute("src").Value;
             HtmlNodeCollection artists = doc.DocumentNode.SelectNodes("//div[@class=\"artist-list\"]/ul/li");
@@ -146,6 +148,17 @@ namespace HitomiViewer.Processor
             var response = await client.GetAsync(url);
             var pageContents = await response.Content.ReadAsByteArrayAsync();
             return pageContents;
+        }
+        public async Task<Tuple<byte[], long?>> LoadNozomiAndRangeMax(string url = null)
+        {
+            url = url ?? this.url ?? "https://ltn.hitomi.la/index-all.nozomi";
+            if (url.Last() == '/') url = url.Remove(url.Length - 1);
+            HttpClient client = new HttpClient();
+            client.DefaultRequestHeaders.Range = new System.Net.Http.Headers.RangeHeaderValue(index * 4, (index + count) * 4 - 1);
+            var response = await client.GetAsync(url);
+            var MaxRange = response.Content.Headers.ContentRange.Length;
+            var pageContents = await response.Content.ReadAsByteArrayAsync();
+            return new Tuple<byte[], long?>(pageContents, MaxRange);
         }
         public async Task<byte[]> LoadNozomiTag(string type, string tag, bool range = true, int? start = null, int? end = null)
         {

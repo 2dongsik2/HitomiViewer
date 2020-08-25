@@ -174,7 +174,7 @@
                     <Button Grid.Column="2" Content="파일 검색" Click="File_Search_Button_Click" x:Name="File_Search_Button"/>
                 </Grid>
             </Grid>
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ScrollViewer x:Name="MainScroll" VerticalScrollBarVisibility="Auto">
                 <StackPanel x:Name="MainPanel" Orientation="Vertical" CanVerticallyScroll="True">
                 </StackPanel>
             </ScrollViewer>

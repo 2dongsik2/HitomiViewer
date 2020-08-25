@@ -66,7 +66,7 @@
                                          Background="White"></wpf:AutoCompleteTextBox>
                 <Button Grid.Column="1" Click="ExceptTagsBtn_Click">추가</Button>
             </Grid>
-            <ListBox x:Name="ExceptTags">
+            <ListBox x:Name="ExceptTags" ScrollViewer.VerticalScrollBarVisibility="Auto" MaxHeight="375">
                 <StackPanel Orientation="Horizontal">
                     <Label MinWidth="176">text</Label>
                     <Button>x</Button>

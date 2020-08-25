@@ -1,5 +1,4 @@
 ﻿using ExtensionMethods;
-using HitomiViewer.Scripts.Loaders;
 using HitomiViewer.Structs;
 using Newtonsoft.Json.Linq;
 using System;
@@ -11,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 
-namespace HitomiViewer.Processor
+namespace HitomiViewer.Processor.Loaders
 {
     partial class SearchLoader
     {

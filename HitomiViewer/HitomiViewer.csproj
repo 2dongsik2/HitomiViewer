@@ -129,7 +129,7 @@
     <Compile Include="Processor\Hitomi\InternetP.cs" />
     <Compile Include="Processor\Hiyobi\InternetP.cs" />
     <Compile Include="Processor\Json\InternetP.cs" />
-    <Compile Include="Processor\Search\Hitomi.cs" />
+    <Compile Include="Processor\Search\Loaders.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -152,6 +152,7 @@
     <Compile Include="Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\IgnoreWheelScrollViewer.cs" />
     <Compile Include="UserControls\HitomiPanel.xaml.cs">
       <DependentUpon>HitomiPanel.xaml</DependentUpon>
     </Compile>

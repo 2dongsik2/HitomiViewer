@@ -2,8 +2,8 @@
 using HitomiViewer.Encryption;
 using HitomiViewer.Processor;
 using HitomiViewer.Processor.Cache;
+using HitomiViewer.Processor.Loaders;
 using HitomiViewer.Scripts;
-using HitomiViewer.Scripts.Loaders;
 using HitomiViewer.Structs;
 using HitomiViewer.UserControls;
 using Microsoft.Win32;
@@ -186,7 +186,19 @@ namespace HitomiViewer
                     Console.WriteLine("Completed: {0}", folder);
                 }));
             }
-            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => label.Visibility = Visibility.Hidden));
+            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
+            {
+                label.Visibility = Visibility.Hidden;
+                var pagination = new CommonLoader().Search((int ind) =>
+                {
+                    MainPanel.Children.Clear();
+                    LabelSetup();
+                    Page_Index.SelectedIndex = ind - 1;
+                    new TaskFactory().StartNew(() => LoadHitomi(path));
+                }).Pagination(SelectedPage);
+                int pages = (int)Math.Ceiling(files.Length / ((double)Page_itemCount));
+                pagination(pages);
+            }));
         }
 
         public int GetPage() => (int) new CountBox("페이지", "원하는 페이지 수", 1).ShowDialog();
@@ -201,6 +213,56 @@ namespace HitomiViewer
         public void Searching(bool tf)
         {
             MainMenu.IsEnabled = !tf;
+        }
+
+        private void HiyobiMain(int index)
+        {
+            InternetP parser = new InternetP(url: "https://api.hiyobi.me/list/" + index);
+            HiyobiLoader hiyobi = new HiyobiLoader();
+            hiyobi.FastDefault();
+            hiyobi.pagination = new CommonLoader().Search((int i) =>
+            {
+                MainPanel.Children.Clear();
+                LabelSetup();
+                HiyobiMain(i);
+            }).Pagination(index);
+            parser.LoadJObject(hiyobi.FastParser);
+        }
+        private void HitomiMain(int index)
+        {
+            HitomiLoader hitomi = new HitomiLoader();
+            hitomi.index = index;
+            hitomi.count = (int)Page_itemCount;
+            hitomi.pagination = new CommonLoader().Search((int i) =>
+            {
+                MainPanel.Children.Clear();
+                LabelSetup();
+                HitomiMain(i);
+            }).Pagination(hitomi.index);
+            hitomi.FastDefault();
+            hitomi.FastParser();
+        }
+        private void HiyobiSearch(List<string> keyword, int index)
+        {
+            InternetP parser = new InternetP(keyword: keyword, index: index);
+            HiyobiLoader hiyobi = new HiyobiLoader();
+            hiyobi.FastDefault();
+            hiyobi.pagination = new CommonLoader().Search((int i) =>
+            {
+                MainPanel.Children.Clear();
+                LabelSetup();
+                HiyobiSearch(keyword, i);
+            }).Pagination(index);
+            parser.HiyobiSearch(data => new InternetP(data: data).ParseJObject(hiyobi.FastParser));
+        }
+        private void HitomiSearch(string[] tags, int index)
+        {
+            SearchLoader loader = new SearchLoader();
+            loader.tags = tags;
+            loader.itemCount = (int)Page_itemCount;
+            loader.index = index;
+            loader.Default()
+                  .HitomiSearch();
         }
 
         private void SetColor()
@@ -502,20 +564,6 @@ namespace HitomiViewer
             LabelSetup();
             HiyobiMain(GetPage());
         }
-        private void HiyobiMain(int index)
-        {
-            InternetP parser = new InternetP(url: "https://api.hiyobi.me/list/" + index);
-            HiyobiLoader hiyobi = new HiyobiLoader();
-            hiyobi.FastDefault();
-            hiyobi.search = (int i) =>
-            {
-                MainPanel.Children.Clear();
-                LabelSetup();
-                HiyobiMain(i);
-            };
-            hiyobi.Pagination(index);
-            parser.LoadJObject(hiyobi.FastParser);
-        }
         private void Hiyobi_Search_Text_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter) Task.Factory.StartNew(() =>
@@ -530,29 +578,25 @@ namespace HitomiViewer
             LabelSetup();
             HiyobiSearch(keyword: Hiyobi_Search_Text.Text.Split(' ').ToList(), index: GetPage());
         }
-        private void HiyobiSearch(List<string> keyword, int index)
-        {
-            InternetP parser = new InternetP(keyword: keyword, index: index);
-            HiyobiLoader hiyobi = new HiyobiLoader();
-            hiyobi.FastDefault();
-            hiyobi.search = (int i) =>
-            {
-                MainPanel.Children.Clear();
-                LabelSetup();
-                HiyobiSearch(keyword, i);
-            };
-            hiyobi.Pagination(index);
-            parser.HiyobiSearch(data => new InternetP(data: data).ParseJObject(hiyobi.FastParser));
-        }
         private void MenuHitomi_Click(object sender, RoutedEventArgs e)
         {
             MainPanel.Children.Clear();
             LabelSetup();
-            HitomiLoader hitomi = new HitomiLoader();
-            hitomi.index = GetPage();
-            hitomi.count = (int)Page_itemCount;
-            hitomi.FastDefault();
-            hitomi.FastParser();
+            HitomiMain(GetPage());
+        }
+        private void Hitomi_Search_Text_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter) Task.Factory.StartNew(() =>
+            {
+                Thread.Sleep(500);
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => Hitomi_Search_Button_Click(null, null)));
+            });
+        }
+        public void Hitomi_Search_Button_Click(object sender, RoutedEventArgs e)
+        {
+            MainPanel.Children.Clear();
+            LabelSetup();
+            HitomiSearch(Hitomi_Search_Text.Text.Split(' '), GetPage());
         }
         private void OpenSetting_Click(object sender, RoutedEventArgs e)
         {
@@ -688,155 +732,6 @@ namespace HitomiViewer
             {
                 MessageBox.Show("잘못된 형식 입니다.");
             }
-        }
-
-        private void Hitomi_Search_Text_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter) Task.Factory.StartNew(() =>
-            {
-                Thread.Sleep(500);
-                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => Hitomi_Search_Button_Click(null, null)));
-            });
-        }
-        public void Hitomi_Search_Button_Click(object sender, RoutedEventArgs e)
-        {
-            SearchLoader loader = new SearchLoader();
-            loader.tags = Hitomi_Search_Text.Text.Split(' ');
-            loader.itemCount = (int)Page_itemCount;
-            loader.index = GetPage();
-            loader.Default()
-                  .HitomiSearch();
-            /*
-            string[] tags = Hitomi_Search_Text.Text.Split(' ');
-            List<int> idlist = new List<int>();
-            int index = GetPage();
-            int compcount = 0;
-            List<Task> tasks = new List<Task>();
-            label.Content = "0/" + tags.Length;
-            label.Visibility = Visibility.Visible;
-            foreach (string tag in tags)
-            {
-                if (Global.CacheSearch)
-                {
-                    Tag tag2 = Structs.Tag.Parse(tag);
-                    string path = Path.Combine(rootDir, "Cache", tag2.types.ToString(), tag2.name + "json");
-                    if (File.Exists(path))
-                    {
-                        JArray arr = JArray.Parse(File.ReadAllText(path));
-                        int[] ids = arr.Select(x => int.Parse(x.ToString())).ToArray();
-                        idlist = idlist.Concat(ids).ToList();
-                        continue;
-                    }
-                }
-                Thread th = new Thread(new ThreadStart(async () =>
-                {
-                    if (HiyobiTags.Tags.Select(y => y.full).Contains(tag))
-                    {
-                        Tag tag2 = Structs.Tag.Parse(tag);
-                        InternetP parser = new InternetP();
-                        parser.url = $"https://ltn.hitomi.la/{tag2.types}/{tag2.name}-all.nozomi";
-                        parser.index = index - 1;
-                        parser.count = (int)1000;
-                        int[] ids = parser.ByteArrayToIntArray(await parser.LoadNozomi());
-                        Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => 
-                            idlist = idlist.Concat(ids).ToList()));
-                    }
-                    else
-                    {
-                        InternetP parser = new InternetP();
-                        int[] ids = await parser.LoadQuery(tag);
-                        Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
-                            idlist = idlist.Concat(ids).ToList()));
-                        Console.WriteLine("Completed");
-                    }
-                    compcount++;
-                    Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
-                        label.Content = $"{compcount}/{tags.Length}"));
-                }));
-                th.Start();
-            }
-            int start = (int)((index - 1) * Page_itemCount);
-            int PageCount = (int)(start + Page_itemCount);
-            Task.Factory.StartNew(() =>
-            {
-                while (compcount != tags.Length) { }
-                List<int> new_idlist = new List<int>();
-                for (int i = 0; i < idlist.Count; i++)
-                {
-                    int count = idlist.Count(y => y == idlist[i]);
-                    if (count == tags.Length) new_idlist.Add(idlist[i]);
-                    if (new_idlist.Count >= PageCount) break;
-                }
-                new_idlist = new_idlist.Skip(start).ToList();
-                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
-                {
-                    MainPanel.Children.Clear();
-                    LabelSetup();
-                    HitomiLoader hitomi = new HitomiLoader();
-                    hitomi.FastDefault();
-                    hitomi.FastParser(new_idlist.ToArray());
-                }));
-            });
-            */
-        }
-        private void Hitomi_Search_TagOnly_Text_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter) Task.Factory.StartNew(() =>
-            {
-                Thread.Sleep(500);
-                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => Hitomi_Search_TagOnly_Button_Click(null, null)));
-            });
-        }
-        private void Hitomi_Search_TagOnly_Button_Click(object sender, RoutedEventArgs e)
-        {
-            /*
-            string[] tags = Hitomi_Search_TagOnly_Text.Text.Split(' ');
-            string[] tagstart = Enum.GetNames(typeof(Tag.Types));
-            tags = tags.Where(x => HiyobiTags.Tags.Select(y => y.full).Contains(x))
-                       .Where(x => tagstart.Any(x.ToLower().StartsWith)).ToArray();
-            if (tags.Length <= 0)
-            {
-                MessageBox.Show("검색 가능한 태그가 없습니다.");
-                return;
-            }
-            List<int> idlist = new List<int>();
-            int index = GetPage();
-            foreach (string tag in tags)
-            {
-                if (Global.CacheSearch)
-                {
-                    Tag tag2 = Structs.Tag.Parse(tag);
-                    string path = Path.Combine(rootDir, "Cache", tag2.types.ToString(), tag2.name + "json");
-                    if (File.Exists(path))
-                    {
-                        JArray arr = JArray.Parse(File.ReadAllText(path));
-                        int[] ids2 = arr.Select(x => int.Parse(x.ToString())).ToArray();
-                        idlist = idlist.Concat(ids2).ToList();
-                        continue;
-                    }
-                }
-                InternetP parser = new InternetP();
-                parser.url = $"https://ltn.hitomi.la/tag/{tag}-all.nozomi";
-                parser.index = index - 1;
-                parser.count = (int)1000;
-                int[] ids = parser.ByteArrayToIntArray(await parser.LoadNozomi());
-                idlist = idlist.Concat(ids).ToList();
-            }
-            List<int> new_idlist = new List<int>();
-            for (int i = 0; i < idlist.Count; i++)
-            {
-                int count = idlist.Count(y => y == idlist[i]);
-                if (count == tags.Length) new_idlist.Add(idlist[i]);
-                if (new_idlist.Count >= (int)Page_itemCount) break;
-            }
-            //idlist = idlist.Where(x => idlist.Count(y => y == x) == tags.Length).ToList();
-            //_ = idlist;
-            MainPanel.Children.Clear();
-            LabelSetup();
-            HitomiLoader hitomi = new HitomiLoader();
-            hitomi.FastDefault();
-            hitomi.FastParser(new_idlist.ToArray());
-            */
         }
         private void CacheDownload_Click(object sender, RoutedEventArgs e)
         {

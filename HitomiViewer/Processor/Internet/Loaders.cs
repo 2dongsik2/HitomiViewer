@@ -1,5 +1,6 @@
 ﻿using ExtensionMethods;
 using HitomiViewer.Processor;
+using HitomiViewer.Scripts;
 using HitomiViewer.Structs;
 using HitomiViewer.UserControls;
 using Newtonsoft.Json.Linq;
@@ -11,10 +12,31 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using Hitomi = HitomiViewer.Hitomi;
 
-namespace HitomiViewer.Scripts.Loaders
+namespace HitomiViewer.Processor.Loaders
 {
+    class CommonLoader
+    {
+        public Action<int> search = null;
+        public CommonLoader Search(Action<int> search)
+        {
+            this.search = search;
+            return this;
+        }
+        public Action<int> Pagination(int page)
+        {
+            return (int pages) =>
+            {
+                Pagination pagination = new Pagination(page, pages);
+                pagination.btnFirs_Clk = (object sender, RoutedEventArgs e) => search(1);
+                pagination.btnPrev_Clk = (object sender, RoutedEventArgs e) => search(page - 1);
+                pagination.btnNext_Clk = (object sender, RoutedEventArgs e) => search(page + 1);
+                pagination.btnLast_Clk = (object sender, RoutedEventArgs e) => search(pages);
+                pagination.cbNumberOfRecords_SelectionChanged1 = (object sender, SelectionChangedEventArgs e) => search((int)e.AddedItems[0]);
+                Global.MainWindow.MainPanel.Children.Add(pagination);
+            };
+        }
+    }
     class HiyobiLoader
     {
         public readonly Hitomi.Type type = HitomiViewer.Hitomi.Type.Hiyobi;
@@ -23,7 +45,6 @@ namespace HitomiViewer.Scripts.Loaders
         public int index;
         public Action<Hitomi, int, int> update = null;
         public Action<int> start = null;
-        public Action<int> search = null;
         public Action<int> pagination = null;
         public Action end = null;
 
@@ -66,20 +87,6 @@ namespace HitomiViewer.Scripts.Loaders
             };
             return this;
         }
-        public HiyobiLoader Pagination(int page)
-        {
-            pagination = (int pages) =>
-            {
-                Pagination pagination = new Pagination(page, pages);
-                pagination.btnFirs_Clk = (object sender, RoutedEventArgs e) => search(1);
-                pagination.btnPrev_Clk = (object sender, RoutedEventArgs e) => search(page - 1);
-                pagination.btnNext_Clk = (object sender, RoutedEventArgs e) => search(page + 1);
-                pagination.btnLast_Clk = (object sender, RoutedEventArgs e) => search(pages);
-                pagination.cbNumberOfRecords_SelectionChanged1 = (object sender, SelectionChangedEventArgs e) => search((int)e.AddedItems[0]);
-                Global.MainWindow.MainPanel.Children.Add(pagination);
-            };
-            return this;
-        }
 
         public async void Parser(JObject jobject)
         {
@@ -118,6 +125,8 @@ namespace HitomiViewer.Scripts.Loaders
                     jobject["list"].Count());
             }
             end();
+            int pages = (int)Math.Ceiling((jobject.IntValue("count") ?? 0) / ((double)jobject["list"].Count()));
+            pagination?.Invoke(pages);
         }
         public void FastParser(JObject jobject)
         {
@@ -132,8 +141,8 @@ namespace HitomiViewer.Scripts.Loaders
                 if (!config.ArrayValue<string>(Settings.except_tags).Any(x => h.tags.Select(y => y.full).Contains(x)) || !(config.BoolValue(Settings.block_tags) ?? false))
                     update(h, i, arr.Count);
             }
-            int pages = (int)Math.Ceiling((jobject.IntValue("count") ?? 0) / ((double)arr.Count));
             end();
+            int pages = (int)Math.Ceiling((jobject.IntValue("count") ?? 0) / ((double)arr.Count));
             pagination?.Invoke(pages);
         }
         public async Task<Hitomi> Parser()
@@ -195,6 +204,7 @@ namespace HitomiViewer.Scripts.Loaders
         public int count = 0;
         public Action<Hitomi, int, int> update = null;
         public Action<int> start = null;
+        public Action<int> pagination = null;
         public Action end = null;
 
         public HitomiLoader FastDefault()
@@ -234,23 +244,13 @@ namespace HitomiViewer.Scripts.Loaders
             parser.index = (index - 1) * count;
             parser.count = count;
             parser.url = "https://ltn.hitomi.la/index-all.nozomi";
-            int[] ids = parser.ByteArrayToIntArray(await parser.LoadNozomi());
-            FastParser(ids);
-            /*
-            start(ids.Count());
-            for (int i = 0; i < ids.Length; i++)
-            {
-                InternetP parser2 = new InternetP();
-                parser2.index = ids[i];
-                Hitomi h = await parser2.HitomiData();
-                h.type = Hitomi.Type.Hitomi;
-                h.id = ids[i].ToString();
-                update(h, i, ids.Count());
-            }
-            end();
-            */
+            Tuple<byte[], long?> result = await parser.LoadNozomiAndRangeMax();
+            int[] ids = parser.ByteArrayToIntArray(result.Item1);
+            await FastParser(ids);
+            int pages = (int)Math.Ceiling((result.Item2 ?? 0) / ((double)count));
+            pagination?.Invoke(pages);
         }
-        public async void FastParser(int[] ids)
+        public async Task FastParser(int[] ids)
         {
             start(ids.Length);
             for (int i = 0; i < ids.Length; i++)

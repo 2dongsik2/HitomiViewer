@@ -1,6 +1,6 @@
 ﻿using ExtensionMethods;
+using HitomiViewer.Processor.Loaders;
 using HitomiViewer.Scripts;
-using HitomiViewer.Scripts.Loaders;
 using HitomiViewer.Structs;
 using HtmlAgilityPack;
 using Newtonsoft.Json.Linq;

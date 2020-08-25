@@ -76,7 +76,7 @@ namespace HitomiViewer.Processor
             h.name = item.StringValue("title");
             h.designType = DesignTypeFromString(item.StringValue("type"));
             h.thumbpath = $"https://cdn.hiyobi.me/tn/{h.id}.jpg";
-            h.thumb = ImageProcessor.LoadWebImage(h.thumbpath);
+            //h.thumb = ImageProcessor.LoadWebImage(h.thumbpath);
             h.dir = $"https://hiyobi.me/reader/{h.id}";
             h.page = 0;
             h.AutoAuthor();
