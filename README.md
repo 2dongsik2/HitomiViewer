@@ -8,7 +8,7 @@
 현재는 별도로 우회 프로그램을 사용하지 않아도 모든 기능이 사용이 가능합니다.
 
 # Framework
-.NET Framework 4.8
+.NET Framework 4.8 - [download](https://dotnet.microsoft.com/download) - [downloads](https://dotnet.microsoft.com/download/visual-studio-sdks?utm_source=getdotnetsdk&utm_medium=referral)
 
 # Dependencies
 - [WebP wrapper](https://github.com/JosePineiro/WebP-wrapper)
