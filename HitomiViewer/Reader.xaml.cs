@@ -194,8 +194,12 @@ namespace HitomiViewer
             if (hitomi.images == null || hitomi.images.Length < hitomi.page)
                 hitomi.images = new BitmapImage[hitomi.page];
             if (hitomi.images[copypage] == null)
-                hitomi.images[copypage] = await ImageProcessor.ProcessEncryptAsync(link);
-            if (copypage == page)
+            {
+                BitmapImage image = await ImageProcessor.ProcessEncryptAsync(link);
+                if (hitomi.images.Length == hitomi.page)
+                    hitomi.images[copypage] = image;
+            }
+            if (copypage == page && hitomi.images.Length == hitomi.page)
                 image.Source = hitomi.images[page];
             /*
             if (result)

@@ -392,7 +392,7 @@ namespace HitomiViewer.UserControls
                 h.Json = info;
                 h = await parser.HitomiGalleryData(h);
                 if (!(Global.OriginThumb && h.files != null && h.files[0] != null))
-                    h.thumb = await ImageProcessor.ProcessEncryptAsync("https:" + h.thumbpath);
+                    h.thumb = await ImageProcessor.ProcessEncryptAsync(h.thumbpath.https());
             }
             if (Global.OriginThumb && h.files != null && h.files[0] != null)
             {

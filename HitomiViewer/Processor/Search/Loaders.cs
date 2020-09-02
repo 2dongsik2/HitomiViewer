@@ -110,7 +110,14 @@ namespace HitomiViewer.Processor.Loaders
                             parser.url = $"https://ltn.hitomi.la/{tag2.types}/{tag2.name}-all.nozomi";
                             parser.index = index - 1;
                             parser.count = search_count;
-                            ids = parser.ByteArrayToIntArray(await parser.LoadNozomiTag(tag2.types.ToString(), tag2.name, range: search_range));
+                            try
+                            {
+                                ids = parser.ByteArrayToIntArray(await parser.LoadNozomiTag(tag2.types.ToString(), tag2.name, range: !Global.CacheSearch, start: 0, end: 99));
+                            }
+                            catch
+                            {
+                                ids = new int[0];
+                            }
                         }
                         else
                         {

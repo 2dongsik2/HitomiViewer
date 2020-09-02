@@ -30,7 +30,8 @@ namespace HitomiViewer.Scripts
             Version repov = Version.Parse(jarray[0]["tag_name"].ToString());
             if (repov > thisv)
             {
-                MessageBox.Show("업데이트가 필요합니다.");
+                MessageBoxResult result = MessageBox.Show("업데이트가 필요합니다.", "", MessageBoxButton.OKCancel);
+                if (result == MessageBoxResult.Cancel) return;
                 JToken item = jarray[0]["assets"].Where(x => x["browser_download_url"].ToString().EndsWith(".zip")).First();
                 WebClient wc = new WebClient();
                 if (File.Exists(Path.Combine(MainWindow.rootDir, "Update.zip")))

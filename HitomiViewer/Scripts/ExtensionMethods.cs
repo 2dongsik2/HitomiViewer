@@ -114,6 +114,14 @@ namespace ExtensionMethods
             return result;
         }
         public static bool isNull(this string s) => s == null;
+        public static string https(this string s)
+        {
+            if (s.StartsWith("//")) 
+                return "https:" + s;
+            if (!s.StartsWith("http://") && !s.StartsWith("https://"))
+                return "https://" + s;
+            return s;
+        }
 
         #region JSON
         public static string StringValue(this JObject config, string path)
