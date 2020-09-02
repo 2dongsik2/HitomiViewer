@@ -14,3 +14,14 @@
 - [WebP wrapper](https://github.com/JosePineiro/WebP-wrapper)
 - [Newtonsoft.Json](https://www.newtonsoft.com/json)
 - [HtmlAgilityPack](https://html-agility-pack.net/)
+
+# Versions
+
+- [![3.2](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/v3.2/total?style=flat-square)](https://github.com/rmagur1203/HitomiViewer/releases/tag/v3.2)
+- [![3.5.1](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/3.5.1/total?style=flat-square)](https://github.com/rmagur1203/HitomiViewer/releases/tag/3.5.1)
+- [![3.6.1](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/3.6.1/total?style=flat-square)](https://github.com/rmagur1203/HitomiViewer/releases/tag/3.6.1)
+- [![3.6.6](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/3.6.6/total?style=flat-square)](https://github.com/rmagur1203/HitomiViewer/releases/tag/3.6.6)
+## Has a bug
+### 3.6.3
+- 가끔씩 히토미에서 불러올때 오류 발생
+- [다운로드](https://github.com/rmagur1203/HitomiViewer/releases/tag/3.6.3)
