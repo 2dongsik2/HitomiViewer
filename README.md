@@ -17,12 +17,12 @@
 
 # Versions
 - [![release latest](https://img.shields.io/github/release/rmagur1203/HitomiViewer.svg?logo=github)](https://github.com/rmagur1203/HitomiViewer/releases/latest)
-- [![3.8.1.4](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/3.8.1.4/total?style=flat-square)](https://github.com/rmagur1203/HitomiViewer/releases/tag/3.8.1.4)
-- [![3.7.8](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/3.7.8/total?style=flat-square)](https://github.com/rmagur1203/HitomiViewer/releases/tag/3.7.8)
-- [![3.6.6](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/3.6.6/total?style=flat-square)](https://github.com/rmagur1203/HitomiViewer/releases/tag/3.6.6)
-- [![3.6.1](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/3.6.1/total?style=flat-square)](https://github.com/rmagur1203/HitomiViewer/releases/tag/3.6.1)
-- [![3.5.1](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/3.5.1/total?style=flat-square)](https://github.com/rmagur1203/HitomiViewer/releases/tag/3.5.1)
-- [![3.2](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/v3.2/total?style=flat-square)](https://github.com/rmagur1203/HitomiViewer/releases/tag/v3.2)
+- [![3.8.1.4](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/3.8.1.4/total?logo=github)](https://github.com/rmagur1203/HitomiViewer/releases/tag/3.8.1.4)
+- [![3.7.8](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/3.7.8/total?logo=github)](https://github.com/rmagur1203/HitomiViewer/releases/tag/3.7.8)
+- [![3.6.6](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/3.6.6/total?logo=github)](https://github.com/rmagur1203/HitomiViewer/releases/tag/3.6.6)
+- [![3.6.1](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/3.6.1/total?logo=github)](https://github.com/rmagur1203/HitomiViewer/releases/tag/3.6.1)
+- [![3.5.1](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/3.5.1/total?logo=github)](https://github.com/rmagur1203/HitomiViewer/releases/tag/3.5.1)
+- [![3.2](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/v3.2/total?logo=github)](https://github.com/rmagur1203/HitomiViewer/releases/tag/v3.2)
 
 ## Description
 - 3.8.1.4
