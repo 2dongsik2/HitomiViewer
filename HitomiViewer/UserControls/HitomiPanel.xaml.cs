@@ -599,7 +599,7 @@ namespace HitomiViewer.UserControls
         private async void authorLabel_MouseDown(object sender, MouseButtonEventArgs e)
         {
             bool result = await new InternetP(index: int.Parse(h.id)).isHiyobi();
-            result = false; //디버깅용
+            //result = false; //디버깅용
             Label lbsender = sender as Label;
             string author = lbsender.Content.ToString();
             MainWindow.MainPanel.Children.Clear();
