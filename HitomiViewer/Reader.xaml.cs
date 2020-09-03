@@ -73,10 +73,16 @@ namespace HitomiViewer
             new TaskFactory().StartNew(() => {
                 while (hitomi.files == null || hitomi.files.Length <= 0) { }
                 if (hitomi.thumb == null) this.image.Source = ImageProcessor.ProcessEncrypt(hitomi.files[0]);
-                System.Threading.Thread.Sleep(100);
                 this.Activate();
                 this.WindowStyle = WindowStyle.None;
                 this.WindowState = WindowState.Maximized;
+                System.Threading.Thread.Sleep(100);
+                this.Dispatcher.Invoke(() =>
+                {
+                    this.Activate();
+                    this.WindowStyle = WindowStyle.None;
+                    this.WindowState = WindowState.Maximized;
+                });
             });
         }
 
