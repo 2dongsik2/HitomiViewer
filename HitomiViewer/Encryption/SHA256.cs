@@ -9,36 +9,23 @@ namespace HitomiViewer.Encryption
 {
     class SHA256
     {
+        private static SHA256Managed sha256 = new SHA256Managed();
         public static string Hash(string data)
         {
-            SHA256Managed sha256 = new SHA256Managed();
-            byte[] hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(data));
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < hash.Length; i++)
-            {
-                builder.Append(hash[i].ToString("x2"));
-            }
-            return builder.ToString();
+            byte[] digest = sha256.ComputeHash(Encoding.UTF8.GetBytes(data));
+            return BitConverter.ToString(digest).Replace("-","").ToLower();
         }
         public static string Hash(byte[] data)
         {
-            SHA256Managed sha256 = new SHA256Managed();
-            byte[] hash = sha256.ComputeHash(data);
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < hash.Length; i++)
-            {
-                builder.Append(hash[i].ToString("x2"));
-            }
-            return builder.ToString();
+            byte[] digest = sha256.ComputeHash(data);
+            return BitConverter.ToString(digest).Replace("-","").ToLower();
         }
         public static byte[] HashArray(string data)
         {
-            SHA256Managed sha256 = new SHA256Managed();
             return sha256.ComputeHash(Encoding.UTF8.GetBytes(data));
         }
         public static byte[] HashArray(byte[] data)
         {
-            SHA256Managed sha256 = new SHA256Managed();
             return sha256.ComputeHash(data);
         }
     }
