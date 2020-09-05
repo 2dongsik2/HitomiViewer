@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
+using static HitomiViewer.Api.Pixiv;
+using Tag = HitomiViewer.Structs.Tag;
 
 namespace HitomiViewer.Processor.Loaders
 {
@@ -300,6 +302,7 @@ namespace HitomiViewer.Processor.Loaders
         public int index = 0;
         public int count = 0;
         public Action<Hitomi, int, int> update = null;
+        public Action<PixivUser, int, int> pixivUpdate = null;
         public Action<int> start = null;
         public Action<int> pagination = null;
         public Action end = null;
@@ -334,6 +337,16 @@ namespace HitomiViewer.Processor.Loaders
             };
             return this;
         }
+        public PixivLoader UserDefault()
+        {
+            Default();
+            this.pixivUpdate = (PixivUser h, int index, int max) =>
+            {
+                Global.MainWindow.label.Content = $"{index}/{max}";
+                Global.MainWindow.MainPanel.Children.Add(new PixivUserPanel(h));
+            };
+            return this;
+        }
 
         public async void FastParser()
         {
@@ -348,6 +361,8 @@ namespace HitomiViewer.Processor.Loaders
             start(items.Count);
             for (int i = 0; i < items.Count; i++)
             {
+                //x_restrict == R-18
+
                 Hitomi h = new Hitomi();
                 h.type = Hitomi.Type.Pixiv;
                 h.id = items[i].StringValue("id");
@@ -358,6 +373,11 @@ namespace HitomiViewer.Processor.Loaders
                 h.thumbpath = items[i]["image_urls"].StringValue("square_medium");
                 h.thumb = await ImageProcessor.PixivImage(h.thumbpath);
                 h.page = items[i].IntValue("page_count") ?? 0;
+                h.tags = items[i]["tags"].Select(x => new Tag { name = x.StringValue2("translated_name") ?? x.StringValue("name"), types = Tag.Types.none }).ToList();
+                if (items[i].IntValue("page_count") <= 1)
+                    h.files = new string[] { items[i]["meta_single_page"].StringValue("original_image_url") };
+                else
+                    h.files = items[i]["meta_pages"].Select(x => x["image_urls"].StringValue("original")).ToArray();
                 update(h, i, items.Count);
             }
             end();
@@ -380,6 +400,7 @@ namespace HitomiViewer.Processor.Loaders
                 h.thumbpath = items[i]["image_urls"].StringValue("square_medium");
                 h.thumb = await ImageProcessor.PixivImage(h.thumbpath);
                 h.page = items[i].IntValue("page_count") ?? 0;
+                h.tags = items[i]["tags"].Select(x => new Tag { name = x.StringValue2("translated_name") ?? x.StringValue("name"), types = Tag.Types.none }).ToList();
                 try
                 {
                     Pixiv pixiv = Global.Account.Pixiv;
@@ -389,6 +410,7 @@ namespace HitomiViewer.Processor.Loaders
                     byte[] zipbyte = await wc.DownloadDataTaskAsync(obj["ugoira_metadata"]["zip_urls"].StringValue("medium"));
                     h.ugoiraImage = pixiv.UnZip(zipbyte);
                     h.ugoiraImage.delays = obj["ugoira_metadata"]["frames"].Select(x => x.IntValue("delay") ?? 0).ToList();
+                    h.name += " (우고이라)";
                 }
                 catch { }
                 if (items[i].IntValue("page_count") <= 1)
@@ -396,6 +418,27 @@ namespace HitomiViewer.Processor.Loaders
                 else
                     h.files = items[i]["meta_pages"].Select(x => x["image_urls"].StringValue("original")).ToArray();
                 update(h, i, items.Count);
+            }
+            end();
+        }
+
+        public void UserParser(JObject data)
+        {
+            JArray jusers = data["user_previews"] as JArray;
+            start(jusers.Count);
+            for (int i = 0; i < jusers.Count; i++)
+            {
+                JToken juser = jusers[i];
+                PixivUser user = new PixivUser();
+                user.user = new PixivUser.User().Parse(juser["user"]);
+                JArray illusts = juser["illusts"] as JArray;
+                List<Illust> illustlist = new List<Illust>();
+                for (int j = 0; j < illusts.Count; j++)
+                {
+                    illustlist.Add(new Illust().Parse(illusts[j]));
+                }
+                user.illusts = illustlist.ToArray();
+                pixivUpdate(user, i, jusers.Count);
             }
             end();
         }

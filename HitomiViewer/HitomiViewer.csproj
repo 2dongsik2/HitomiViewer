@@ -141,6 +141,7 @@
     <Compile Include="Encryption\AES128.cs" />
     <Compile Include="Processor\Image\BlurEffect.cs" />
     <Compile Include="Processor\Internet\CheckUpdate.cs" />
+    <Compile Include="Scripts\Account.cs" />
     <Compile Include="Scripts\Config.cs" />
     <Compile Include="Scripts\File.cs" />
     <Compile Include="Scripts\Invoker.cs" />
@@ -174,6 +175,9 @@
     </Compile>
     <Compile Include="UserControls\Pagination.xaml.cs">
       <DependentUpon>Pagination.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Pixiv\PixivUserPanel.xaml.cs">
+      <DependentUpon>PixivUserPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\ProgressBox.xaml.cs">
       <DependentUpon>ProgressBox.xaml</DependentUpon>
@@ -218,6 +222,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\Pagination.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\Pixiv\PixivUserPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

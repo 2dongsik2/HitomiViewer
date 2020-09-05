@@ -66,6 +66,7 @@ namespace HitomiViewer
         {
             CheckUpdate.Auto();
             HiyobiTags.LoadTags();
+            Account.Load();
             this.MinWidth = 300;
             Global.MainWindow = this;
             string[] args = Environment.GetCommandLineArgs();
@@ -747,8 +748,10 @@ namespace HitomiViewer
             bool result = login.ShowDialog() ?? false;
             if (result)
             {
+                if (login.remember)
+                    Account.Save("pixiv", login.username, login.password);
                 Pixiv pixiv = new Pixiv();
-                Global.Account.Pixiv = await pixiv.AuthChain(login.nickname, login.password, true);
+                Global.Account.Pixiv = await pixiv.AuthChain(login.username, login.password, true);
             }
             return result;
         }
@@ -757,10 +760,35 @@ namespace HitomiViewer
             if (Global.Account.Pixiv == null)
                 if (await Login() == false)
                     return;
+            MainPanel.Children.Clear();
             JObject data = await Global.Account.Pixiv.illustFollow();
             PixivLoader loader = new PixivLoader();
             loader.Default()
                 .Parser(data);
+        }
+        private async void PixivRecommend_Click(object sender, RoutedEventArgs e)
+        {
+            if (Global.Account.Pixiv == null)
+                if (await Login() == false)
+                    return;
+            MainPanel.Children.Clear();
+            JObject data = await Global.Account.Pixiv.illustRecommended();
+            PixivLoader loader = new PixivLoader();
+            loader.Default()
+                .Parser(data);
+        }
+        public async void PixivUser_Search_Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (Global.Account.Pixiv == null)
+                if (await Login() == false)
+                    return;
+            MainPanel.Children.Clear();
+            JObject data = await Global.Account.Pixiv.searchUser(PixivUser_Search_Text.Text);
+            PixivLoader loader = new PixivLoader();
+            loader.UserDefault().UserParser(data);
+            //data = await Global.Account.Pixiv.userIllusts(data["user_previews"][0]["user"].StringValue("id"));
+            //PixivLoader loader = new PixivLoader();
+            //loader.Default().Parser(data);
         }
         #endregion
     }

@@ -5,9 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:HitomiViewer.UserControls"
         mc:Ignorable="d"
-        Title="Login" Height="100" Width="200">
+        Title="Login" Height="120" Width="200">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition></RowDefinition>
             <RowDefinition></RowDefinition>
             <RowDefinition></RowDefinition>
             <RowDefinition></RowDefinition>
@@ -15,7 +16,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <TextBox x:Name="Nickname" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <TextBox x:Name="Username" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <TextBox.Style>
                 <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
                     <Style.Resources>
@@ -60,7 +61,8 @@
                 </Style>
             </PasswordBox.Style>
         </PasswordBox>
-        <Grid Grid.Row="2">
+        <CheckBox x:Name="Remember" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">기억하기</CheckBox>
+        <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>

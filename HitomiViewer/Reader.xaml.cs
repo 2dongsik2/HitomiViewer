@@ -94,7 +94,7 @@ namespace HitomiViewer
         }
         private void Ugoira(Dispatcher dispatcher)
         {
-            if (this.Visibility != Visibility.Visible)
+            if (this.Visibility != Visibility.Visible || this.IsClosed)
                 return;
             dispatcher.Invoke(() =>
             {

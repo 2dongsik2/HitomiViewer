@@ -19,25 +19,28 @@ namespace HitomiViewer.UserControls
     /// </summary>
     public partial class Login : Window
     {
-        public string nickname;
+        public string username;
         public string password;
+        public bool remember;
         public Login()
         {
             InitializeComponent();
-            Nickname.Focus();
+            Username.Focus();
         }
 
         private void submit_Click(object sender, RoutedEventArgs e)
         {
-            this.nickname = Nickname.Text;
+            this.username = Username.Text;
             this.password = Password.Password;
+            this.remember = Remember.IsChecked ?? false;
             this.DialogResult = true;
         }
 
         private void cancel_Click(object sender, RoutedEventArgs e)
         {
-            this.nickname = Nickname.Text;
+            this.username = Username.Text;
             this.password = Password.Password;
+            this.remember = Remember.IsChecked ?? false;
             this.DialogResult = false;
         }
     }

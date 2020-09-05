@@ -171,6 +171,25 @@
                                     <Image Source="{StaticResource PixivIcon}"/>
                                 </MenuItem.Icon>
                             </MenuItem>
+                            <MenuItem Header="추천 일러스트" Click="PixivRecommend_Click">
+                                <MenuItem.Icon>
+                                    <Image Source="{StaticResource PixivIcon}"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <Grid Width="200">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="8*" />
+                                    <ColumnDefinition Width="2*" />
+                                </Grid.ColumnDefinitions>
+                                <wpf:AutoCompleteTextBox VerticalAlignment="Top"
+                                                                 Grid.Column="0"
+                                                                 Height="20"
+                                                                 Watermark="유저 검색"
+                                                                 Background="White"
+                                                                 x:Name="PixivUser_Search_Text">
+                                </wpf:AutoCompleteTextBox>
+                                <Button Grid.Column="1" Content="검색" x:Name="PixivUser_Search_Button"  Click="PixivUser_Search_Button_Click"/>
+                            </Grid>
                         </MenuItem>
                     </MenuItem>
                 </Menu>
