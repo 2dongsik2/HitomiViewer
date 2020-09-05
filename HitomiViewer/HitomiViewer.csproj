@@ -70,7 +70,7 @@
     <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
@@ -297,7 +297,7 @@
       <Project>{75dffafd-b3f3-41b3-938f-fb38ff4cb18e}</Project>
       <Name>Updater</Name>
     </ProjectReference>
-    <ProjectReference Include="C:\Users\rmagu\Downloads\WebP-wrapper-master\WebP-wrapper-master\WebPTest\WebPTest.csproj">
+    <ProjectReference Include="..\WebPTest\WebPTest.csproj">
       <Project>{38700B2B-939E-439F-A975-E6FA91703BDB}</Project>
       <Name>WebPTest</Name>
     </ProjectReference>
@@ -344,6 +344,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\pixiv.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="WpfControls.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
