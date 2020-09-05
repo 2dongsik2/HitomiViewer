@@ -1,4 +1,5 @@
 ﻿using ExtensionMethods;
+using HitomiViewer.Api;
 using HitomiViewer.Encryption;
 using HitomiViewer.Processor;
 using HitomiViewer.Processor.Loaders;
@@ -393,6 +394,11 @@ namespace HitomiViewer.UserControls
                 h = await parser.HitomiGalleryData(h);
                 if (!(Global.OriginThumb && h.files != null && h.files[0] != null))
                     h.thumb = await ImageProcessor.ProcessEncryptAsync(h.thumbpath.https());
+            }
+            if (h.type == Hitomi.Type.Pixiv)
+            {
+                Pixiv pixiv = Global.Account.Pixiv;
+                //pixiv.ugoiraMetaData(h.id);
             }
             if (Global.OriginThumb && h.files != null && h.files[0] != null)
             {

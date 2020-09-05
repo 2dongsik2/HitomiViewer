@@ -16,13 +16,13 @@ namespace HitomiViewer.Processor
 {
     partial class InternetP
     {
-        private string nozomiextension = ".nozomi";
-        private string compressed_nozomi_prefix = "";
-        private string domain = "ltn.hitomi.la";
-        private string index_dir = "tagindex";
-        private string galleries_index_dir = "galleriesindex";
-        private int max_node_size = 464;
-        private bool adapose = false;
+        private const string nozomiextension = ".nozomi";
+        private const string compressed_nozomi_prefix = "";
+        private const string domain = "ltn.hitomi.la";
+        private const string index_dir = "tagindex";
+        private const string galleries_index_dir = "galleriesindex";
+        private const int max_node_size = 464;
+        private const bool adapose = false;
 
         public async Task<Hitomi> HitomiData()
         {

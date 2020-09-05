@@ -1,4 +1,5 @@
-﻿using HitomiViewer.Scripts;
+﻿using HitomiViewer.Api;
+using HitomiViewer.Scripts;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -44,6 +45,10 @@ namespace HitomiViewer
         {
             public static readonly string path = Path.Combine(MainWindow.rootDir, "config.json");
             public static readonly string encryptpath = Path.Combine(MainWindow.rootDir, "config.lock");
+        }
+        public class Account
+        {
+            public static Pixiv Pixiv;
         }
     }
 }

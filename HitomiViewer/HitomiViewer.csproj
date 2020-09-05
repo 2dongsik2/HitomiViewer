@@ -93,6 +93,9 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -120,6 +123,7 @@
     </ApplicationDefinition>
     <Compile Include="AutoComplete\SuggestionProvider.cs" />
     <Compile Include="Encryption\Base64.cs" />
+    <Compile Include="Encryption\MD5.cs" />
     <Compile Include="LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
@@ -127,6 +131,7 @@
     <Compile Include="Processor\Hitomi\InternetP.cs" />
     <Compile Include="Processor\Hiyobi\InternetP.cs" />
     <Compile Include="Processor\Json\InternetP.cs" />
+    <Compile Include="Processor\Api\Pixiv.cs" />
     <Compile Include="Processor\Search\Loaders.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -164,6 +169,9 @@
     <Compile Include="Processor\Internet\InternetP.cs" />
     <Compile Include="Scripts\LoginClass.cs" />
     <Compile Include="Structs\Tag.cs" />
+    <Compile Include="UserControls\Login.xaml.cs">
+      <DependentUpon>Login.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\Pagination.xaml.cs">
       <DependentUpon>Pagination.xaml</DependentUpon>
     </Compile>
@@ -202,6 +210,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Style\Style1.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\Login.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -329,6 +341,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\libwebp_x86.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\pixiv.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

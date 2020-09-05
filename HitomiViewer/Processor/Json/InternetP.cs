@@ -10,9 +10,9 @@ namespace HitomiViewer.Processor
     partial class InternetP
     {
         public async void LoadJObject(Action<JObject> callback) => callback(await LoadJObject());
-        public async Task<JObject> LoadJObject()
+        public async Task<JObject> LoadJObject(string url = null)
         {
-            string html = await Load(url);
+            string html = await Load(url ?? this.url);
             return JObject.Parse(html);
         }
         public async void LoadJArray(Action<JArray> callback) => callback(await LoadJArray());

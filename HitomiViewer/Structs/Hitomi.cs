@@ -20,7 +20,9 @@ namespace HitomiViewer
             None,
             Folder,
             Hiyobi,
-            Hitomi
+            Hitomi,
+            Pixiv,
+            PixivUgoira
         }
 
         public List<Tag> tags = new List<Tag>();
@@ -38,6 +40,7 @@ namespace HitomiViewer
         public double SizePerPage;
         public BitmapImage thumb;
         public BitmapImage[] images;
+        public PixivUgoira ugoiraImage = null;
         public Type type = Type.None;
         public HitomiInfo.Type designType;
         public JToken Json;
@@ -112,7 +115,7 @@ namespace HitomiViewer
             };
         }
     }
-    class HitomiFile
+    public class HitomiFile
     {
         public string path { get; set; }
         public string hash { get; set; }
@@ -122,6 +125,13 @@ namespace HitomiViewer
         public int width { get; set; }
         public bool hasavif { get; set; }
         public bool haswebp { get; set; }
+    }
+    public class PixivUgoira
+    {
+        public List<byte[]> bytesofimages;
+        public List<int> delays;
+        public List<BitmapImage> images;
+        public int index = 0;
     }
     public class HitomiInfo
     {

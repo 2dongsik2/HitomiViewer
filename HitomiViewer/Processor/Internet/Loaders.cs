@@ -1,4 +1,5 @@
 ﻿using ExtensionMethods;
+using HitomiViewer.Api;
 using HitomiViewer.Processor;
 using HitomiViewer.Scripts;
 using HitomiViewer.Structs;
@@ -8,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -289,6 +291,111 @@ namespace HitomiViewer.Processor.Loaders
                 parser.index = ids[i];
                 Hitomi h = await parser.HitomiData2();
                 update(h, i, ids.Count());
+            }
+            end();
+        }
+    }
+    class PixivLoader
+    {
+        public int index = 0;
+        public int count = 0;
+        public Action<Hitomi, int, int> update = null;
+        public Action<int> start = null;
+        public Action<int> pagination = null;
+        public Action end = null;
+
+        public PixivLoader FastDefault()
+        {
+            Default();
+            this.update = (Hitomi h, int index, int max) =>
+            {
+                Global.MainWindow.label.Content = $"{index}/{max}";
+                Global.MainWindow.MainPanel.Children.Add(new UserControls.HitomiPanel(h, Global.MainWindow, true, true));
+            };
+            return this;
+        }
+        public PixivLoader Default()
+        {
+            this.start = (int count) =>
+            {
+                Global.MainWindow.label.Content = "0/" + count;
+                Global.MainWindow.label.Visibility = System.Windows.Visibility.Visible;
+                Global.MainWindow.Searching(true);
+            };
+            this.update = (Hitomi h, int index, int max) =>
+            {
+                Global.MainWindow.label.Content = $"{index}/{max}";
+                Global.MainWindow.MainPanel.Children.Add(new UserControls.HitomiPanel(h, Global.MainWindow, true));
+            };
+            this.end = () =>
+            {
+                Global.MainWindow.label.Visibility = System.Windows.Visibility.Collapsed;
+                Global.MainWindow.Searching(false);
+            };
+            return this;
+        }
+
+        public async void FastParser()
+        {
+            if (Global.Account.Pixiv == null)
+                return;
+            JObject data = await Global.Account.Pixiv.illustFollow();
+            await FastParser(data);
+        }
+        public async Task FastParser(JObject data)
+        {
+            JArray items = JArray.FromObject(data["illusts"]);
+            start(items.Count);
+            for (int i = 0; i < items.Count; i++)
+            {
+                Hitomi h = new Hitomi();
+                h.type = Hitomi.Type.Pixiv;
+                h.id = items[i].StringValue("id");
+                h.dir = "https://www.pixiv.net/artworks/" + h.id;
+                h.name = items[i].StringValue("title");
+                h.author = items[i]["user"].StringValue("name");
+                h.authors = new string[] { items[i]["user"].StringValue("name") };
+                h.thumbpath = items[i]["image_urls"].StringValue("square_medium");
+                h.thumb = await ImageProcessor.PixivImage(h.thumbpath);
+                h.page = items[i].IntValue("page_count") ?? 0;
+                update(h, i, items.Count);
+            }
+            end();
+        }
+        public async void Parser(JObject data)
+        {
+            JArray items = JArray.FromObject(data["illusts"]);
+            start(items.Count);
+            for (int i = 0; i < items.Count; i++)
+            {
+                //x_restrict == R-18
+
+                Hitomi h = new Hitomi();
+                h.type = Hitomi.Type.Pixiv;
+                h.id = items[i].StringValue("id");
+                h.dir = "https://www.pixiv.net/artworks/" + h.id;
+                h.name = items[i].StringValue("title");
+                h.author = items[i]["user"].StringValue("name");
+                h.authors = new string[] { items[i]["user"].StringValue("name") };
+                h.thumbpath = items[i]["image_urls"].StringValue("square_medium");
+                h.thumb = await ImageProcessor.PixivImage(h.thumbpath);
+                h.page = items[i].IntValue("page_count") ?? 0;
+                try
+                {
+                    Pixiv pixiv = Global.Account.Pixiv;
+                    JObject obj = await pixiv.ugoiraMetaData(h.id);
+                    WebClient wc = new WebClient();
+                    wc.Headers.Add("Referer", "https://www.pixiv.net/");
+                    byte[] zipbyte = await wc.DownloadDataTaskAsync(obj["ugoira_metadata"]["zip_urls"].StringValue("medium"));
+                    h.ugoiraImage = pixiv.UnZip(zipbyte);
+                    h.ugoiraImage.delays = obj["ugoira_metadata"]["frames"].Select(x => x.IntValue("delay") ?? 0).ToList();
+                }
+                catch { }
+                if (items[i].IntValue("page_count") <= 1)
+                    h.files = new string[] { items[i]["meta_single_page"].StringValue("original_image_url") };
+                else
+                    h.files = items[i]["meta_pages"].Select(x => x["image_urls"].StringValue("original")).ToArray();
+                update(h, i, items.Count);
             }
             end();
         }

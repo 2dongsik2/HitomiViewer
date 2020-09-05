@@ -1,4 +1,5 @@
 ﻿using ExtensionMethods;
+using HitomiViewer.Api;
 using HitomiViewer.Encryption;
 using HitomiViewer.Processor;
 using HitomiViewer.Processor.Cache;
@@ -50,6 +51,7 @@ namespace HitomiViewer
         public List<Reader> Readers = new List<Reader>();
         public MainWindow()
         {
+            Console.WriteLine(SHA256.Hash("Hello!"));
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(ResolveAssembly);
             Global.dispatcher = Dispatcher;
             //Task.Factory.StartNew(new Cache().TagCache);
@@ -737,5 +739,29 @@ namespace HitomiViewer
         {
             Task.Factory.StartNew(new Cache().TagCache);
         }
+
+        #region Pixiv
+        private async Task<bool> Login()
+        {
+            Login login = new Login();
+            bool result = login.ShowDialog() ?? false;
+            if (result)
+            {
+                Pixiv pixiv = new Pixiv();
+                Global.Account.Pixiv = await pixiv.AuthChain(login.nickname, login.password, true);
+            }
+            return result;
+        }
+        private async void PixivFollow_Click(object sender, RoutedEventArgs e)
+        {
+            if (Global.Account.Pixiv == null)
+                if (await Login() == false)
+                    return;
+            JObject data = await Global.Account.Pixiv.illustFollow();
+            PixivLoader loader = new PixivLoader();
+            loader.Default()
+                .Parser(data);
+        }
+        #endregion
     }
 }

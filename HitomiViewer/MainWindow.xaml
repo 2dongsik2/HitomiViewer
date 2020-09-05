@@ -13,6 +13,7 @@
         <autocomplete:SuggestionProvider x:Key="fsp" />
         <BitmapImage x:Key="HiyobiIcon">Resources/hiyobi.ico</BitmapImage>
         <BitmapImage x:Key="HitomiIcon">Resources/hitomi.jpg</BitmapImage>
+        <BitmapImage x:Key="PixivIcon">Resources/pixiv.ico</BitmapImage>
     </Window.Resources>
     <Grid>
         <DockPanel>
@@ -158,6 +159,16 @@
                             <MenuItem Header="캐시 다운로드" Click="CacheDownload_Click">
                                 <MenuItem.Icon>
                                     <Image Source="{StaticResource HitomiIcon}" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </MenuItem>
+                        <MenuItem x:Name="MenuPixiv" Header="Pixiv.net">
+                            <MenuItem.Icon>
+                                <Image Source="{StaticResource PixivIcon}"/>
+                            </MenuItem.Icon>
+                            <MenuItem Header="팔로우 일러스트" Click="PixivFollow_Click">
+                                <MenuItem.Icon>
+                                    <Image Source="{StaticResource PixivIcon}"/>
                                 </MenuItem.Icon>
                             </MenuItem>
                         </MenuItem>

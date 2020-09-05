@@ -19,6 +19,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using WebPWrapper;
 
 namespace HitomiViewer
@@ -70,6 +71,12 @@ namespace HitomiViewer
                 MessageBox.Show("이미지를 불러올 수 없습니다.");
                 Close();
             }
+            if (hitomi.ugoiraImage != null)
+                Task.Factory.StartNew(() =>
+                {
+                    System.Threading.Thread.Sleep(1000);
+                    Ugoira(this.Dispatcher);
+                });
             new TaskFactory().StartNew(() => {
                 while (hitomi.files == null || hitomi.files.Length <= 0) { }
                 if (hitomi.thumb == null) this.image.Source = ImageProcessor.ProcessEncrypt(hitomi.files[0]);
@@ -84,6 +91,19 @@ namespace HitomiViewer
                     this.WindowState = WindowState.Maximized;
                 });
             });
+        }
+        private void Ugoira(Dispatcher dispatcher)
+        {
+            if (this.Visibility != Visibility.Visible)
+                return;
+            dispatcher.Invoke(() =>
+            {
+                if (hitomi.ugoiraImage.index >= hitomi.ugoiraImage.bytesofimages.Count)
+                    hitomi.ugoiraImage.index = 0;
+                this.image.Source = ImageProcessor.Bytes2Image2(hitomi.ugoiraImage.bytesofimages[hitomi.ugoiraImage.index]);
+            });
+            Thread.Sleep(hitomi.ugoiraImage.delays[hitomi.ugoiraImage.index++]);
+            Ugoira(dispatcher);
         }
 
         public void ChangeMode()
@@ -156,7 +176,14 @@ namespace HitomiViewer
                             if (hitomi.images == null || hitomi.images.Length < hitomi.page)
                                 hitomi.images = new BitmapImage[hitomi.page];
                             if (hitomi.images[i] == null)
-                                hitomi.images[i] = await ImageProcessor.ProcessEncryptAsync(hitomi.files[i]);
+                            {
+                                BitmapImage image;
+                                if (hitomi.type == Hitomi.Type.Pixiv)
+                                    image = await ImageProcessor.PixivImage(hitomi.files[i]);
+                                else
+                                    image = await ImageProcessor.ProcessEncryptAsync(hitomi.files[i]);
+                                hitomi.images[i] = image;
+                            }
                         }
                     }
                     catch { }
@@ -201,7 +228,11 @@ namespace HitomiViewer
                 hitomi.images = new BitmapImage[hitomi.page];
             if (hitomi.images[copypage] == null)
             {
-                BitmapImage image = await ImageProcessor.ProcessEncryptAsync(link);
+                BitmapImage image;
+                if (hitomi.type == Hitomi.Type.Pixiv)
+                    image = await ImageProcessor.PixivImage(link);
+                else
+                    image = await ImageProcessor.ProcessEncryptAsync(link);
                 if (hitomi.images.Length == hitomi.page)
                     hitomi.images[copypage] = image;
             }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -262,6 +263,14 @@ namespace HitomiViewer.Processor
                 return image;
             }
         }
+        public static BitmapImage Bytes2Image2(byte[] array)
+        {
+            BitmapImage bimgTemp = new BitmapImage();
+            bimgTemp.BeginInit();
+            bimgTemp.StreamSource = new MemoryStream(array);
+            bimgTemp.EndInit();
+            return bimgTemp;
+        }
         public static BitmapImage Bitmap2BitmapImage(Bitmap bitmap)
         {
             using (MemoryStream ms = new MemoryStream())
@@ -281,6 +290,18 @@ namespace HitomiViewer.Processor
                                       IntPtr.Zero,
                                       Int32Rect.Empty,
                                       BitmapSizeOptions.FromEmptyOptions());
+        }
+        public static async Task<BitmapImage> PixivImage(string url)
+        {
+            HttpClient client = new HttpClient();
+            client.DefaultRequestHeaders.Add("Referer", "https://www.pixiv.net/");
+            HttpResponseMessage response = await client.GetAsync(url);
+            byte[] data = await response.Content.ReadAsByteArrayAsync();
+            BitmapImage bimgTemp = new BitmapImage();
+            bimgTemp.BeginInit();
+            bimgTemp.StreamSource = new MemoryStream(data);
+            bimgTemp.EndInit();
+            return bimgTemp;
         }
     }
     public static partial class ExtensionMethods

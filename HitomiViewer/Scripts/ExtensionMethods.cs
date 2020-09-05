@@ -14,6 +14,8 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using HitomiViewer.UserControls;
 using Newtonsoft.Json.Linq;
+using System.Collections.Specialized;
+using System.Web;
 
 namespace ExtensionMethods
 {
@@ -116,11 +118,34 @@ namespace ExtensionMethods
         public static bool isNull(this string s) => s == null;
         public static string https(this string s)
         {
-            if (s.StartsWith("//")) 
+            if (s.StartsWith("//"))
                 return "https:" + s;
             if (!s.StartsWith("http://") && !s.StartsWith("https://"))
                 return "https://" + s;
             return s;
+        }
+        public static string ToQueryString(this NameValueCollection nvc)
+        {
+            var array = (
+                from key in nvc.AllKeys
+                from value in nvc.GetValues(key)
+                select string.Format(
+            "{0}={1}",
+            HttpUtility.UrlEncode(key),
+            HttpUtility.UrlEncode(value))
+                ).ToArray();
+            return "?" + string.Join("&", array);
+        }
+        public static string ToQueryString(this List<KeyValuePair<string, string>> nvc)
+        {
+            var array = (
+                from nv in nvc
+                select string.Format(
+            "{0}={1}",
+            HttpUtility.UrlEncode(nv.Key),
+            HttpUtility.UrlEncode(nv.Value))
+                ).ToArray();
+            return "?" + string.Join("&", array);
         }
 
         #region JSON
@@ -197,6 +222,27 @@ namespace ExtensionMethods
 
         public static async void TaskCallback<T>(this Task<T> Task, Action<T> callback) where T : class => callback(await Task);
         public static async void then<T>(this Task<T> Task, Action<T> callback) where T : class => callback(await Task);
+        public static async Task<Task<T>> tthen<T>(this Task<T> Task, Action<T> callback) where T : class
+        {
+            try
+            {
+                Task.then(callback);
+            }
+            catch { }
+            return Task;
+        }
+        public static async Task<Task<T>> tcatch<T>(this Task<T> Task, Action<T> callback) where T : class
+        {
+            try
+            {
+                await Task;
+            }
+            catch
+            {
+                callback(await Task);
+            }
+            return Task;
+        }
         public static async void then<T>(this Task<T> Task, Action<T, object> callback, object data) where T : class => callback(await Task, data);
         public static bool ToBool(this int i) => Convert.ToBoolean(i);
         public static void RemoveAllEvents(this EventHandler events)
