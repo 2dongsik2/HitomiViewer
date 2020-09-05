@@ -25,6 +25,9 @@
 - [![3.2](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/v3.2/total?logo=github)](https://github.com/rmagur1203/HitomiViewer/releases/tag/v3.2)
 
 ## Description
+- 3.8.1.5
+  - 픽시브도 사용 가능하게 변경
+  - 픽시브는 아직 실험단계
 - 3.8.1.4
   - 업데이트 취소 추가
   - System.IndexOutOfRangeException 오류 수정
