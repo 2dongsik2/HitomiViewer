@@ -25,6 +25,7 @@ using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using Path = System.IO.Path;
 
 #pragma warning disable CS0618 // 형식 또는 멤버는 사용되지 않습니다.
@@ -65,7 +66,12 @@ namespace HitomiViewer.UserControls
                 if (!reader.IsClosed)
                     reader.Show();
             };
-            thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
+            if ((h.type != Hitomi.Type.Pixiv) || (!afterLoad && h.ugoiraImage == null))
+                thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
+            /*
+            if (h.ugoiraImage == null)
+                thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
+            */
         }
         private async void Init()
         {
@@ -78,7 +84,14 @@ namespace HitomiViewer.UserControls
             }
             thumbNail.Source = h.thumb;
             thumbBrush.ImageSource = h.thumb;
-            //thumbNail.ToolTip = GetToolTip(panel.Height);
+            if ((h.type != Hitomi.Type.Pixiv) || (!afterLoad && h.ugoiraImage == null))
+                thumbNail.ToolTip = GetToolTip(panel.Height);
+            /*
+            if (h.ugoiraImage == null)
+                thumbNail.ToolTip = GetToolTip(panel.Height);
+            else
+                thumbNail.ClearValue(Image.ToolTipProperty);
+            */
 
             authorsPanel.Children.Clear();
             authorsPanel.Children.Add(new Label { Content = "작가 :" });
@@ -277,6 +290,7 @@ namespace HitomiViewer.UserControls
 
         private ToolTip GetToolTip(double height)
         {
+            if (h.thumb == null) return null;
             if (!thumbNail.IsVisible) return null;
             //b = 비율
             //Magnif = 배율
@@ -397,10 +411,29 @@ namespace HitomiViewer.UserControls
             }
             if (h.type == Hitomi.Type.Pixiv)
             {
-                Pixiv pixiv = Global.Account.Pixiv;
-                //pixiv.ugoiraMetaData(h.id);
+                try
+                {
+                    Pixiv pixiv = Global.Account.Pixiv;
+                    JObject obj = await pixiv.ugoiraMetaData(h.id);
+                    WebClient wc = new WebClient();
+                    wc.Headers.Add("Referer", "https://www.pixiv.net/");
+                    byte[] zipbyte = await wc.DownloadDataTaskAsync(obj["ugoira_metadata"]["zip_urls"].StringValue("medium"));
+                    h.ugoiraImage = pixiv.UnZip(zipbyte);
+                    h.ugoiraImage.delays = obj["ugoira_metadata"]["frames"].Select(x => x.IntValue("delay") ?? 0).ToList();
+                    h.name += " (우고이라)";
+                }
+                catch { }
             }
-            if (Global.OriginThumb && h.files != null && h.files[0] != null)
+            if (h.ugoiraImage == null)
+            {
+                thumbNail.ToolTip = GetToolTip(panel.Height);
+                thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
+            }
+            if (Global.OriginThumb &&
+                h.files != null &&
+                h.files.Length >= 1 &&
+                h.files[0] != null &&
+                h.type != Hitomi.Type.Pixiv)
             {
                 this.nameLabel.Content = h.name + " (썸네일 로딩중)";
                 ImageProcessor.ProcessEncryptAsync(h.files[0]).then((BitmapImage image) =>
@@ -604,34 +637,29 @@ namespace HitomiViewer.UserControls
         }
         private async void authorLabel_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            bool result = await new InternetP(index: int.Parse(h.id)).isHiyobi();
-            //result = false; //디버깅용
-            Label lbsender = sender as Label;
-            string author = lbsender.Content.ToString();
-            MainWindow.MainPanel.Children.Clear();
-            if (result)
+            if (h.type == Hitomi.Type.Pixiv || h.type == Hitomi.Type.PixivUgoira)
             {
-                Global.MainWindow.Hiyobi_Search_Text.Text = "artist:" + author;
-                Global.MainWindow.Hiyobi_Search_Button_Click(this, null);
-                /*
-                MainWindow.LabelSetup();
-                int index = MainWindow.GetPage();
-                int count = (int)MainWindow.Page_itemCount;
-                InternetP parser = new InternetP(keyword: new string[] { "artist:" + author }.ToList(), index: index);
-                HiyobiLoader hiyobi = new HiyobiLoader();
-                hiyobi.FastDefault();
-                parser.HiyobiSearch(data => new InternetP(data: data).ParseJObject(hiyobi.FastParser));
-                parser.index = index - 1;
-                parser.count = count;
-                int[] ids = parser.ByteArrayToIntArray(await parser.LoadNozomiTag("artist", author, true));
-                HitomiLoader hitomi = new HitomiLoader();
-                hitomi.FastDefault().FastParser(ids);
-                */
+                Label lbsender = sender as Label;
+                string author = lbsender.Content.ToString();
+                MainWindow.PixivUser_Search_Text.Text = author;
+                MainWindow.PixivUser_Search_Button_Click(this, null);
             }
-            else
+            else if (h.type == Hitomi.Type.Hiyobi || h.type == Hitomi.Type.Hitomi)
             {
-                Global.MainWindow.Hitomi_Search_Text.Text = "artist:" + author;
-                Global.MainWindow.Hitomi_Search_Button_Click(this, null);
+                bool result = await new InternetP(index: int.Parse(h.id)).isHiyobi();
+                Label lbsender = sender as Label;
+                string author = lbsender.Content.ToString();
+                MainWindow.MainPanel.Children.Clear();
+                if (result)
+                {
+                    Global.MainWindow.Hiyobi_Search_Text.Text = "artist:" + author;
+                    Global.MainWindow.Hiyobi_Search_Button_Click(this, null);
+                }
+                else
+                {
+                    Global.MainWindow.Hitomi_Search_Text.Text = "artist:" + author;
+                    Global.MainWindow.Hitomi_Search_Button_Click(this, null);
+                }
             }
         }
         private async void DownloadData_Click(object sender, RoutedEventArgs e)
@@ -729,6 +757,28 @@ namespace HitomiViewer.UserControls
             else
                 scroll.ScrollToVerticalOffset(scroll.VerticalOffset - (offset * e.Delta));
             e.Handled = true;
+        }
+        private void thumbNail_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (h.ugoiraImage != null)
+                Task.Factory.StartNew(() =>
+                    Ugoira(this.Dispatcher));
+        }
+        private void Ugoira(Dispatcher dispatcher)
+        {
+            if (this.Visibility != Visibility.Visible)
+                return;
+            if (!thumbNail.IsMouseOver)
+                return;
+            //thumbNail.ToolTip = null;
+            dispatcher.Invoke(() =>
+            {
+                if (h.ugoiraImage.index >= h.ugoiraImage.bytesofimages.Count)
+                    h.ugoiraImage.index = 0;
+                this.thumbNail.Source = ImageProcessor.Bytes2Image2(h.ugoiraImage.bytesofimages[h.ugoiraImage.index]);
+            });
+            Thread.Sleep(h.ugoiraImage.delays[h.ugoiraImage.index++]);
+            Ugoira(dispatcher);
         }
     }
 }

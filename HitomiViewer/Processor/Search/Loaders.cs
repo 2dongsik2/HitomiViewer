@@ -104,12 +104,11 @@ namespace HitomiViewer.Processor.Loaders
                     Thread th = new Thread(new ThreadStart(async () =>
                     {
                         int[] ids;
+                        InternetP parser = new InternetP();
+                        parser.index = index - 1;
+                        parser.count = search_count;
                         if (HiyobiTags.Tags.Select(y => y.full).Contains(tag))
                         {
-                            InternetP parser = new InternetP();
-                            parser.url = $"https://ltn.hitomi.la/{tag2.types}/{tag2.name}-all.nozomi";
-                            parser.index = index - 1;
-                            parser.count = search_count;
                             try
                             {
                                 ids = parser.ByteArrayToIntArray(await parser.LoadNozomiTag(tag2.types.ToString(), tag2.name, range: !Global.CacheSearch, start: 0, end: 99));
@@ -121,7 +120,6 @@ namespace HitomiViewer.Processor.Loaders
                         }
                         else
                         {
-                            InternetP parser = new InternetP();
                             ids = await parser.LoadQuery(tag);
                         }
                         if (Global.CacheSearch && !File.Exists(path))

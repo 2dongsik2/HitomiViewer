@@ -141,7 +141,7 @@ namespace HitomiViewer.Processor
         }
         public async Task<byte[]> LoadNozomi(string url = null)
         {
-            url = url ?? this.url ?? "https://ltn.hitomi.la/index-all.nozomi";
+            url = (url ?? this.url ?? "https://ltn.hitomi.la/index-all.nozomi").https();
             if (url.Last() == '/') url = url.Remove(url.Length - 1);
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Range = new System.Net.Http.Headers.RangeHeaderValue(index * 4, (index + count) * 4 - 1);
@@ -168,6 +168,8 @@ namespace HitomiViewer.Processor
             string url;
             if (type == "female" || type == "male")
                 url = $"https://ltn.hitomi.la/tag/{type}:{tag}-all.nozomi";
+            else if (type == "language")
+                url = $"https://ltn.hitomi.la/index-{tag}.nozomi";
             else
                 url = $"https://ltn.hitomi.la/{type}/{tag}-all.nozomi";
             if (url.Last() == '/') url = url.Remove(url.Length - 1);

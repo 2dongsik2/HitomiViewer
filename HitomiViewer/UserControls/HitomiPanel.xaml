@@ -24,7 +24,7 @@
             </ContextMenu>
         </DockPanel.ContextMenu>
         <Border x:Name="border" Background="LightGray" DockPanel.Dock="Left">
-            <Image x:Name="thumbNail" VerticalAlignment="Stretch" Width="100">
+            <Image x:Name="thumbNail" VerticalAlignment="Stretch" Width="100" MouseEnter="thumbNail_MouseEnter">
                 <Image.OpacityMask>
                     <ImageBrush x:Name="thumbBrush"/>
                 </Image.OpacityMask>

@@ -11,6 +11,7 @@
         Title="MainWindow" Height="450" Width="800" KeyDown="MainWindow_KeyDown">
     <Window.Resources>
         <autocomplete:SuggestionProvider x:Key="fsp" />
+        <autocomplete:PixivSuggestionProvider x:Key="psp" />
         <BitmapImage x:Key="HiyobiIcon">Resources/hiyobi.ico</BitmapImage>
         <BitmapImage x:Key="HitomiIcon">Resources/hitomi.jpg</BitmapImage>
         <BitmapImage x:Key="PixivIcon">Resources/pixiv.ico</BitmapImage>
@@ -170,6 +171,62 @@
                                 <MenuItem.Icon>
                                     <Image Source="{StaticResource PixivIcon}"/>
                                 </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="추천 일러스트" Click="PixivRecommend_Click">
+                                <MenuItem.Icon>
+                                    <Image Source="{StaticResource PixivIcon}"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem>
+                                <MenuItem.Icon>
+                                    <Image Source="{StaticResource PixivIcon}"/>
+                                </MenuItem.Icon>
+                                <MenuItem.Header>
+                                    <Grid Width="200">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="8*" />
+                                            <ColumnDefinition Width="2*" />
+                                        </Grid.ColumnDefinitions>
+                                        <wpf:AutoCompleteTextBox VerticalAlignment="Top"
+                                                                 Grid.Column="0"
+                                                                 Height="20"
+                                                                 Watermark="일러스트 검색"
+                                                                 Background="White"
+                                                                 Provider="{StaticResource psp}"
+                                                                 Keyboard.KeyDown="PixivIllust_Search_Text_KeyDown"
+                                                                 x:Name="PixivIllust_Search_Text">
+                                            <wpf:AutoCompleteTextBox.LoadingContent>
+                                                <TextBlock Text="Loading..."/>
+                                            </wpf:AutoCompleteTextBox.LoadingContent>
+                                        </wpf:AutoCompleteTextBox>
+                                        <Button Grid.Column="1" Content="검색" x:Name="PixivIllust_Search_Button"  Click="PixivIllust_Search_Button_Click"/>
+                                    </Grid>
+                                </MenuItem.Header>
+                            </MenuItem>
+                            <MenuItem>
+                                <MenuItem.Icon>
+                                    <Image Source="{StaticResource PixivIcon}"/>
+                                </MenuItem.Icon>
+                                <MenuItem.Header>
+                                    <Grid Width="200">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="8*" />
+                                            <ColumnDefinition Width="2*" />
+                                        </Grid.ColumnDefinitions>
+                                        <wpf:AutoCompleteTextBox VerticalAlignment="Top"
+                                                                 Grid.Column="0"
+                                                                 Height="20"
+                                                                 Watermark="유저 검색"
+                                                                 Background="White"
+                                                                 Keyboard.KeyDown="PixivUser_Search_Text_KeyDown"
+                                                                 x:Name="PixivUser_Search_Text">
+                                            <wpf:AutoCompleteTextBox.LoadingContent>
+                                                <TextBlock Text="Loading..."/>
+                                            </wpf:AutoCompleteTextBox.LoadingContent>
+                                        </wpf:AutoCompleteTextBox>
+                                        <Button Grid.Column="1" Content="검색" x:Name="PixivUser_Search_Button"  Click="PixivUser_Search_Button_Click"/>
+                                    </Grid>
+                                </MenuItem.Header>
                             </MenuItem>
                         </MenuItem>
                     </MenuItem>

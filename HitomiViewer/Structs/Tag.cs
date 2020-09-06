@@ -17,6 +17,7 @@ namespace HitomiViewer.Structs
             character,
             group,
             series,
+            language,
             none
         }
         public bool Hitomi = true;

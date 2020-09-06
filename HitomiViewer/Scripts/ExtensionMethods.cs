@@ -188,6 +188,16 @@ namespace ExtensionMethods
         {
             if (config == null) return null;
             if (config[path] == null) return null;
+            if (config[path].ToString() == "null") return null;
+            if (config[path].ToString() == "null") return null;
+            return config[path].ToString();
+        }
+        public static string StringValue2(this JToken config, string path)
+        {
+            if (config == null) return null;
+            if (config[path] == null) return null;
+            if (config[path].ToString() == "null") return null;
+            if (config[path].ToString() == "") return null;
             return config[path].ToString();
         }
         public static int? IntValue(this JToken config, string path)
@@ -222,7 +232,7 @@ namespace ExtensionMethods
 
         public static async void TaskCallback<T>(this Task<T> Task, Action<T> callback) where T : class => callback(await Task);
         public static async void then<T>(this Task<T> Task, Action<T> callback) where T : class => callback(await Task);
-        public static async Task<Task<T>> tthen<T>(this Task<T> Task, Action<T> callback) where T : class
+        public static Task<T> tthen<T>(this Task<T> Task, Action<T> callback) where T : class
         {
             try
             {

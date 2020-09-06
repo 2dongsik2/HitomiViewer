@@ -66,6 +66,7 @@ namespace HitomiViewer
         {
             CheckUpdate.Auto();
             HiyobiTags.LoadTags();
+            Account.Load();
             this.MinWidth = 300;
             Global.MainWindow = this;
             string[] args = Environment.GetCommandLineArgs();
@@ -132,7 +133,13 @@ namespace HitomiViewer
             return null;
         }
 
-        public void LoadHitomi(string path) => LoadHitomi(Directory.GetDirectories(path));
+        public void LoadHitomi(string path)
+        {
+            if (Global.DownloadFolder != "hitomi_downloaded")
+                LoadHitomi(File2.GetDirectories(root: "", path, rootDir + Global.DownloadFolder));
+            else
+                LoadHitomi(Directory.GetDirectories(path));
+        }
         public void LoadHitomi(string[] files)
         {
             Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => label.Visibility = Visibility.Hidden));
@@ -394,11 +401,7 @@ namespace HitomiViewer
             Page_ItemCount.SelectedIndex = 3;
             SearchMode2.SelectedIndex = 0;
             DelayRegistEvents();
-            if (Global.DownloadFolder != "hitomi_downloaded")
-                new TaskFactory().StartNew(() 
-                    => LoadHitomi(File2.GetDirectories(root: "", path, rootDir + Global.DownloadFolder)));
-            else
-                new TaskFactory().StartNew(() => LoadHitomi(path));
+            new TaskFactory().StartNew(() => LoadHitomi(path));
         }
         private void MenuItem_Checked(object sender, RoutedEventArgs e)
         {
@@ -522,11 +525,7 @@ namespace HitomiViewer
         }
         private void LoadBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (Global.DownloadFolder != "hitomi_downloaded")
-                new TaskFactory().StartNew(()
-                    => LoadHitomi(File2.GetDirectories(root: "", path, rootDir + Global.DownloadFolder)));
-            else
-                new TaskFactory().StartNew(() => LoadHitomi(path));
+            new TaskFactory().StartNew(() => LoadHitomi(path));
         }
         private async void Search_Button_Click(object sender, RoutedEventArgs e)
         {
@@ -548,7 +547,7 @@ namespace HitomiViewer
         private void File_Search_Button_Click(object sender, RoutedEventArgs e)
         {
             string SearchText = Search_Text.Text;
-            string[] files = Directory.GetDirectories(path).Where(x => x.RemoveSpace().Contains(SearchText.RemoveSpace())).ToArray();
+            string[] files = File2.GetDirectories(root: "", path, rootDir + Global.DownloadFolder).Where(x => x.RemoveSpace().Contains(SearchText.RemoveSpace())).ToArray();
             new TaskFactory().StartNew(() => LoadHitomi(files));
         }
         private void Search_Text_KeyDown(object sender, KeyEventArgs e)
@@ -556,7 +555,7 @@ namespace HitomiViewer
             if (e.Key == Key.Enter)
             {
                 string SearchText = Search_Text.Text;
-                string[] files = Directory.GetDirectories(path).Where(x => x.RemoveSpace().Contains(SearchText.RemoveSpace())).ToArray();
+                string[] files = File2.GetDirectories(root: "", path, rootDir + Global.DownloadFolder).Where(x => x.RemoveSpace().Contains(SearchText.RemoveSpace())).ToArray();
                 new TaskFactory().StartNew(() => LoadHitomi(files));
             }
         }
@@ -747,8 +746,10 @@ namespace HitomiViewer
             bool result = login.ShowDialog() ?? false;
             if (result)
             {
+                if (login.remember)
+                    Account.Save("pixiv", login.username, login.password);
                 Pixiv pixiv = new Pixiv();
-                Global.Account.Pixiv = await pixiv.AuthChain(login.nickname, login.password, true);
+                Global.Account.Pixiv = await pixiv.AuthChain(login.username, login.password, true);
             }
             return result;
         }
@@ -757,10 +758,58 @@ namespace HitomiViewer
             if (Global.Account.Pixiv == null)
                 if (await Login() == false)
                     return;
+            MainPanel.Children.Clear();
             JObject data = await Global.Account.Pixiv.illustFollow();
             PixivLoader loader = new PixivLoader();
             loader.Default()
                 .Parser(data);
+        }
+        private async void PixivRecommend_Click(object sender, RoutedEventArgs e)
+        {
+            if (Global.Account.Pixiv == null)
+                if (await Login() == false)
+                    return;
+            MainPanel.Children.Clear();
+            JObject data = await Global.Account.Pixiv.illustRecommended();
+            PixivLoader loader = new PixivLoader();
+            loader.Default()
+                .Parser(data);
+        }
+        private void PixivUser_Search_Text_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter) Task.Factory.StartNew(() =>
+            {
+                Thread.Sleep(500);
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => PixivUser_Search_Button_Click(null, null)));
+            });
+        }
+        public async void PixivUser_Search_Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (Global.Account.Pixiv == null)
+                if (await Login() == false)
+                    return;
+            MainPanel.Children.Clear();
+            JObject data = await Global.Account.Pixiv.searchUser(PixivUser_Search_Text.Text);
+            PixivLoader loader = new PixivLoader();
+            loader.UserDefault().UserParser(data);
+        }
+        private void PixivIllust_Search_Text_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter) Task.Factory.StartNew(() =>
+            {
+                Thread.Sleep(500);
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => PixivIllust_Search_Button_Click(null, null)));
+            });
+        }
+        public async void PixivIllust_Search_Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (Global.Account.Pixiv == null)
+                if (await Login() == false)
+                    return;
+            MainPanel.Children.Clear();
+            JObject data = await Global.Account.Pixiv.searchIllust(PixivIllust_Search_Text.Text);
+            PixivLoader loader = new PixivLoader();
+            loader.FastDefault().FastParser(data);
         }
         #endregion
     }

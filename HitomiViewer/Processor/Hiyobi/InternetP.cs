@@ -31,7 +31,9 @@ namespace HitomiViewer.Processor
         {
             List<HitomiFile> files = new List<HitomiFile>();
             url = $"https://cdn.hiyobi.me/data/json/{index}_list.json";
-            JArray arr = await LoadJArray();
+            JArray arr = await TryLoadJArray();
+            if (arr == null)
+                return new List<HitomiFile>();
             foreach (JToken tk in arr)
             {
                 files.Add(new HitomiFile

@@ -2,6 +2,7 @@
 using HitomiViewer.Processor;
 using HitomiViewer.Scripts;
 using HitomiViewer.Structs;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,6 +38,17 @@ namespace HitomiViewer.AutoComplete
             List<Tag> tags = HiyobiTags.Tags;
             if (tags == null) HiyobiTags.LoadTags();
             return tags.Select(x => x.full).StartsContains(filter.Split(' ').Last());
+        }
+    }
+
+    public class PixivSuggestionProvider : ISuggestionProvider
+    {
+        public System.Collections.IEnumerable GetSuggestions(string filter)
+        {
+            Task<JObject> task = Global.Account.Pixiv.searchAutoComplete(filter);
+            JObject data = task.Result;
+            JArray keywords = data["search_auto_complete_keywords"] as JArray;
+            return keywords.Select(x => x.ToString());
         }
     }
 }
