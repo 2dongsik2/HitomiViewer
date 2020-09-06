@@ -77,6 +77,20 @@ namespace HitomiViewer
                     System.Threading.Thread.Sleep(1000);
                     Ugoira(this.Dispatcher);
                 });
+            new TaskFactory().StartNew(() => {
+                while (hitomi.files == null || hitomi.files.Length <= 0) { }
+                if (hitomi.thumb == null) this.image.Source = ImageProcessor.ProcessEncrypt(hitomi.files[0]);
+                this.Activate();
+                this.WindowStyle = WindowStyle.None;
+                this.WindowState = WindowState.Maximized;
+                System.Threading.Thread.Sleep(100);
+                this.Dispatcher.Invoke(() =>
+                {
+                    this.Activate();
+                    this.WindowStyle = WindowStyle.None;
+                    this.WindowState = WindowState.Maximized;
+                });
+            });
             new TaskFactory().StartNew(async () =>
             {
                 Uri uriResult;
@@ -103,22 +117,11 @@ namespace HitomiViewer
                             }
                         }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
                 }
-            });
-            new TaskFactory().StartNew(() => {
-                while (hitomi.files == null || hitomi.files.Length <= 0) { }
-                if (hitomi.thumb == null) this.image.Source = ImageProcessor.ProcessEncrypt(hitomi.files[0]);
-                this.Activate();
-                this.WindowStyle = WindowStyle.None;
-                this.WindowState = WindowState.Maximized;
-                System.Threading.Thread.Sleep(100);
-                this.Dispatcher.Invoke(() =>
-                {
-                    this.Activate();
-                    this.WindowStyle = WindowStyle.None;
-                    this.WindowState = WindowState.Maximized;
-                });
             });
         }
         private void Ugoira(Dispatcher dispatcher)

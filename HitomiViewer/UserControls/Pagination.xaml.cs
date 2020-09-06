@@ -46,14 +46,10 @@ namespace HitomiViewer.UserControls
             cbNumberOfRecords.SelectedIndex = page - 1;
         }
 
-        private void btnFirs_Click(object sender, RoutedEventArgs e) =>
-            btnFirs_Clk(sender, e);
-        private void btnPrev_Click(object sender, RoutedEventArgs e) => 
-            btnPrev_Clk(sender, e);
-        private void btnNext_Click(object sender, RoutedEventArgs e) => 
-            btnNext_Clk(sender, e);
-        private void btnLast_Click(object sender, RoutedEventArgs e) => 
-            btnLast_Clk(sender, e);
+        private void btnFirs_Click(object sender, RoutedEventArgs e) => btnFirs_Clk(sender, e);
+        private void btnPrev_Click(object sender, RoutedEventArgs e) => btnPrev_Clk(sender, e);
+        private void btnNext_Click(object sender, RoutedEventArgs e) => btnNext_Clk(sender, e);
+        private void btnLast_Click(object sender, RoutedEventArgs e) => btnLast_Clk(sender, e);
 
         private void cbNumberOfRecords_SelectionChanged(object sender, SelectionChangedEventArgs e) => cbNumberOfRecords_SelectionChanged1(sender, e);
     }
