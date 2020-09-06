@@ -110,6 +110,7 @@ namespace HitomiViewer
                                     image = await ImageProcessor.PixivImage(hitomi.files[i]);
                                 else
                                     image = await ImageProcessor.ProcessEncryptAsync(hitomi.files[i]);
+                                image.Freeze();
                                 hitomi.images[i] = image;
                             }
                         }
@@ -143,6 +144,7 @@ namespace HitomiViewer
                     hitomi.images[i] = null;
                 }
             }
+            GC.Collect();
         }
 
         public void ChangeMode()
@@ -221,6 +223,7 @@ namespace HitomiViewer
                                     image = await ImageProcessor.PixivImage(hitomi.files[i]);
                                 else
                                     image = await ImageProcessor.ProcessEncryptAsync(hitomi.files[i]);
+                                image.Freeze();
                                 hitomi.images[i] = image;
                             }
                         }
@@ -272,6 +275,7 @@ namespace HitomiViewer
                     image = await ImageProcessor.PixivImage(link);
                 else
                     image = await ImageProcessor.ProcessEncryptAsync(link);
+                image.Freeze();
                 if (hitomi.images.Length == hitomi.page)
                     hitomi.images[copypage] = image;
             }
