@@ -18,17 +18,52 @@ using static HitomiViewer.Api.PixivUser;
 
 namespace HitomiViewer.Api
 {
+    public static partial class MyExtensions
+    {
+        public static string toString(this SearchTarget target)
+        {
+            if (target == SearchTarget.TAGS_PARTIAL)
+                return "partial_match_for_tags";
+            if (target == SearchTarget.TAGS_EXACT)
+                return "exact_match_for_tags";
+            if (target == SearchTarget.TITLE_AND_CAPTION)
+                return "title_and_caption";
+            return "";
+        }
+        public static string toString(this Sort target)
+        {
+            if (target == Sort.DATE_ASC)
+                return "date_asc";
+            if (target == Sort.DATE_DESC)
+                return "date_desc";
+            return "";
+        }
+    }
+
     public partial class Pixiv
     {
         private const string BASE_URL = "https://app-api.pixiv.net";
         private const string CLIENT_ID = "MOBrBDS8blbauoSck0ZfDbtuzpyT";
         private const string CLIENT_SECRET = "lsACyCD94FhDUtGTXi3QzcFE2uU1hqtDaKeqrdwj";
         private const string HASH_SECRET = "28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c";
+        private const string FILTER = "for_ios";
 
         private JObject auth;
         private bool rememberPassword = false;
         private string username;
         private string password;
+
+        public enum SearchTarget
+        {
+            TAGS_PARTIAL, //partial_match_for_tags
+            TAGS_EXACT, //exact_match_for_tags
+            TITLE_AND_CAPTION, //title_and_caption
+        }
+        public enum Sort
+        {
+            DATE_DESC, //date_desc
+            DATE_ASC //date_asc
+        }
 
         public async Task<JObject> Auth(string username, string password, bool rememberPassword = false)
         {
@@ -63,6 +98,7 @@ namespace HitomiViewer.Api
             await Auth(username, password, rememberPassword);
             return this;
         }
+        #region illust
         public async Task<JObject> illustRelated(string id, List<KeyValuePair<string, string>> query = null)
         {
             query = query ?? new List<KeyValuePair<string, string>>();
@@ -71,7 +107,6 @@ namespace HitomiViewer.Api
             string result = await requestUrl($"/v1/illust/related{queryString}");
             return JObject.Parse(result);
         }
-        [Obsolete]
         public async Task<JObject> illustDetail(string id, List<KeyValuePair<string, string>> query = null)
         {
             query = query ?? new List<KeyValuePair<string, string>>();
@@ -96,6 +131,19 @@ namespace HitomiViewer.Api
             string result = await requestUrl($"/v1/illust/recommended{queryString}");
             return JObject.Parse(result);
         }
+        #endregion
+        #region Search
+        public async Task<JObject> searchIllust(string word, SearchTarget search_target = SearchTarget.TAGS_PARTIAL, Sort sort = Sort.DATE_DESC)
+        {
+            List<KeyValuePair<string, string>> query = new List<KeyValuePair<string, string>>();
+            query.Add(new KeyValuePair<string, string>("word", word));
+            query.Add(new KeyValuePair<string, string>("search_target", search_target.toString()));
+            query.Add(new KeyValuePair<string, string>("sort", sort.toString()));
+            //query.Add(new KeyValuePair<string, string>("filter", FILTER));
+            string queryString = query.ToQueryString();
+            string result = await requestUrl($"/v1/search/illust{queryString}");
+            return JObject.Parse(result);
+        }
         public async Task<JObject> searchUser(string word)
         {
             List<KeyValuePair<string, string>> query = new List<KeyValuePair<string, string>>();
@@ -104,6 +152,16 @@ namespace HitomiViewer.Api
             string result = await requestUrl($"/v1/search/user{queryString}");
             return JObject.Parse(result);
         }
+        public async Task<JObject> searchAutoComplete(string word)
+        {
+            List<KeyValuePair<string, string>> query = new List<KeyValuePair<string, string>>();
+            query.Add(new KeyValuePair<string, string>("word", word));
+            string queryString = query.ToQueryString();
+            string result = await requestUrl($"/v1/search/autocomplete{queryString}");
+            return JObject.Parse(result);
+        }
+        #endregion
+        #region User
         public async Task<JObject> userDetail(string user_id, List<KeyValuePair<string, string>> query = null)
         {
             query = query ?? new List<KeyValuePair<string, string>>();
@@ -121,6 +179,7 @@ namespace HitomiViewer.Api
             string result = await requestUrl($"/v1/user/illusts{queryString}");
             return JObject.Parse(result);
         }
+        #endregion
         public async Task<JObject> ugoiraMetaData(string id, List<KeyValuePair<string, string>> query = null)
         {
             query = query ?? new List<KeyValuePair<string, string>>();

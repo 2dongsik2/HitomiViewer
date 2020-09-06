@@ -66,8 +66,12 @@ namespace HitomiViewer.UserControls
                 if (!reader.IsClosed)
                     reader.Show();
             };
+            if ((h.type != Hitomi.Type.Pixiv) || (!afterLoad && h.ugoiraImage == null))
+                thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
+            /*
             if (h.ugoiraImage == null)
                 thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
+            */
         }
         private async void Init()
         {
@@ -80,7 +84,14 @@ namespace HitomiViewer.UserControls
             }
             thumbNail.Source = h.thumb;
             thumbBrush.ImageSource = h.thumb;
-            thumbNail.ToolTip = GetToolTip(panel.Height);
+            if ((h.type != Hitomi.Type.Pixiv) || (!afterLoad && h.ugoiraImage == null))
+                thumbNail.ToolTip = GetToolTip(panel.Height);
+            /*
+            if (h.ugoiraImage == null)
+                thumbNail.ToolTip = GetToolTip(panel.Height);
+            else
+                thumbNail.ClearValue(Image.ToolTipProperty);
+            */
 
             authorsPanel.Children.Clear();
             authorsPanel.Children.Add(new Label { Content = "작가 :" });
@@ -279,6 +290,7 @@ namespace HitomiViewer.UserControls
 
         private ToolTip GetToolTip(double height)
         {
+            if (h.thumb == null) return null;
             if (!thumbNail.IsVisible) return null;
             //b = 비율
             //Magnif = 배율
@@ -412,7 +424,16 @@ namespace HitomiViewer.UserControls
                 }
                 catch { }
             }
-            if (Global.OriginThumb && h.files != null && h.files.Length >= 1 && h.files[0] != null)
+            if (h.ugoiraImage == null)
+            {
+                thumbNail.ToolTip = GetToolTip(panel.Height);
+                thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
+            }
+            if (Global.OriginThumb &&
+                h.files != null &&
+                h.files.Length >= 1 &&
+                h.files[0] != null &&
+                h.type != Hitomi.Type.Pixiv)
             {
                 this.nameLabel.Content = h.name + " (썸네일 로딩중)";
                 ImageProcessor.ProcessEncryptAsync(h.files[0]).then((BitmapImage image) =>

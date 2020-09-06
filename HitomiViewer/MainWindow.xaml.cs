@@ -777,6 +777,14 @@ namespace HitomiViewer
             loader.Default()
                 .Parser(data);
         }
+        private void PixivUser_Search_Text_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter) Task.Factory.StartNew(() =>
+            {
+                Thread.Sleep(500);
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => PixivUser_Search_Button_Click(null, null)));
+            });
+        }
         public async void PixivUser_Search_Button_Click(object sender, RoutedEventArgs e)
         {
             if (Global.Account.Pixiv == null)
@@ -786,9 +794,24 @@ namespace HitomiViewer
             JObject data = await Global.Account.Pixiv.searchUser(PixivUser_Search_Text.Text);
             PixivLoader loader = new PixivLoader();
             loader.UserDefault().UserParser(data);
-            //data = await Global.Account.Pixiv.userIllusts(data["user_previews"][0]["user"].StringValue("id"));
-            //PixivLoader loader = new PixivLoader();
-            //loader.Default().Parser(data);
+        }
+        private void PixivIllust_Search_Text_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter) Task.Factory.StartNew(() =>
+            {
+                Thread.Sleep(500);
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => PixivIllust_Search_Button_Click(null, null)));
+            });
+        }
+        public async void PixivIllust_Search_Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (Global.Account.Pixiv == null)
+                if (await Login() == false)
+                    return;
+            MainPanel.Children.Clear();
+            JObject data = await Global.Account.Pixiv.searchIllust(PixivIllust_Search_Text.Text);
+            PixivLoader loader = new PixivLoader();
+            loader.FastDefault().FastParser(data);
         }
         #endregion
     }
