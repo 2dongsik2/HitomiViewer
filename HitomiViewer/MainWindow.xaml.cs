@@ -133,7 +133,13 @@ namespace HitomiViewer
             return null;
         }
 
-        public void LoadHitomi(string path) => LoadHitomi(Directory.GetDirectories(path));
+        public void LoadHitomi(string path)
+        {
+            if (Global.DownloadFolder != "hitomi_downloaded")
+                LoadHitomi(File2.GetDirectories(root: "", path, rootDir + Global.DownloadFolder));
+            else
+                LoadHitomi(Directory.GetDirectories(path));
+        }
         public void LoadHitomi(string[] files)
         {
             Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => label.Visibility = Visibility.Hidden));
@@ -395,11 +401,7 @@ namespace HitomiViewer
             Page_ItemCount.SelectedIndex = 3;
             SearchMode2.SelectedIndex = 0;
             DelayRegistEvents();
-            if (Global.DownloadFolder != "hitomi_downloaded")
-                new TaskFactory().StartNew(() 
-                    => LoadHitomi(File2.GetDirectories(root: "", path, rootDir + Global.DownloadFolder)));
-            else
-                new TaskFactory().StartNew(() => LoadHitomi(path));
+            new TaskFactory().StartNew(() => LoadHitomi(path));
         }
         private void MenuItem_Checked(object sender, RoutedEventArgs e)
         {
@@ -523,11 +525,7 @@ namespace HitomiViewer
         }
         private void LoadBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (Global.DownloadFolder != "hitomi_downloaded")
-                new TaskFactory().StartNew(()
-                    => LoadHitomi(File2.GetDirectories(root: "", path, rootDir + Global.DownloadFolder)));
-            else
-                new TaskFactory().StartNew(() => LoadHitomi(path));
+            new TaskFactory().StartNew(() => LoadHitomi(path));
         }
         private async void Search_Button_Click(object sender, RoutedEventArgs e)
         {
@@ -549,7 +547,7 @@ namespace HitomiViewer
         private void File_Search_Button_Click(object sender, RoutedEventArgs e)
         {
             string SearchText = Search_Text.Text;
-            string[] files = Directory.GetDirectories(path).Where(x => x.RemoveSpace().Contains(SearchText.RemoveSpace())).ToArray();
+            string[] files = File2.GetDirectories(root: "", path, rootDir + Global.DownloadFolder).Where(x => x.RemoveSpace().Contains(SearchText.RemoveSpace())).ToArray();
             new TaskFactory().StartNew(() => LoadHitomi(files));
         }
         private void Search_Text_KeyDown(object sender, KeyEventArgs e)
@@ -557,7 +555,7 @@ namespace HitomiViewer
             if (e.Key == Key.Enter)
             {
                 string SearchText = Search_Text.Text;
-                string[] files = Directory.GetDirectories(path).Where(x => x.RemoveSpace().Contains(SearchText.RemoveSpace())).ToArray();
+                string[] files = File2.GetDirectories(root: "", path, rootDir + Global.DownloadFolder).Where(x => x.RemoveSpace().Contains(SearchText.RemoveSpace())).ToArray();
                 new TaskFactory().StartNew(() => LoadHitomi(files));
             }
         }
