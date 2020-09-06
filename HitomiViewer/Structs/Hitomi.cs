@@ -49,6 +49,8 @@ namespace HitomiViewer
         public void Save(string path) => File.WriteAllText(path, JObject.FromObject(this).ToString());
         public void Ugoira(JObject data)
         {
+            if (data["ugoiraImage"] == null)
+                return;
             if (!data["ugoiraImage"].HasValues)
                 return;
             JToken parent = data["ugoiraImage"];
