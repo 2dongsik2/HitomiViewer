@@ -47,6 +47,16 @@ namespace HitomiViewer
 
         public void AutoAuthor() => author = string.Join(", ", authors);
         public void Save(string path) => File.WriteAllText(path, JObject.FromObject(this).ToString());
+        public void Ugoira(JObject data)
+        {
+            if (!data["ugoiraImage"].HasValues)
+                return;
+            JToken parent = data["ugoiraImage"];
+            ugoiraImage = new PixivUgoira();
+            ugoiraImage.bytesofimages = parent["bytesofimages"].Select(x => Convert.FromBase64String(x.ToString())).ToList();
+            ugoiraImage.delays = parent["delays"].Select(x => int.Parse(x.ToString())).ToList();
+            ugoiraImage.original = parent.StringValue("original");
+        }
 
         public static Hitomi Copy(Hitomi hitomi)
         {
@@ -131,6 +141,7 @@ namespace HitomiViewer
         public List<byte[]> bytesofimages;
         public List<int> delays;
         public List<BitmapImage> images;
+        public string original;
         public int index = 0;
     }
     public class HitomiInfo

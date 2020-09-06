@@ -66,8 +66,13 @@ namespace HitomiViewer.UserControls
                 if (!reader.IsClosed)
                     reader.Show();
             };
-            if ((h.type != Hitomi.Type.Pixiv) || (!afterLoad && h.ugoiraImage == null))
+            if ((h.type != Hitomi.Type.Pixiv && h.type != Hitomi.Type.Folder) || (!afterLoad && h.ugoiraImage == null))
                 thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
+            else if (h.type == Hitomi.Type.Folder)
+            {
+                if (ftype != Hitomi.Type.Pixiv || h.ugoiraImage == null)
+                    thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
+            }
             /*
             if (h.ugoiraImage == null)
                 thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
@@ -84,8 +89,6 @@ namespace HitomiViewer.UserControls
             }
             thumbNail.Source = h.thumb;
             thumbBrush.ImageSource = h.thumb;
-            if ((h.type != Hitomi.Type.Pixiv) || (!afterLoad && h.ugoiraImage == null))
-                thumbNail.ToolTip = GetToolTip(panel.Height);
             /*
             if (h.ugoiraImage == null)
                 thumbNail.ToolTip = GetToolTip(panel.Height);
@@ -164,6 +167,7 @@ namespace HitomiViewer.UserControls
                             h.authors = jobject["author"].ToString().Split(new string[] { ", " }, StringSplitOptions.None);
                         else
                             h.authors = new string[0];
+                        h.Ugoira(jobject);
                     }
                 }
                 else if (File.Exists(System.IO.Path.Combine(h.dir, "info.txt")))
@@ -238,6 +242,13 @@ namespace HitomiViewer.UserControls
                 }
             }
 
+            if ((h.type != Hitomi.Type.Pixiv && h.type != Hitomi.Type.Folder) || (!afterLoad && h.ugoiraImage == null))
+                thumbNail.ToolTip = GetToolTip(panel.Height);
+            if (h.type == Hitomi.Type.Folder)
+            {
+                if (ftype != Hitomi.Type.Pixiv || h.ugoiraImage == null)
+                    thumbNail.ToolTip = GetToolTip(panel.Height);
+            }
             nameLabel.Width = panel.Width - border.Width;
             //nameLabel.Content = h.name;
             ContextSetup();
@@ -252,8 +263,10 @@ namespace HitomiViewer.UserControls
             Folder_Hiyobi_Search.Visibility = Visibility.Collapsed;
             Hiyobi_Download.Visibility = Visibility.Collapsed;
             Hitomi_Download.Visibility = Visibility.Collapsed;
+            Pixiv_Download.Visibility = Visibility.Collapsed;
             Encrypt.Visibility = Visibility.Collapsed;
             Decrypt.Visibility = Visibility.Collapsed;
+            CopyNumber.Visibility = Visibility.Visible;
             switch (h.type)
             {
                 case Hitomi.Type.Folder:
@@ -270,11 +283,15 @@ namespace HitomiViewer.UserControls
                 case Hitomi.Type.Hitomi:
                     Hitomi_Download.Visibility = Visibility.Visible;
                     break;
+                case Hitomi.Type.Pixiv:
+                    Pixiv_Download.Visibility = Visibility.Visible;
+                    break;
             }
             if (h.id == null || h.id == "")
             {
                 DownloadData.Visibility = Visibility.Collapsed;
                 DownloadImage.Visibility = Visibility.Collapsed;
+                CopyNumber.Visibility = Visibility.Collapsed;
             }
             if (ftype == Hitomi.Type.Hiyobi)
                 Folder_Hiyobi_Search.Visibility = Visibility.Visible;
@@ -419,6 +436,7 @@ namespace HitomiViewer.UserControls
                     wc.Headers.Add("Referer", "https://www.pixiv.net/");
                     byte[] zipbyte = await wc.DownloadDataTaskAsync(obj["ugoira_metadata"]["zip_urls"].StringValue("medium"));
                     h.ugoiraImage = pixiv.UnZip(zipbyte);
+                    h.ugoiraImage.original = obj["ugoira_metadata"]["zip_urls"].StringValue("medium");
                     h.ugoiraImage.delays = obj["ugoira_metadata"]["frames"].Select(x => x.IntValue("delay") ?? 0).ToList();
                     h.name += " (우고이라)";
                 }
@@ -510,6 +528,33 @@ namespace HitomiViewer.UserControls
                     string file = h.files[i];
                     WebClient wc = new WebClient();
                     wc.Headers.Add("referer", "https://hitomi.la/");
+                    if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/{i}.jpg"))
+                    {
+                        h.encrypted = Global.AutoFileEn;
+                        if (Global.AutoFileEn)
+                            FileEncrypt.DownloadAsync(wc, new Uri(file), $"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/{i}.jpg.lock");
+                        else wc.DownloadFileAsync(new Uri(file), $"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/{i}.jpg");
+                    }
+                }
+                Process.Start($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}");
+            });
+        }
+        private void Pixiv_Download_Click(object sender, RoutedEventArgs e)
+        {
+            Task.Factory.StartNew(() =>
+            {
+                string filename = File2.GetDownloadTitle(File2.SaftyFileName(h.name));
+                if (!Directory.Exists($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}"))
+                    Directory.CreateDirectory($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}");
+                Directory.CreateDirectory($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}");
+                h.dir = $"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}";
+                this.Dispatcher.Invoke(() => h.Save($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/info.json"));
+                for (int i = 0; i < h.files.Length; i++)
+                {
+                    string file = h.files[i];
+                    WebClient wc = new WebClient();
+                    wc.Headers.Add("Referer", "https://www.pixiv.net/");
+                    wc.DownloadFileAsync(new Uri(h.ugoiraImage.original), $"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/ugoira_metadata.zip");
                     if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/{i}.jpg"))
                     {
                         h.encrypted = Global.AutoFileEn;
@@ -666,7 +711,7 @@ namespace HitomiViewer.UserControls
         {
             bool hiyobi = ftype == Hitomi.Type.Hiyobi;
             if (ftype == Hitomi.Type.Folder)
-            {   
+            {
                 bool result = await new InternetP(index: int.Parse(h.id)).isHiyobi();
                 hiyobi = result;
             }

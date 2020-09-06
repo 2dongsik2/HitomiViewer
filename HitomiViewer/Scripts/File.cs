@@ -43,7 +43,12 @@ namespace HitomiViewer.Scripts
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".lock" };
             return Directory.GetFiles(dir).Where(file => allowedExtensions.Any(file.ToLower().EndsWith)).ToArray().ESort();
         }
-        public static string SaftyFileName(string s) => s.Replace("|", "｜").Replace("?", "？");
+        public static string SaftyFileName(string s) => s
+            .Replace("|", "｜").Replace("?", "？")
+            .Replace(":", "：").Replace("<", "＜")
+            .Replace(">", "＞").Replace("*", "⋆")
+            .Replace("\"", "”").Replace("/", "／")
+            .Replace("\\", "／");
         public static string GetDownloadTitle(string t)
         {
             if (Global.EncryptTitle)

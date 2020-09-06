@@ -76,6 +76,7 @@ namespace HitomiViewer.UserControls
                             wc.Headers.Add("Referer", "https://www.pixiv.net/");
                             byte[] zipbyte = await wc.DownloadDataTaskAsync(obj["ugoira_metadata"]["zip_urls"].StringValue("medium"));
                             PixivUgoira ugoiraImage = pixiv.UnZip(zipbyte);
+                            ugoiraImage.original = obj["ugoira_metadata"]["zip_urls"].StringValue("medium");
                             ugoiraImage.delays = obj["ugoira_metadata"]["frames"].Select(x => x.IntValue("delay") ?? 0).ToList();
                             image.MouseDown += (object sender, MouseButtonEventArgs e) =>
                             {

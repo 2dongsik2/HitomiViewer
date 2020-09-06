@@ -409,6 +409,7 @@ namespace HitomiViewer.Processor.Loaders
                     wc.Headers.Add("Referer", "https://www.pixiv.net/");
                     byte[] zipbyte = await wc.DownloadDataTaskAsync(obj["ugoira_metadata"]["zip_urls"].StringValue("medium"));
                     h.ugoiraImage = pixiv.UnZip(zipbyte);
+                    h.ugoiraImage.original = obj["ugoira_metadata"]["zip_urls"].StringValue("medium");
                     h.ugoiraImage.delays = obj["ugoira_metadata"]["frames"].Select(x => x.IntValue("delay") ?? 0).ToList();
                     h.name += " (우고이라)";
                 }
