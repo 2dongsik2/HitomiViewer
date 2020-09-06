@@ -7,6 +7,8 @@
 업데이트는 실행 시 자동으로 되고 Updater.exe를 실행할 시에도 업데이트가 됩니다.
 현재는 별도로 우회 프로그램을 사용하지 않아도 모든 기능이 사용이 가능합니다.
 
+오류나 개선사항 Issues 에 올려주세요.
+
 # Framework
 .NET Framework 4.8 - [download](https://dotnet.microsoft.com/download) - [downloads](https://dotnet.microsoft.com/download/visual-studio-sdks?utm_source=getdotnetsdk&utm_medium=referral)
 
