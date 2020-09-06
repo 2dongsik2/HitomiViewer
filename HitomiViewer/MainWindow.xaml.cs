@@ -203,7 +203,7 @@ namespace HitomiViewer
                     MainPanel.Children.Clear();
                     LabelSetup();
                     Page_Index.SelectedIndex = ind - 1;
-                    new TaskFactory().StartNew(() => LoadHitomi(path));
+                    //new TaskFactory().StartNew(() => Console.WriteLine(path));
                 }).Pagination(SelectedPage);
                 int pages = (int)Math.Ceiling(files.Length / ((double)Page_itemCount));
                 pagination(pages);
