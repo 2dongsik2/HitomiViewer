@@ -88,6 +88,38 @@ namespace HitomiViewer
                     this.WindowState = WindowState.Maximized;
                 });
             });
+            new TaskFactory().StartNew(async () =>
+            {
+                Uri uriResult;
+                bool result = Uri.TryCreate(hitomi.dir, UriKind.Absolute, out uriResult)
+                    && ((uriResult.Scheme == Uri.UriSchemeHttp) || (uriResult.Scheme == Uri.UriSchemeHttps));
+                if (result)
+                {
+                    try
+                    {
+                        this.Title = hitomi.name + " 0/" + (hitomi.files.Length - 1);
+                        for (int i = 0; i < hitomi.files.Length; i++)
+                        {
+                            this.Title = hitomi.name + " " + i + "/" + (hitomi.files.Length - 1);
+                            if (hitomi.images == null || hitomi.images.Length < hitomi.page)
+                                hitomi.images = new BitmapImage[hitomi.page];
+                            if (hitomi.images[i] == null)
+                            {
+                                BitmapImage image;
+                                if (hitomi.type == Hitomi.Type.Pixiv)
+                                    image = await ImageProcessor.PixivImage(hitomi.files[i]);
+                                else
+                                    image = await ImageProcessor.ProcessEncryptAsync(hitomi.files[i]);
+                                hitomi.images[i] = image;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+            });
         }
         private void Ugoira(Dispatcher dispatcher)
         {
@@ -101,6 +133,16 @@ namespace HitomiViewer
             });
             Thread.Sleep(hitomi.ugoiraImage.delays[hitomi.ugoiraImage.index++]);
             Ugoira(dispatcher);
+        }
+        private void ClearMemory()
+        {
+            for (int i = 0; i < hitomi.images.Length; i++)
+            {
+                if (page - 10 > i)
+                {
+                    hitomi.images[i] = null;
+                }
+            }
         }
 
         public void ChangeMode()
@@ -235,6 +277,7 @@ namespace HitomiViewer
             }
             if (copypage == page && hitomi.images.Length == hitomi.page)
                 image.Source = hitomi.images[page];
+            ClearMemory();
             /*
             if (result)
             {
