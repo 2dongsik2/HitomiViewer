@@ -28,6 +28,8 @@
 - [![3.2](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/v3.2/total?logo=github)](https://github.com/rmagur1203/HitomiViewer/releases/tag/v3.2)
 
 ## Description
+- 3.8.1.6
+  - GIF 지원 추가
 - 3.8.1.5
   - 픽시브도 사용 가능하게 변경
   - 픽시브는 아직 실험단계
