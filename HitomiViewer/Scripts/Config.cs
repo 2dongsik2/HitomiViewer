@@ -51,7 +51,11 @@ namespace HitomiViewer.Scripts
         {
             if (config == null) return null;
             if (!config.ContainsKey(path)) return null;
-            return bool.Parse(config[path].ToString());
+            if (config[path].Type == JTokenType.Boolean) return (bool?)config[path];
+            bool result;
+            if (!bool.TryParse(config[path].ToString(), out result))
+                return null;
+            return result;
         }
         public IList<T> ArrayValue<T>(string path) where T : class
         {

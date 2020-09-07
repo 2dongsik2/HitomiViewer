@@ -35,11 +35,11 @@
             <Label x:Name="nameLabel" HorizontalAlignment="Stretch" DockPanel.Dock="Top" Foreground="Black" Content="NAMELABEL"/>
             <StackPanel x:Name="bottomPanel" DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Stretch" FlowDirection="RightToLeft" Background="White">
                 <Label x:Name="sizeLabel" VerticalAlignment="Bottom" Foreground="Black" Content="SIZELABEL"/>
-                <Image x:Name="sizeImage" Width="25" Height="25" VerticalAlignment="Bottom" Source="pack://siteoforigin:,,,/Resources/download-button.png"/>
+                <Image x:Name="sizeImage" Width="25" Height="25" VerticalAlignment="Bottom" Source="/Resources/download-button.png"/>
                 <Label x:Name="pageLabel" VerticalAlignment="Bottom" Foreground="Black" Content="PAGELABEL"/>
-                <Image x:Name="pageImage" Width="25" Height="25" VerticalAlignment="Bottom" Source="pack://siteoforigin:,,,/Resources/imageicon.png"/>
+                <Image x:Name="pageImage" Width="25" Height="25" VerticalAlignment="Bottom" Source="/Resources/imageicon.png"/>
                 <Label x:Name="sizeperpageLabel" VerticalAlignment="Bottom" Foreground="Black" Content="SIZEPERPAGELABEL"/>
-                <Image x:Name="sizeperpageImage" Width="25" Height="25" VerticalAlignment="Bottom" Source="pack://siteoforigin:,,,/Resources/imageicon.png"/>
+                <Image x:Name="sizeperpageImage" Width="25" Height="25" VerticalAlignment="Bottom" Source="/Resources/imageicon.png"/>
             </StackPanel>
             <StackPanel x:Name="authorsStackPanel" DockPanel.Dock="Top" Orientation="Vertical" Visibility="Collapsed">
                 <DockPanel x:Name="authorsPanel">

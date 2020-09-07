@@ -109,7 +109,7 @@ namespace HitomiViewer
         private void InitEncrypt(JObject config)
         {
             if (config.GetValue(file_encrypt) != null)
-                FileEncrypt.IsChecked = config.BoolValue(download_file_encrypt);
+                FileEncrypt.IsChecked = config.BoolValue(file_encrypt);
             if (config.GetValue(download_file_encrypt) != null)
                 AutoEncryption.IsChecked = config.BoolValue(download_file_encrypt);
         }

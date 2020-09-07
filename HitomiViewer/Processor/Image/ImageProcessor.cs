@@ -242,7 +242,7 @@ namespace HitomiViewer.Processor
                 return null;
             }
         }
-        public static BitmapImage FromResource(string psResourceName)
+        public static BitmapImage FromIncludedResource(string psResourceName)
         {
             Uri oUri = new Uri($"pack://siteoforigin:,,,/Resources/{psResourceName}");
             return new BitmapImage(oUri);
@@ -250,6 +250,11 @@ namespace HitomiViewer.Processor
         public static BitmapImage FromResourceWithName(string psAssemblyName, string psResourceName)
         {
             Uri oUri = new Uri("pack://application:,,,/" + psAssemblyName + ";component/" + psResourceName, UriKind.RelativeOrAbsolute);
+            return new BitmapImage(oUri);
+        }
+        public static BitmapImage FromResource(string psResourceName)
+        {
+            Uri oUri = new Uri($"/Resources/{psResourceName}", UriKind.RelativeOrAbsolute);
             return new BitmapImage(oUri);
         }
         public static BitmapImage Bytes2Image(byte[] array)
