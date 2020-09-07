@@ -27,10 +27,7 @@ namespace Updater
                 Update(args);
             else
                 Download(args);
-            while (true)
-            {
-                Console.Read();
-            }
+            while (true) { }
         }
         public static async void Update(string[] args)
         {
@@ -42,28 +39,48 @@ namespace Updater
                 Version filev = Version.Parse(versionInfo.FileVersion);
                 string s = await Load("https://api.github.com/repos/rmagur1203/HitomiViewer/releases");
                 JArray jarray = JArray.Parse(s);
-                Version repov = Version.Parse(jarray[0]["tag_name"].ToString());
-                Console.WriteLine("현재 버전: {0}", filev);
-                Console.WriteLine("최신 버전: {0}", repov);
-                Console.WriteLine(jarray[0]["assets"].Where(x => x["browser_download_url"].ToString().EndsWith(".zip")).First()["browser_download_url"].ToString());
-                Thread.Sleep(1000);
-                if (repov > filev)
+                Console.WriteLine("현재 버전: {0}\n", filev);
+
+                Console.WriteLine("0: 최신 버전 (프리 릴리즈 제외)");
+                for (int i = 0; i < jarray.Count; i++)
                 {
-                    JToken item = jarray[0]["assets"].Where(x => x["browser_download_url"].ToString().EndsWith(".zip")).First();
-                    WebClient wc = new WebClient();
-                    if (File.Exists(Path.Combine(rootDir, "Update.zip")))
-                        File.Delete(Path.Combine(rootDir, "Update.zip"));
-                    wc.DownloadFile(new Uri(item["browser_download_url"].ToString()), Path.Combine(rootDir, "Update.zip"));
-                    wc.DownloadProgressChanged += (object sender, DownloadProgressChangedEventArgs e) =>
-                    {
-                        Console.WriteLine(e.ProgressPercentage);
-                    };
+                    Console.Write("{0}: {1}", i + 1, jarray[i]["tag_name"].ToString());
+                    if (bool.Parse(jarray[i]["prerelease"].ToString()) == true)
+                        Console.Write(" (프리 릴리즈)");
+                    Console.Write("\n");
                 }
+                Console.WriteLine();
+                Console.Write("선택: ");
+                int sel = int.Parse(Console.ReadLine());
+
+                if (sel == 0)
+                    sel = jarray.IndexOf(jarray.Where(x => !bool.Parse(x["prerelease"].ToString())).First()) + 1;
+
+                JToken item;
+                if (jarray[sel - 1]["assets"].Any(x => x["name"].ToString().ToLower() == "debug.zip"))
+                    item = jarray[sel - 1]["assets"].Where(x => x["name"].ToString().ToLower() == "debug.zip").First();
                 else
                 {
-                    Process.Start(Path.Combine(rootDir, "HitomiViewer.exe"));
-                    Environment.Exit(0);
+                    IEnumerable<JToken> js = jarray[sel - 1]["assets"].Where(x => x["name"].ToString().EndsWith(".zip")).OrderBy(x => x["created_at"]);
+                    item = js.Last();
                 }
+
+                for (int i = 0; i < (jarray[sel - 1]["assets"] as JArray).Count; i++)
+                {
+                    Console.WriteLine(jarray[sel - 1]["assets"][i]["name"]);
+                }
+                Console.WriteLine();
+
+                Console.WriteLine(item["browser_download_url"].ToString());
+                Thread.Sleep(1000);
+                WebClient wc = new WebClient();
+                if (File.Exists(Path.Combine(rootDir, "Update.zip")))
+                    File.Delete(Path.Combine(rootDir, "Update.zip"));
+                wc.DownloadFile(new Uri(item["browser_download_url"].ToString()), Path.Combine(rootDir, "Update.zip"));
+                wc.DownloadProgressChanged += (object sender, DownloadProgressChangedEventArgs e) =>
+                {
+                    Console.WriteLine(e.ProgressPercentage);
+                };
                 file = "Update.zip";
             }
             else file = args[0];
@@ -84,6 +101,7 @@ namespace Updater
                     catch (Exception ex) { Console.WriteLine(ex.Message); }
                 }
             }
+            Thread.Sleep(1000);
             File.Delete(Path.Combine(rootDir, file));
             Process.Start(Path.Combine(rootDir, "HitomiViewer.exe"));
             Environment.Exit(0);
@@ -96,15 +114,40 @@ namespace Updater
             {
                 string s = await Load("https://api.github.com/repos/rmagur1203/HitomiViewer/releases");
                 JArray jarray = JArray.Parse(s);
-                Version repov = Version.Parse(jarray[0]["tag_name"].ToString());
-                Console.WriteLine("최신 버전: {0}", repov);
-                Console.WriteLine(jarray[0]["assets"].Where(x => x["browser_download_url"].ToString().EndsWith(".zip")).First()["browser_download_url"].ToString());
+
+                Console.WriteLine("0: 최신 버전 (프리 릴리즈 제외)");
+                for (int i = 0; i < jarray.Count; i++)
+                {
+                    Console.Write("{0}: {1}", i + 1, jarray[i]["tag_name"].ToString());
+                    if (bool.Parse(jarray[i]["prerelease"].ToString()) == true)
+                        Console.Write(" (프리 릴리즈)");
+                    Console.Write("\n");
+                }
+                Console.WriteLine();
+                Console.Write("선택: ");
+                int sel = int.Parse(Console.ReadLine());
+
+                if (sel == 0)
+                    sel = jarray.IndexOf(jarray.Where(x => !bool.Parse(x["prerelease"].ToString())).First()) + 1;
+
+                JToken item;
+                if (jarray[sel - 1]["assets"].Any(x => x["name"].ToString().ToLower() == "debug.zip"))
+                    item = jarray[sel - 1]["assets"].Where(x => x["name"].ToString().ToLower() == "debug.zip").First();
+                else
+                {
+                    IEnumerable<JToken> js = jarray[sel - 1]["assets"].Where(x => x["name"].ToString().EndsWith(".zip")).OrderBy(x => x["created_at"]);
+                    item = js.Last();
+                }
+                Console.WriteLine(item["browser_download_url"].ToString());
                 Thread.Sleep(1000);
-                JToken item = jarray[0]["assets"].Where(x => x["browser_download_url"].ToString().EndsWith(".zip")).First();
                 WebClient wc = new WebClient();
                 if (File.Exists(Path.Combine(rootDir, "Update.zip")))
                     File.Delete(Path.Combine(rootDir, "Update.zip"));
                 wc.DownloadFile(new Uri(item["browser_download_url"].ToString()), Path.Combine(rootDir, "Update.zip"));
+                wc.DownloadProgressChanged += (object sender, DownloadProgressChangedEventArgs e) =>
+                {
+                    Console.WriteLine(e.ProgressPercentage);
+                };
                 file = "Update.zip";
             }
             else file = args[0];

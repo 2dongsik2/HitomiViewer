@@ -264,7 +264,10 @@ namespace HitomiViewer
             Uri uriResult;
             bool result = Uri.TryCreate(link, UriKind.Absolute, out uriResult)
                 && ((uriResult.Scheme == Uri.UriSchemeHttp) || (uriResult.Scheme == Uri.UriSchemeHttps));
-            image.Source = new BitmapImage(new Uri("/Resources/loading2.png", UriKind.Relative));
+            //image.Source = new BitmapImage(new Uri("/Resources/loading.gif", UriKind.RelativeOrAbsolute));
+            BitmapImage LoadingImage = new BitmapImage(new Uri("/Resources/loading2.gif", UriKind.RelativeOrAbsolute));
+            LoadingImage.Freeze();
+            WpfAnimatedGif.ImageBehavior.SetAnimatedSource(image, LoadingImage);
             int copypage = page;
             if (hitomi.images == null || hitomi.images.Length < hitomi.page)
                 hitomi.images = new BitmapImage[hitomi.page];
@@ -280,8 +283,12 @@ namespace HitomiViewer
                     hitomi.images[copypage] = image;
             }
             if (copypage == page && hitomi.images.Length == hitomi.page)
-                image.Source = hitomi.images[page];
-            ClearMemory();
+            {
+                //image.Source = hitomi.images[page];
+                //if (link.EndsWith(".gif"))
+                WpfAnimatedGif.ImageBehavior.SetAnimatedSource(image, hitomi.images[page]);
+                ClearMemory();
+            }
             /*
             if (result)
             {

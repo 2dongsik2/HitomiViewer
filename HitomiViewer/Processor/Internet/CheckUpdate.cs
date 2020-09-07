@@ -1,4 +1,5 @@
-﻿using HitomiViewer.Properties;
+﻿using ExtensionMethods;
+using HitomiViewer.Properties;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -26,13 +27,14 @@ namespace HitomiViewer.Scripts
             github.owner = "rmagur1203";
             github.repos = "HitomiViewer";
             JArray jarray = await github.Releases();
+            JToken release = jarray.Where(x => !(x.BoolValue("prerelease") ?? false)).First();
             Version thisv = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-            Version repov = Version.Parse(jarray[0]["tag_name"].ToString());
+            Version repov = Version.Parse(release["tag_name"].ToString());
             if (repov > thisv)
             {
                 MessageBoxResult result = MessageBox.Show("업데이트가 필요합니다.", "", MessageBoxButton.OKCancel);
                 if (result == MessageBoxResult.Cancel) return;
-                JToken item = jarray[0]["assets"].Where(x => x["browser_download_url"].ToString().EndsWith(".zip")).First();
+                JToken item = release["assets"].Where(x => x["browser_download_url"].ToString().EndsWith(".zip")).First();
                 WebClient wc = new WebClient();
                 if (File.Exists(Path.Combine(MainWindow.rootDir, "Update.zip")))
                     File.Delete(Path.Combine(MainWindow.rootDir, "Update.zip"));
@@ -54,14 +56,14 @@ namespace HitomiViewer.Scripts
             }
             string s = await Load("https://api.github.com/repos/rmagur1203/HitomiViewer/releases");
             JArray jarray = JArray.Parse(s);
-            JToken latest = jarray.Where(x => x["assets"].Select(y => y["browser_download_url"].ToString().EndsWith("Updater.exe")).Contains(true)).First();
+            JToken latest = jarray.Where(x => x["assets"].Any(y => y["name"].ToString() == "Updater.exe")).First();
             Version latestv = Version.Parse(latest["tag_name"].ToString());
             string download = latest["assets"].Where(x => x["name"].ToString() == "Updater.exe").First()["browser_download_url"].ToString();
             if (latestv > version)
             {
                 File.Delete(Path.Combine(MainWindow.rootDir, "Updater.exe"));
                 WebClient wc = new WebClient();
-                wc.DownloadFile(download, Path.Combine(MainWindow.rootDir, "Updater.exe"));
+                await wc.DownloadFileTaskAsync(download, Path.Combine(MainWindow.rootDir, "Updater.exe"));
                 Console.WriteLine("Updater has been updated!");
             }
             Console.WriteLine(download);
@@ -70,32 +72,8 @@ namespace HitomiViewer.Scripts
         {
             if (!File.Exists(Path.Combine(Global.rootDir, "WebPTest.exe")))
                 File.WriteAllBytes(Path.Combine(Global.rootDir, "WebPTest.exe"), Resources.WebPTest);
-            Version version = new Version(0, 0, 0, 0);
-            if (File.Exists(Path.Combine(MainWindow.rootDir, "Updater.exe")))
-            {
-                FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(Path.Combine(MainWindow.rootDir, "Updater.exe"));
-                version = Version.Parse(versionInfo.FileVersion);
-            }
-            string s = await Load("https://api.github.com/repos/rmagur1203/HitomiViewer/releases");
-            JArray jarray = JArray.Parse(s);
-            JToken latest = jarray.Where(x => x["assets"].Select(y => y["browser_download_url"].ToString().EndsWith("Updater.exe")).Contains(true)).First();
-            Version latestv = Version.Parse(latest["tag_name"].ToString());
-            string download = latest["assets"].Where(x => x["name"].ToString() == "Updater.exe").First()["browser_download_url"].ToString();
-            if (latestv > version)
-            {
-                File.Delete(Path.Combine(MainWindow.rootDir, "Updater.exe"));
-                WebClient wc = new WebClient();
-                wc.DownloadFileAsync(new Uri(download), Path.Combine(MainWindow.rootDir, "Updater.exe"));
-                wc.DownloadFileCompleted += (object sender, AsyncCompletedEventArgs e) =>
-                {
-                    Console.WriteLine("Updater has been updated!");
-                    _ = Main();
-                };
-            }
-            else
-            {
-                _ = Main();
-            }
+            await Updater();
+            await Main();
         }
         public static async Task<string> Load(string Url)
         {

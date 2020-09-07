@@ -111,6 +111,10 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
+    <Reference Include="WpfAnimatedGif, Version=2.0.0.0, Culture=neutral, PublicKeyToken=9e7cd3b544a090dc, processorArchitecture=MSIL">
+      <HintPath>..\packages\WpfAnimatedGif.2.0.0\lib\net40\WpfAnimatedGif.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="WpfControls">
       <HintPath>C:\Users\rmagu\Downloads\wpfautocomplete\WpfControls.CS\bin\Debug\WpfControls.dll</HintPath>
       <Private>False</Private>
@@ -293,12 +297,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\loading.gif" />
+    <Resource Include="Resources\loading.gif" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\loading2.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <Resource Include="Resources\loading2.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Updater\Updater.csproj">
@@ -354,6 +356,8 @@
     <Resource Include="Resources\pixiv.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\loading2.gif" />
+    <EmbeddedResource Include="Libs\WpfAnimatedGif.dll" />
     <Content Include="WpfControls.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
