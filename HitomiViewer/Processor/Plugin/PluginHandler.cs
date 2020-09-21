@@ -152,6 +152,21 @@ namespace HitomiViewer.Plugin
                 }
             }
         }
+        public static void FireOnHitomiChangeColor(HitomiPanel panel)
+        {
+            foreach (var plugin in loadedPlugins)
+            {
+                try
+                {
+                    plugin.OnHitomiChangeColor(panel);
+                }
+                catch (Exception e)
+                {
+                    Type type = plugin.GetType();
+                    Console.WriteLine("Error in OnHitomiChangeColor event for " + type.FullName + " (" + type.Assembly.FullName + "), Exception: " + e);
+                }
+            }
+        }
 
     }
 }

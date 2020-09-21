@@ -13,6 +13,7 @@ namespace HitomiViewer.Plugin
         void OnDelayInit(MainWindow main);
         void OnHitomiPanelInit(HitomiPanel panel);
         void OnHitomiPanelDelayInit(HitomiPanel panel);
+        void OnHitomiChangeColor(HitomiPanel panel);
     }
 
     public abstract class Plugin : IPlugin
@@ -21,5 +22,6 @@ namespace HitomiViewer.Plugin
         public virtual void OnDelayInit(MainWindow main) { }
         public virtual void OnHitomiPanelInit(HitomiPanel panel) { }
         public virtual void OnHitomiPanelDelayInit(HitomiPanel panel) { }
+        public virtual void OnHitomiChangeColor(HitomiPanel panel) { }
     }
 }

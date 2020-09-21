@@ -285,7 +285,7 @@ namespace HitomiViewer
                 menuItem.Background = new SolidColorBrush(Global.MenuItmclr);
                 menuItem.Foreground = new SolidColorBrush(Global.fontscolor);
                 foreach (MenuItem item in menuItem.Items)
-                    item.Foreground = new SolidColorBrush(Global.fontscolor);
+                    item.Foreground = new SolidColorBrush(Colors.Black);
             }
             foreach (Reader reader in Readers)
                 reader.ChangeMode();
