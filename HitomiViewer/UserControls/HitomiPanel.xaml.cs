@@ -1,6 +1,7 @@
 ﻿using ExtensionMethods;
 using HitomiViewer.Api;
 using HitomiViewer.Encryption;
+using HitomiViewer.Plugin;
 using HitomiViewer.Processor;
 using HitomiViewer.Processor.Loaders;
 using HitomiViewer.Scripts;
@@ -53,8 +54,9 @@ namespace HitomiViewer.UserControls
             this.thumb = h.thumb;
             this.MainWindow = sender;
             InitializeComponent();
+            PluginHandler.FireOnHitomiPanelInit(this);
             Init();
-            this.nameLabel.Content = h.name;
+            PluginHandler.FireOnHitomiPanelDelayInit(this);
             InitEvent();
         }
 
@@ -89,12 +91,6 @@ namespace HitomiViewer.UserControls
             }
             thumbNail.Source = h.thumb;
             thumbBrush.ImageSource = h.thumb;
-            /*
-            if (h.ugoiraImage == null)
-                thumbNail.ToolTip = GetToolTip(panel.Height);
-            else
-                thumbNail.ClearValue(Image.ToolTipProperty);
-            */
 
             authorsPanel.Children.Clear();
             authorsPanel.Children.Add(new Label { Content = "작가 :" });
@@ -250,7 +246,7 @@ namespace HitomiViewer.UserControls
                     thumbNail.ToolTip = GetToolTip(panel.Height);
             }
             nameLabel.Width = panel.Width - border.Width;
-            //nameLabel.Content = h.name;
+            nameLabel.Content = h.name;
             ContextSetup();
             ChangeColor(this);
         }

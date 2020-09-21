@@ -34,7 +34,7 @@ namespace WebPWrapper
     public sealed class WebP : IDisposable
     {
         private const int WEBP_MAX_DIMENSION = 16383;
-        #region | Public Decode Functions |
+#region | Public Decode Functions |
         /// <summary>Read a WebP file</summary>
         /// <param name="pathFileName">WebP file to load</param>
         /// <returns>Bitmap with the WebP image</returns>
@@ -330,9 +330,9 @@ namespace WebPWrapper
                     pinnedWebP.Free();
             }
         }
-        #endregion
+#endregion
 
-        #region | Public Encode Functions |
+#region | Public Encode Functions |
         /// <summary>Save bitmap to file in WebP format</summary>
         /// <param name="bmp">Bitmap with the WebP image</param>
         /// <param name="pathFileName">The file to write</param>
@@ -551,9 +551,9 @@ namespace WebPWrapper
 
             return AdvancedEncode(bmp, config, false);
         }
-        #endregion
+#endregion
 
-        #region | Another Public Functions |
+#region | Another Public Functions |
         /// <summary>Get the libwebp version</summary>
         /// <returns>Version of library</returns>
         public string GetVersion()
@@ -712,9 +712,9 @@ namespace WebPWrapper
                     pinnedResult.Free();
             }
         }
-        #endregion
+#endregion
 
-        #region | Private Methods |
+#region | Private Methods |
         /// <summary>Encoding image  using Advanced encoding API</summary>
         /// <param name="bmp">Bitmap with the image</param>
         /// <param name="config">Config for encode</param>
@@ -883,18 +883,18 @@ namespace WebPWrapper
         }
 
         private delegate int MyWriterDelegate([InAttribute()] IntPtr data, UIntPtr data_size, ref WebPPicture picture);
-        #endregion
+#endregion
 
-        #region | Destruction |
+#region | Destruction |
         /// <summary>Free memory</summary>
         public void Dispose()
         {
             GC.SuppressFinalize(this);
         }
-        #endregion
+#endregion
     }
 
-    #region | Import libwebp functions |
+#region | Import libwebp functions |
     [SuppressUnmanagedCodeSecurityAttribute]
     internal sealed partial class UnsafeNativeMethods
     {
@@ -1423,9 +1423,9 @@ namespace WebPWrapper
         [DllImport("libwebp_x64.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "WebPPictureDistortion")]
         private static extern int WebPPictureDistortion_x64(ref WebPPicture srcPicture, ref WebPPicture refPicture, int metric_type, IntPtr pResult);
     }
-    #endregion
+#endregion
 
-    #region | Predefined |
+#region | Predefined |
     /// <summary>Enumerate some predefined settings for WebPConfig, depending on the type of source picture. These presets are used when calling WebPConfigPreset().</summary>
     public enum WebPPreset
     {
@@ -1559,9 +1559,9 @@ namespace WebPWrapper
         STATE_DONE,
         STATE_ERROR
     };
-    #endregion
+#endregion
 
-    #region | libwebp structs |
+#region | libwebp structs |
     /// <summary>Features gathered from the bitstream</summary>
     [StructLayoutAttribute(LayoutKind.Sequential)]
     public struct WebPBitstreamFeatures
@@ -1947,5 +1947,5 @@ namespace WebPWrapper
         /// <summary>padding for later use.</summary>
         private readonly UInt32 pad5;
     };
-    #endregion
+#endregion
 }

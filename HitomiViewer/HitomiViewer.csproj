@@ -136,6 +136,8 @@
     <Compile Include="Processor\Hiyobi\InternetP.cs" />
     <Compile Include="Processor\Json\InternetP.cs" />
     <Compile Include="Processor\Api\Pixiv.cs" />
+    <Compile Include="Processor\Plugin\Plugin.cs" />
+    <Compile Include="Processor\Plugin\PluginHandler.cs" />
     <Compile Include="Processor\Search\Loaders.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

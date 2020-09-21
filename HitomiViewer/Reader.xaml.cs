@@ -261,9 +261,6 @@ namespace HitomiViewer
 
         private async void SetImage(string link)
         {
-            Uri uriResult;
-            bool result = Uri.TryCreate(link, UriKind.Absolute, out uriResult)
-                && ((uriResult.Scheme == Uri.UriSchemeHttp) || (uriResult.Scheme == Uri.UriSchemeHttps));
             BitmapImage LoadingImage = new BitmapImage(new Uri("/Resources/loading2.gif", UriKind.RelativeOrAbsolute));
             LoadingImage.Freeze();
             image.Source = LoadingImage;

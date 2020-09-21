@@ -6,9 +6,9 @@
              xmlns:local="clr-namespace:HitomiViewer" xmlns:style="clr-namespace:HitomiViewer.UserControls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" Loaded="HitomiPanel_Loaded">
-    <DockPanel x:Name="panel" HorizontalAlignment="Stretch" Height="100" Margin="5" Background="White">
+    <DockPanel x:Name="panel" HorizontalAlignment="Stretch" Height="100" Margin="5" Background="White" x:FieldModifier="public">
         <DockPanel.ContextMenu>
-            <ContextMenu>
+            <ContextMenu x:Name="DockContextMenu" x:FieldModifier="public">
                 <MenuItem x:Name="Favorite" Header="즐겨찾기" Click="Favorite_Click" />
                 <MenuItem x:Name="FavoriteRemove" Header="즐겨찾기 삭제" Click="FavoriteRemove_Click" />
                 <MenuItem x:Name="Folder_Remove" Header="삭제" Click="Folder_Remove_Click" />
@@ -25,29 +25,29 @@
             </ContextMenu>
         </DockPanel.ContextMenu>
         <Border x:Name="border" Background="LightGray" DockPanel.Dock="Left">
-            <Image x:Name="thumbNail" VerticalAlignment="Stretch" Width="100" MouseEnter="thumbNail_MouseEnter">
+            <Image x:Name="thumbNail" VerticalAlignment="Stretch" Width="100" MouseEnter="thumbNail_MouseEnter" x:FieldModifier="public">
                 <Image.OpacityMask>
-                    <ImageBrush x:Name="thumbBrush"/>
+                    <ImageBrush x:Name="thumbBrush" x:FieldModifier="public"/>
                 </Image.OpacityMask>
             </Image>
         </Border>
-        <DockPanel x:Name="InfoPanel" HorizontalAlignment="Stretch" DockPanel.Dock="Right">
-            <Label x:Name="nameLabel" HorizontalAlignment="Stretch" DockPanel.Dock="Top" Foreground="Black" Content="NAMELABEL"/>
-            <StackPanel x:Name="bottomPanel" DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Stretch" FlowDirection="RightToLeft" Background="White">
-                <Label x:Name="sizeLabel" VerticalAlignment="Bottom" Foreground="Black" Content="SIZELABEL"/>
-                <Image x:Name="sizeImage" Width="25" Height="25" VerticalAlignment="Bottom" Source="/Resources/download-button.png"/>
-                <Label x:Name="pageLabel" VerticalAlignment="Bottom" Foreground="Black" Content="PAGELABEL"/>
-                <Image x:Name="pageImage" Width="25" Height="25" VerticalAlignment="Bottom" Source="/Resources/imageicon.png"/>
-                <Label x:Name="sizeperpageLabel" VerticalAlignment="Bottom" Foreground="Black" Content="SIZEPERPAGELABEL"/>
-                <Image x:Name="sizeperpageImage" Width="25" Height="25" VerticalAlignment="Bottom" Source="/Resources/imageicon.png"/>
+        <DockPanel x:Name="InfoPanel" HorizontalAlignment="Stretch" DockPanel.Dock="Right" x:FieldModifier="public">
+            <Label x:Name="nameLabel" HorizontalAlignment="Stretch" DockPanel.Dock="Top" Foreground="Black" Content="NAMELABEL" x:FieldModifier="public"/>
+            <StackPanel x:Name="bottomPanel" DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Stretch" FlowDirection="RightToLeft" Background="White" x:FieldModifier="public">
+                <Label x:Name="sizeLabel" VerticalAlignment="Bottom" Foreground="Black" Content="SIZELABEL" x:FieldModifier="public"/>
+                <Image x:Name="sizeImage" Width="25" Height="25" VerticalAlignment="Bottom" Source="/Resources/download-button.png" x:FieldModifier="public"/>
+                <Label x:Name="pageLabel" VerticalAlignment="Bottom" Foreground="Black" Content="PAGELABEL" x:FieldModifier="public"/>
+                <Image x:Name="pageImage" Width="25" Height="25" VerticalAlignment="Bottom" Source="/Resources/imageicon.png" x:FieldModifier="public"/>
+                <Label x:Name="sizeperpageLabel" VerticalAlignment="Bottom" Foreground="Black" Content="SIZEPERPAGELABEL" x:FieldModifier="public"/>
+                <Image x:Name="sizeperpageImage" Width="25" Height="25" VerticalAlignment="Bottom" Source="/Resources/imageicon.png" x:FieldModifier="public"/>
             </StackPanel>
-            <StackPanel x:Name="authorsStackPanel" DockPanel.Dock="Top" Orientation="Vertical" Visibility="Collapsed">
-                <DockPanel x:Name="authorsPanel">
+            <StackPanel x:Name="authorsStackPanel" DockPanel.Dock="Top" Orientation="Vertical" Visibility="Collapsed" x:FieldModifier="public">
+                <DockPanel x:Name="authorsPanel" x:FieldModifier="public">
                     <Label>작가 :</Label>
                 </DockPanel>
             </StackPanel>
-            <ScrollViewer x:Name="tagScroll" PreviewMouseWheel="tagScroll_MouseWheel">
-                <WrapPanel x:Name="tagPanel" DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Stretch" FlowDirection="LeftToRight">
+            <ScrollViewer x:Name="tagScroll" PreviewMouseWheel="tagScroll_MouseWheel" x:FieldModifier="public">
+                <WrapPanel x:Name="tagPanel" DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Stretch" FlowDirection="LeftToRight" x:FieldModifier="public">
 
                 </WrapPanel>
             </ScrollViewer>
