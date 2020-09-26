@@ -676,18 +676,16 @@ namespace HitomiViewer.UserControls
         }
         private async void authorLabel_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            Label lbsender = sender as Label;
+            string author = lbsender.Content.ToString().Replace(" ", "_");
             if (h.type == Hitomi.Type.Pixiv || h.type == Hitomi.Type.PixivUgoira)
             {
-                Label lbsender = sender as Label;
-                string author = lbsender.Content.ToString();
                 MainWindow.PixivUser_Search_Text.Text = author;
                 MainWindow.PixivUser_Search_Button_Click(this, null);
             }
             else if (h.type == Hitomi.Type.Hiyobi || h.type == Hitomi.Type.Hitomi)
             {
                 bool result = await new InternetP(index: int.Parse(h.id)).isHiyobi();
-                Label lbsender = sender as Label;
-                string author = lbsender.Content.ToString();
                 MainWindow.MainPanel.Children.Clear();
                 if (result)
                 {

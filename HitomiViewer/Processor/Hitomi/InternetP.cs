@@ -144,7 +144,7 @@ namespace HitomiViewer.Processor
             url = (url ?? this.url ?? "https://ltn.hitomi.la/index-all.nozomi").https();
             if (url.Last() == '/') url = url.Remove(url.Length - 1);
             HttpClient client = new HttpClient();
-            client.DefaultRequestHeaders.Range = new System.Net.Http.Headers.RangeHeaderValue(index * 4, (index + count) * 4 - 1);
+            client.DefaultRequestHeaders.Range = new System.Net.Http.Headers.RangeHeaderValue(index * 4, (index + Count) * 4 - 1);
             var response = await client.GetAsync(url);
             var pageContents = await response.Content.ReadAsByteArrayAsync();
             return pageContents;
@@ -154,7 +154,7 @@ namespace HitomiViewer.Processor
             url = url ?? this.url ?? "https://ltn.hitomi.la/index-all.nozomi";
             if (url.Last() == '/') url = url.Remove(url.Length - 1);
             HttpClient client = new HttpClient();
-            client.DefaultRequestHeaders.Range = new System.Net.Http.Headers.RangeHeaderValue(index * 4, (index + count) * 4 - 1);
+            client.DefaultRequestHeaders.Range = new System.Net.Http.Headers.RangeHeaderValue(index * 4, (index + Count) * 4 - 1);
             var response = await client.GetAsync(url);
             var MaxRange = response.Content.Headers.ContentRange.Length;
             var pageContents = await response.Content.ReadAsByteArrayAsync();
@@ -163,7 +163,7 @@ namespace HitomiViewer.Processor
         public async Task<byte[]> LoadNozomiTag(string type, string tag, bool range = true, int? start = null, int? end = null)
         {
             start = start ?? index * 4;
-            end = end ?? (index + count) * 4 - 1;
+            end = end ?? (index + Count) * 4 - 1;
             tag = tag.Replace("_", "%20");
             string url;
             if (type == "female" || type == "male")

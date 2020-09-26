@@ -22,16 +22,8 @@ namespace HitomiViewer.Processor
         public string data { get; set; }
         public List<string> keyword { get; set; }
         public int index { get; set; }
-        public int count { get; set; }
-        /// <summary>
-        /// 0. Hitomi => class Hitomi
-        /// 1. int => index
-        /// 2. int => count
-        /// </summary>
+        public int Count { get; set; }
         public Action<Hitomi, int, int> update = null;
-        /// <summary>
-        /// int => count
-        /// </summary>
         public Action<int> start = null;
         public Action end = null;
 

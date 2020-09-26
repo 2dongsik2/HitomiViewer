@@ -246,7 +246,7 @@ namespace HitomiViewer.Processor.Loaders
         {
             InternetP parser = new InternetP();
             parser.index = (index - 1) * count;
-            parser.count = count;
+            parser.Count = count;
             parser.url = "https://ltn.hitomi.la/index-all.nozomi";
             Tuple<byte[], long?> result = await parser.LoadNozomiAndRangeMax();
             int[] ids = parser.ByteArrayToIntArray(result.Item1);
@@ -272,7 +272,7 @@ namespace HitomiViewer.Processor.Loaders
         {
             InternetP parser = new InternetP();
             parser.index = (index - 1) * count;
-            parser.count = count;
+            parser.Count = count;
             parser.url = "https://ltn.hitomi.la/index-all.nozomi";
             int[] ids = parser.ByteArrayToIntArray(await parser.LoadNozomi());
             start(ids.Count());
