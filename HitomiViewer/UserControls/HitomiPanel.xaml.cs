@@ -264,6 +264,7 @@ namespace HitomiViewer.UserControls
             Hiyobi_Download.Visibility = Visibility.Collapsed;
             Hitomi_Download.Visibility = Visibility.Collapsed;
             Pixiv_Download.Visibility = Visibility.Collapsed;
+            AtHitomi.Visibility = Visibility.Collapsed;
             Encrypt.Visibility = Visibility.Collapsed;
             Decrypt.Visibility = Visibility.Collapsed;
             CopyNumber.Visibility = Visibility.Visible;
@@ -279,6 +280,7 @@ namespace HitomiViewer.UserControls
                     break;
                 case Hitomi.Type.Hiyobi:
                     Hiyobi_Download.Visibility = Visibility.Visible;
+                    AtHitomi.Visibility = Visibility.Visible;
                     break;
                 case Hitomi.Type.Hitomi:
                     Hitomi_Download.Visibility = Visibility.Visible;
@@ -824,6 +826,16 @@ namespace HitomiViewer.UserControls
             });
             Thread.Sleep(h.ugoiraImage.delays[h.ugoiraImage.index++]);
             Ugoira(dispatcher);
+        }
+
+        private async void AtHitomi_Click(object sender, RoutedEventArgs e)
+        {
+            //HiyobiLoader hiyobi = new HiyobiLoader();
+            //hiyobi.Default();
+            //await hiyobi.Parser(hiyobiList.ToArray());
+            HitomiLoader hitomi = new HitomiLoader();
+            hitomi.Default();
+            await hitomi.Parser(new int[] { int.Parse(h.id) });
         }
     }
 }

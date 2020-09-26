@@ -15,6 +15,7 @@
                 <MenuItem x:Name="Folder_Open" Header="열기" Click="Folder_Open_Click" />
                 <MenuItem x:Name="CopyNumber" Header="번호 복사" Click="CopyNumber_Click" />
                 <MenuItem x:Name="Folder_Hiyobi_Search" Header="검색" Click="Folder_Hiyobi_Search_Click" />
+                <MenuItem x:Name="AtHitomi" Header="히토미에서 검색" Click="AtHitomi_Click" />
                 <MenuItem x:Name="Hiyobi_Download" Header="다운로드 (히요비)" Click="Hiyobi_Download_Click" />
                 <MenuItem x:Name="Hitomi_Download" Header="다운로드 (히토미)" Click="Hitomi_Download_Click" />
                 <MenuItem x:Name="Pixiv_Download" Header="다운로드 (픽시브)" Click="Pixiv_Download_Click" />
