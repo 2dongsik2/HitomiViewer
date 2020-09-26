@@ -19,13 +19,60 @@ namespace HitomiViewer.Processor
 {
     class ImageProcessor
     {
+        public static BitmapImage Process(string url)
+        {
+            if (url.isUrl())
+            {
+                if (url.EndsWith(".webp"))
+                    return LoadWebWebPImage(url);
+                else
+                    return LoadWebImage(url);
+            }
+            if (Global.FileEn)
+            {
+                try
+                {
+                    byte[] org = File.ReadAllBytes(url);
+                    byte[] dec = FileDecrypt.Default(org);
+                    using (var ms = new MemoryStream(dec))
+                    {
+                        var image = new BitmapImage();
+                        image.BeginInit();
+                        image.CacheOption = BitmapCacheOption.OnLoad; // here
+                        image.StreamSource = ms;
+                        image.EndInit();
+                        return image;
+                    }
+                }
+                catch
+                {
+                    return ProcessFile(url);
+                }
+            }
+            return ProcessFile(url);
+        }
+        public static BitmapImage ProcessFile(string url)
+        {
+            try
+            {
+                return LoadMemory(url);
+            }
+            catch (FileNotFoundException)
+            {
+                return FromResource("NoImage.jpg");
+            }
+            catch (NotSupportedException)
+            {
+                return FromResource("ErrEncrypted.jpg");
+            }
+        }
         public static BitmapImage ProcessEncrypt(string url)
         {
             if (url.isUrl())
             {
                 if (url.EndsWith(".webp"))
                 {
-                    return LoadWebPImage(url);
+                    return LoadWebWebPImage(url);
                 }
                 else
                 {
@@ -84,7 +131,7 @@ namespace HitomiViewer.Processor
             if (url.isUrl())
             {
                 if (url.EndsWith(".webp"))
-                    return await LoadWebPImageAsync(url);
+                    return await LoadWebWebPImageAsync(url);
                 else
                     return await LoadWebImageAsync(url);
             }
@@ -136,6 +183,7 @@ namespace HitomiViewer.Processor
                 }
             }
         }
+
         public static BitmapImage LoadMemory(string url)
         {
             var bitmap = new BitmapImage();
@@ -190,7 +238,7 @@ namespace HitomiViewer.Processor
                 return null;
             }
         }
-        public static BitmapImage LoadWebPImage(string url)
+        public static BitmapImage LoadWebWebPImage(string url)
         {
             try
             {
@@ -216,7 +264,7 @@ namespace HitomiViewer.Processor
                 return null;
             }
         }
-        public static async Task<BitmapImage> LoadWebPImageAsync(string url)
+        public static async Task<BitmapImage> LoadWebWebPImageAsync(string url)
         {
             try
             {
@@ -242,15 +290,44 @@ namespace HitomiViewer.Processor
                 return null;
             }
         }
-        public static BitmapImage FromResource(string psResourceName)
+
+        public static BitmapImage FromIncludedResource(string psResourceName)
         {
             Uri oUri = new Uri($"pack://siteoforigin:,,,/Resources/{psResourceName}");
             return new BitmapImage(oUri);
         }
-        public static BitmapImage FromResourceWithName(string psAssemblyName, string psResourceName)
+        public static BitmapImage FromIncludedResourceWithName(string psAssemblyName, string psResourceName)
         {
             Uri oUri = new Uri("pack://application:,,,/" + psAssemblyName + ";component/" + psResourceName, UriKind.RelativeOrAbsolute);
             return new BitmapImage(oUri);
+        }
+        public static BitmapImage FromResource(string psResourceName)
+        {
+            Uri oUri = new Uri($"/Resources/{psResourceName}", UriKind.RelativeOrAbsolute);
+            return new BitmapImage(oUri);
+        }
+
+        public static BitmapImage WebPBytes2Image(byte[] data)
+        {
+            using (WebP webP = new WebP())
+            {
+                try
+                {
+                    Bitmap bitmap = webP.Decode(data);
+                    MemoryStream ms = new MemoryStream();
+                    bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
+                    var bi = new BitmapImage();
+                    bi.BeginInit();
+                    bi.StreamSource = ms;
+                    bi.EndInit();
+                    ms.Dispose();
+                    return bi;
+                }
+                catch
+                {
+                    return null;
+                }
+            }
         }
         public static BitmapImage Bytes2Image(byte[] array)
         {

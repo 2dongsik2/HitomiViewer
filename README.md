@@ -19,6 +19,7 @@
 
 # Versions
 - [![release latest](https://img.shields.io/github/release/rmagur1203/HitomiViewer.svg?logo=github)](https://github.com/rmagur1203/HitomiViewer/releases/latest)
+- [![3.8.1.6](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/3.8.1.6/total?logo=github)](https://github.com/rmagur1203/HitomiViewer/releases/tag/3.8.1.6)
 - [![3.8.1.5](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/3.8.1.5/total?logo=github)](https://github.com/rmagur1203/HitomiViewer/releases/tag/3.8.1.5)
 - [![3.8.1.4](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/3.8.1.4/total?logo=github)](https://github.com/rmagur1203/HitomiViewer/releases/tag/3.8.1.4)
 - [![3.7.8](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/3.7.8/total?logo=github)](https://github.com/rmagur1203/HitomiViewer/releases/tag/3.7.8)
@@ -28,6 +29,8 @@
 - [![3.2](https://img.shields.io/github/downloads/rmagur1203/HitomiViewer/v3.2/total?logo=github)](https://github.com/rmagur1203/HitomiViewer/releases/tag/v3.2)
 
 ## Description
+- 3.8.1.6
+  - GIF 지원 추가
 - 3.8.1.5
   - 픽시브도 사용 가능하게 변경
   - 픽시브는 아직 실험단계

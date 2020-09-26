@@ -8,6 +8,7 @@
         xmlns:autocomplete="clr-namespace:HitomiViewer.AutoComplete"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
+        x:FieldModifier="public"
         Title="MainWindow" Height="450" Width="800" KeyDown="MainWindow_KeyDown">
     <Window.Resources>
         <autocomplete:SuggestionProvider x:Key="fsp" />
@@ -23,7 +24,7 @@
                     <ColumnDefinition Width="2*" />
                     <ColumnDefinition Width="1.5*" />
                 </Grid.ColumnDefinitions>
-                <Menu Grid.Column="0" x:Name="MainMenu" >
+                <Menu Grid.Column="0" x:Name="MainMenu" x:FieldModifier="public">
                     <Menu.Background>
                         <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
                             <GradientStop x:Name="MainMenuBackground" Offset="0" Color="#F0F0F0" />
@@ -31,12 +32,12 @@
                     </Menu.Background>
                     <MenuItem Header="설정" x:Name="SettingMenu" Background="White">
                         <MenuItem x:Name="OpenSetting" Header="설정창 열기" Click="OpenSetting_Click"></MenuItem>
-                        <MenuItem x:Name="DarkMode" Header="_야간모드" IsCheckable="True" IsChecked="False" Checked="MenuItem_Checked" Unchecked="DarkMode_Unchecked"/>
+                        <MenuItem x:Name="DarkMode" Header="_야간모드" IsCheckable="True" IsChecked="False" Checked="MenuItem_Checked" Unchecked="DarkMode_Unchecked" x:FieldModifier="public"/>
                         <MenuItem x:Name="MenuPage" Header="페이지">
                             <MenuItem Header="쪽수"/>
-                            <ComboBox x:Name="Page_Index"/>
+                            <ComboBox x:Name="Page_Index" x:FieldModifier="public"/>
                             <MenuItem Header="페이지당 아이템 개수"/>
-                            <ComboBox x:Name="Page_ItemCount">
+                            <ComboBox x:Name="Page_ItemCount" x:FieldModifier="public">
                                 <ComboBoxItem Content="10"/>
                                 <ComboBoxItem Content="15"/>
                                 <ComboBoxItem Content="20"/>
@@ -49,7 +50,7 @@
                             </ComboBox>
                         </MenuItem>
                         <MenuItem x:Name="MenuSearchMode" Header="_정렬모드">
-                            <ComboBox x:Name="SearchMode1" HorizontalAlignment="Left">
+                            <ComboBox x:Name="SearchMode1" HorizontalAlignment="Left" x:FieldModifier="public">
                                 <ComboBoxItem Content="이름순"/>
                                 <ComboBoxItem Content="생성날짜순"/>
                                 <ComboBoxItem Content="편집날짜순"/>
@@ -57,7 +58,7 @@
                                 <ComboBoxItem Content="페이지순"/>
                                 <ComboBoxItem Content="페이지당크기순"/>
                             </ComboBox>
-                            <ComboBox x:Name="SearchMode2" HorizontalAlignment="Left">
+                            <ComboBox x:Name="SearchMode2" HorizontalAlignment="Left" x:FieldModifier="public">
                                 <ComboBoxItem Content="기본"/>
                                 <ComboBoxItem Content="뒤집기"/>
                             </ComboBox>
@@ -81,21 +82,6 @@
                                     <Image Source="{StaticResource ResourceKey=HiyobiIcon}"/>
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <!--<MenuItem>
-                                <MenuItem.Icon>
-                                    <Image Source="{StaticResource ResourceKey=HiyobiIcon}"/>
-                                </MenuItem.Icon>
-                                <MenuItem.Header>
-                                    <Grid Width="200">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="8*" />
-                                            <ColumnDefinition Width="2*" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBox Grid.Column="0" Keyboard.KeyDown="Hiyobi_Search_Text_KeyDown" x:Name="Hiyobi_Search_Text"/>
-                                        <Button Grid.Column="1" Content="검색" Click="Hiyobi_Search_Button_Click" x:Name="Hiyobi_Search_Button"/>
-                                    </Grid>
-                                </MenuItem.Header>
-                            </MenuItem>-->
                             <MenuItem>
                                 <MenuItem.Icon>
                                     <Image Source="{StaticResource ResourceKey=HiyobiIcon}"/>
@@ -242,8 +228,8 @@
                     <Button Grid.Column="2" Content="파일 검색" Click="File_Search_Button_Click" x:Name="File_Search_Button"/>
                 </Grid>
             </Grid>
-            <ScrollViewer x:Name="MainScroll" VerticalScrollBarVisibility="Auto">
-                <StackPanel x:Name="MainPanel" Orientation="Vertical" CanVerticallyScroll="True">
+            <ScrollViewer x:Name="MainScroll" VerticalScrollBarVisibility="Auto" x:FieldModifier="public">
+                <StackPanel x:Name="MainPanel" Orientation="Vertical" CanVerticallyScroll="True" x:FieldModifier="public">
                 </StackPanel>
             </ScrollViewer>
         </DockPanel>

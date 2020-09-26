@@ -12,7 +12,7 @@ using System.Windows.Threading;
 
 namespace HitomiViewer
 {
-    class Global
+    public class Global
     {
         public static readonly string rootDir = AppDomain.CurrentDomain.BaseDirectory;
 

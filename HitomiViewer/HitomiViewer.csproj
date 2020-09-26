@@ -28,8 +28,8 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>1</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.0</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -67,7 +67,7 @@
     <ManifestKeyFile>HitomiViewer_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>false</GenerateManifests>
+    <GenerateManifests>true</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>false</SignManifests>
@@ -79,6 +79,8 @@
   <PropertyGroup>
     <TargetZone>LocalIntranet</TargetZone>
   </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup />
   <PropertyGroup />
   <PropertyGroup />
   <ItemGroup>
@@ -111,6 +113,10 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
+    <Reference Include="WpfAnimatedGif, Version=2.0.0.0, Culture=neutral, PublicKeyToken=9e7cd3b544a090dc, processorArchitecture=MSIL">
+      <HintPath>..\packages\WpfAnimatedGif.2.0.0\lib\net40\WpfAnimatedGif.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="WpfControls">
       <HintPath>C:\Users\rmagu\Downloads\wpfautocomplete\WpfControls.CS\bin\Debug\WpfControls.dll</HintPath>
       <Private>False</Private>
@@ -132,6 +138,8 @@
     <Compile Include="Processor\Hiyobi\InternetP.cs" />
     <Compile Include="Processor\Json\InternetP.cs" />
     <Compile Include="Processor\Api\Pixiv.cs" />
+    <Compile Include="Processor\Plugin\Plugin.cs" />
+    <Compile Include="Processor\Plugin\PluginHandler.cs" />
     <Compile Include="Processor\Search\Loaders.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -263,22 +271,22 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\imageicon.png">
+    <Resource Include="Resources\imageicon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
+    </Resource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\download-button.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <Resource Include="Resources\download-button.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\hitomi-184.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\download-arrow.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <Resource Include="Resources\download-arrow.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
@@ -293,12 +301,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\loading.gif" />
+    <Resource Include="Resources\loading.gif" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\loading2.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <Resource Include="Resources\loading2.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Updater\Updater.csproj">
@@ -311,14 +317,14 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\ErrEncrypted.jpg">
+    <Resource Include="Resources\ErrEncrypted.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
+    </Resource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\NoImage.jpg">
+    <Resource Include="Resources\NoImage.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
+    </Resource>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="favicon.ico" />
@@ -354,6 +360,8 @@
     <Resource Include="Resources\pixiv.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\loading2.gif" />
+    <EmbeddedResource Include="Libs\WpfAnimatedGif.dll" />
     <Content Include="WpfControls.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

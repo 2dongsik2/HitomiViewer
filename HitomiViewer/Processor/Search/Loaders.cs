@@ -106,7 +106,7 @@ namespace HitomiViewer.Processor.Loaders
                         int[] ids;
                         InternetP parser = new InternetP();
                         parser.index = index - 1;
-                        parser.count = search_count;
+                        parser.Count = search_count;
                         if (HiyobiTags.Tags.Select(y => y.full).Contains(tag))
                         {
                             try

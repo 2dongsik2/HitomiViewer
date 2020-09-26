@@ -1,6 +1,7 @@
 ﻿using ExtensionMethods;
 using HitomiViewer.Api;
 using HitomiViewer.Encryption;
+using HitomiViewer.Plugin;
 using HitomiViewer.Processor;
 using HitomiViewer.Processor.Loaders;
 using HitomiViewer.Scripts;
@@ -36,25 +37,21 @@ namespace HitomiViewer.UserControls
     /// </summary>
     public partial class HitomiPanel : UserControl
     {
-        private Hitomi h;
-        private BitmapImage thumb;
+        public Hitomi h;
         private MainWindow MainWindow;
-        private Hitomi.Type ftype = Hitomi.Type.Folder;
-        private FrameworkElementFactory ToolTipImage = null;
-        private bool large;
-        private bool afterLoad;
-        private bool blur;
+        public Hitomi.Type ftype = Hitomi.Type.Folder;
+        public bool large;
+        public bool afterLoad;
+        public bool blur;
         public HitomiPanel(Hitomi h, MainWindow sender, bool large = true, bool afterLoad = false, bool blur = false)
         {
             this.large = large;
             this.afterLoad = afterLoad;
             this.blur = blur;
             this.h = h;
-            this.thumb = h.thumb;
             this.MainWindow = sender;
             InitializeComponent();
             Init();
-            this.nameLabel.Content = h.name;
             InitEvent();
         }
 
@@ -80,6 +77,7 @@ namespace HitomiViewer.UserControls
         }
         private async void Init()
         {
+            PluginHandler.FireOnHitomiPanelInit(this);
             if (h.thumb == null)
             {
                 if (h.thumbpath == null)
@@ -87,14 +85,9 @@ namespace HitomiViewer.UserControls
                 else
                     h.thumb = await ImageProcessor.ProcessEncryptAsync(h.thumbpath);
             }
+            panel.Height = 100;
             thumbNail.Source = h.thumb;
             thumbBrush.ImageSource = h.thumb;
-            /*
-            if (h.ugoiraImage == null)
-                thumbNail.ToolTip = GetToolTip(panel.Height);
-            else
-                thumbNail.ClearValue(Image.ToolTipProperty);
-            */
 
             authorsPanel.Children.Clear();
             authorsPanel.Children.Add(new Label { Content = "작가 :" });
@@ -218,7 +211,7 @@ namespace HitomiViewer.UserControls
 
             if (large)
             {
-                panel.Height = 150;
+                panel.Height += 50;
                 if (h.authors != null)
                 {
                     authorsStackPanel.Visibility = Visibility.Visible;
@@ -250,12 +243,13 @@ namespace HitomiViewer.UserControls
                     thumbNail.ToolTip = GetToolTip(panel.Height);
             }
             nameLabel.Width = panel.Width - border.Width;
-            //nameLabel.Content = h.name;
+            nameLabel.Content = h.name;
             ContextSetup();
-            ChangeColor(this);
+            ChangeColor();
+            PluginHandler.FireOnHitomiPanelDelayInit(this);
         }
 
-        private void ContextSetup()
+        public void ContextSetup()
         {
             Favorite.Visibility = Visibility.Visible;
             FavoriteRemove.Visibility = Visibility.Collapsed;
@@ -307,7 +301,7 @@ namespace HitomiViewer.UserControls
             }
         }
 
-        private ToolTip GetToolTip(double height)
+        public ToolTip GetToolTip(double height)
         {
             if (h.thumb == null) return null;
             if (!thumbNail.IsVisible) return null;
@@ -332,7 +326,6 @@ namespace HitomiViewer.UserControls
                 image.SetValue(Image.HorizontalAlignmentProperty, HorizontalAlignment.Left);
                 image.SetValue(Image.SourceProperty, h.thumb);
             }
-            ToolTipImage = image;
             FrameworkElementFactory elemborder = new FrameworkElementFactory(typeof(Border));
             {
                 elemborder.SetValue(Border.BorderThicknessProperty, new Thickness(1));
@@ -356,6 +349,7 @@ namespace HitomiViewer.UserControls
 
         public void ChangeColor()
         {
+            PluginHandler.FireOnHitomiChangeColor(this);
             panel.Background = new SolidColorBrush(Global.background);
             border.Background = new SolidColorBrush(Global.imagecolor);
             InfoPanel.Background = new SolidColorBrush(Global.Menuground);
@@ -684,18 +678,16 @@ namespace HitomiViewer.UserControls
         }
         private async void authorLabel_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            Label lbsender = sender as Label;
+            string author = lbsender.Content.ToString().Replace(" ", "_");
             if (h.type == Hitomi.Type.Pixiv || h.type == Hitomi.Type.PixivUgoira)
             {
-                Label lbsender = sender as Label;
-                string author = lbsender.Content.ToString();
                 MainWindow.PixivUser_Search_Text.Text = author;
                 MainWindow.PixivUser_Search_Button_Click(this, null);
             }
             else if (h.type == Hitomi.Type.Hiyobi || h.type == Hitomi.Type.Hitomi)
             {
                 bool result = await new InternetP(index: int.Parse(h.id)).isHiyobi();
-                Label lbsender = sender as Label;
-                string author = lbsender.Content.ToString();
                 MainWindow.MainPanel.Children.Clear();
                 if (result)
                 {

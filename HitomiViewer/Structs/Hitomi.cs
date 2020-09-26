@@ -24,6 +24,11 @@ namespace HitomiViewer
             Pixiv,
             PixivUgoira
         }
+        public class DisplayValue
+        {
+            public string Display;
+            public string Value;
+        }
 
         public List<Tag> tags = new List<Tag>();
         public string id;
@@ -34,6 +39,9 @@ namespace HitomiViewer
         public string language;
         public string[] files;
         public string[] authors;
+        public List<DisplayValue> artists = null;
+        public List<DisplayValue> characters = null;
+        public List<DisplayValue> parodys = null;
         public int page;
         public bool encrypted;
         public double FolderByte;

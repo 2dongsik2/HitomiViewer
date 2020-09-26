@@ -4,6 +4,7 @@ using HitomiViewer.Encryption;
 using HitomiViewer.Processor;
 using HitomiViewer.Processor.Cache;
 using HitomiViewer.Processor.Loaders;
+using HitomiViewer.Plugin;
 using HitomiViewer.Scripts;
 using HitomiViewer.Structs;
 using HitomiViewer.UserControls;
@@ -33,7 +34,7 @@ namespace HitomiViewer
     /// </summary>
     public partial class MainWindow : Window
     {
-        private enum FolderSorts
+        public enum FolderSorts
         {
             Name,
             Creation,
@@ -51,18 +52,19 @@ namespace HitomiViewer
         public List<Reader> Readers = new List<Reader>();
         public MainWindow()
         {
-            Console.WriteLine(SHA256.Hash("Hello!"));
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(ResolveAssembly);
+            PluginHandler.LoadPlugins();
             Global.dispatcher = Dispatcher;
-            //Task.Factory.StartNew(new Cache().TagCache);
             new LoginClass().Run();
             new Config().GetConfig().Save();
             InitializeComponent();
+            PluginHandler.FireOnInit(this);
             Init();
+            PluginHandler.FireOnDelayInit(this);
             InitEvents();
         }
 
-        private void Init()
+        public void Init()
         {
             CheckUpdate.Auto();
             HiyobiTags.LoadTags();
@@ -99,11 +101,11 @@ namespace HitomiViewer
                 Decrypt.Visibility = Visibility.Collapsed;
             }
         }
-        private void InitEvents()
+        public void InitEvents()
         {
             this.Loaded += MainWindow_Loaded;
         }
-        private void DelayRegistEvents()
+        public void DelayRegistEvents()
         {
             SearchMode1.SelectionChanged += SearchMode1_SelectionChanged;
             SearchMode2.SelectionChanged += SearchMode2_SelectionChanged;
@@ -224,7 +226,7 @@ namespace HitomiViewer
             MainMenu.IsEnabled = !tf;
         }
 
-        private void HiyobiMain(int index)
+        public void HiyobiMain(int index)
         {
             InternetP parser = new InternetP(url: "https://api.hiyobi.me/list/" + index);
             HiyobiLoader hiyobi = new HiyobiLoader();
@@ -237,7 +239,7 @@ namespace HitomiViewer
             }).Pagination(index);
             parser.LoadJObject(hiyobi.FastParser);
         }
-        private void HitomiMain(int index)
+        public void HitomiMain(int index)
         {
             HitomiLoader hitomi = new HitomiLoader();
             hitomi.index = index;
@@ -251,7 +253,7 @@ namespace HitomiViewer
             hitomi.FastDefault();
             hitomi.FastParser();
         }
-        private void HiyobiSearch(List<string> keyword, int index)
+        public void HiyobiSearch(List<string> keyword, int index)
         {
             InternetP parser = new InternetP(keyword: keyword, index: index);
             HiyobiLoader hiyobi = new HiyobiLoader();
@@ -264,7 +266,7 @@ namespace HitomiViewer
             }).Pagination(index);
             parser.HiyobiSearch(data => new InternetP(data: data).ParseJObject(hiyobi.FastParser));
         }
-        private void HitomiSearch(string[] tags, int index)
+        public void HitomiSearch(string[] tags, int index)
         {
             SearchLoader loader = new SearchLoader();
             loader.tags = tags;
@@ -276,11 +278,21 @@ namespace HitomiViewer
 
         private void SetColor()
         {
+            this.Background = new SolidColorBrush(Global.background);
+            MainMenuBackground.Color = Global.Menuground;
+            foreach (MenuItem menuItem in MainMenu.Items)
+            {
+                menuItem.Background = new SolidColorBrush(Global.MenuItmclr);
+                menuItem.Foreground = new SolidColorBrush(Global.fontscolor);
+                foreach (MenuItem item in menuItem.Items)
+                    item.Foreground = new SolidColorBrush(Colors.Black);
+            }
+            foreach (Reader reader in Readers)
+                reader.ChangeMode();
             foreach (UIElement hitomiPanel in MainPanel.Children)
             {
                 if ((hitomiPanel as HitomiPanel) != null)
                     (hitomiPanel as HitomiPanel).ChangeColor();
-                //HitomiPanel.ChangeColor(hitomiPanel);
             }
         }
         private void SetFolderSort(FolderSorts sorts)
@@ -413,19 +425,7 @@ namespace HitomiViewer
             Global.fontscolor = Colors.White;
             Global.outlineclr = Colors.White;
             Global.artistsclr = Colors.SkyBlue;
-            this.Background = new SolidColorBrush(Global.background);
-            MainMenuBackground.Color = Global.Menuground;
-            foreach (MenuItem menuItem in MainMenu.Items)
-            {
-                menuItem.Background = new SolidColorBrush(Global.MenuItmclr);
-                menuItem.Foreground = new SolidColorBrush(Global.fontscolor);
-                foreach (MenuItem item in menuItem.Items)
-                    item.Foreground = new SolidColorBrush(Colors.Black);
-            }
-            foreach (Reader reader in Readers)
-                reader.ChangeMode();
             SetColor();
-            //LoadHitomi(Path.Combine(rootDir, folder));
         }
         private void DarkMode_Unchecked(object sender, RoutedEventArgs e)
         {
@@ -437,19 +437,7 @@ namespace HitomiViewer
             Global.fontscolor = Colors.Black;
             Global.outlineclr = Colors.Black;
             Global.artistsclr = Colors.Blue;
-            this.Background = new SolidColorBrush(Global.background);
-            MainMenuBackground.Color = Global.Menuground;
-            foreach (MenuItem menuItem in MainMenu.Items)
-            {
-                menuItem.Background = new SolidColorBrush(Global.MenuItmclr);
-                menuItem.Foreground = new SolidColorBrush(Global.fontscolor);
-                foreach (MenuItem item in menuItem.Items)
-                    item.Foreground = new SolidColorBrush(Colors.Black);
-            }
-            foreach (Reader reader in Readers)
-                reader.ChangeMode();
             SetColor();
-            //LoadHitomi(Path.Combine(rootDir, folder));
         }
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
