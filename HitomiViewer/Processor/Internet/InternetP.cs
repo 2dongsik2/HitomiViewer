@@ -42,34 +42,7 @@ namespace HitomiViewer.Processor
         }
 
         
-        public HitomiInfo.Type DesignTypeFromInt(int s)
-        {
-            switch (s)
-            {
-                case 1:
-                    return HitomiInfo.Type.doujinshi;
-                case 2:
-                    return HitomiInfo.Type.manga;
-                case 3:
-                    return HitomiInfo.Type.artistcg;
-                default:
-                    return HitomiInfo.Type.none;
-            }
-        }
-        public HitomiInfo.Type DesignTypeFromString(string s)
-        {
-            switch (s)
-            {
-                case "doujinshi":
-                    return HitomiInfo.Type.doujinshi;
-                case "artistcg":
-                    return HitomiInfo.Type.artistcg;
-                case "manga":
-                    return HitomiInfo.Type.manga;
-                default:
-                    return HitomiInfo.Type.none;
-            }
-        }
+        
         public async Task<List<Hitomi>> LoadCompre(List<string> items)
         {
             List<Hitomi> res = new List<Hitomi>();
@@ -94,8 +67,7 @@ namespace HitomiViewer.Processor
                         Hitomi h = await HitomiData();
                         this.url = $"https://ltn.hitomi.la/galleries/{id}.js";
                         JObject info = await HitomiGalleryInfo();
-                        h.type = Hitomi.Type.Hitomi;
-                        h.tags = HitomiTags(info);
+                        h.tags = Hitomi.HTag.Parse(info);
                         h.files = HitomiFiles(info).ToArray();
                         h.page = h.files.Length;
                         h.thumb = await ImageProcessor.LoadWebImageAsync("https:" + h.thumbpath);

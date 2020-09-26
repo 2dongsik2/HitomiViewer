@@ -1,0 +1,171 @@
+﻿using ExtensionMethods;
+using HitomiViewer.Scripts;
+using HitomiViewer.Structs;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Tag = HitomiViewer.Structs.Tag;
+
+namespace HitomiViewer.Processor.Loaders
+{
+    class HiyobiLoader
+    {
+        public string text;
+        public int index;
+        public Action<Hitomi, int, int> update = null;
+        public Action<int> start = null;
+        public Action<int> pagination = null;
+        public Action end = null;
+
+        public HiyobiLoader(string text = null, int? index = null, Action<Hitomi, int, int> update = null, Action<int> start = null, Action end = null)
+        {
+            this.text = text ?? this.text;
+            this.index = index ?? this.index;
+            this.update = update ?? this.update;
+            this.start = start ?? this.start;
+            this.end = end ?? this.end;
+        }
+
+        public HiyobiLoader Default()
+        {
+            this.start = (int count) =>
+            {
+                Global.MainWindow.label.Content = "0/" + count;
+                Global.MainWindow.label.Visibility = System.Windows.Visibility.Visible;
+                Global.MainWindow.Searching(true);
+            };
+            this.update = (Hitomi h, int index, int max) =>
+            {
+                Global.MainWindow.label.Content = $"{index}/{max}";
+                Global.MainWindow.MainPanel.Children.Add(new UserControls.HitomiPanel(h, Global.MainWindow, true));
+            };
+            this.end = () =>
+            {
+                Global.MainWindow.label.Visibility = System.Windows.Visibility.Collapsed;
+                Global.MainWindow.Searching(false);
+            };
+            return this;
+        }
+        public HiyobiLoader FastDefault()
+        {
+            Default();
+            this.update = (Hitomi h, int index, int max) =>
+            {
+                Global.MainWindow.label.Content = $"{index}/{max}";
+                Global.MainWindow.MainPanel.Children.Add(new UserControls.HitomiPanel(h, Global.MainWindow, true, true));
+            };
+            return this;
+        }
+
+        public async void Parser(JObject jobject)
+        {
+            start(jobject["list"].Count());
+            foreach (JToken tk in jobject["list"])
+            {
+                InternetP parser = new InternetP(url: $"https://cdn.hiyobi.me/data/json/{tk["id"]}_list.json");
+                JArray imgs = await parser.TryLoadJArray();
+                if (imgs == null) continue;
+                Hiyobi h = new Hiyobi
+                {
+                    id = tk["id"].ToString(),
+                    name = tk["title"].ToString(),
+                    type = type,
+                    page = imgs.Count,
+                    dir = $"https://hiyobi.me/reader/{tk["id"]}",
+                    thumb = ImageProcessor.LoadWebImage($"https://cdn.hiyobi.me/tn/{tk["id"]}.jpg"),
+                    thumbpath = $"https://cdn.hiyobi.me/tn/{tk["id"]}.jpg",
+                    files = imgs.ToList().Select(x => $"https://cdn.hiyobi.me/data/{tk["id"]}/{x["name"]}").ToArray(),
+                    author = string.Join(", ", tk["artists"].Select(x => x["display"].ToString())),
+                    authors = tk["artists"].Select(x => x["display"].ToString()).ToArray(),
+                    Json = tk
+                };
+                foreach (JToken tags in tk["tags"])
+                {
+                    Tag tag = new Tag();
+                    if (tags["value"].ToString().Contains(":"))
+                        tag.types = (Tag.Types)Enum.Parse(typeof(Tag.Types), tags["value"].ToString().Split(':')[0]);
+                    else
+                        tag.types = Tag.Types.tag;
+                    tag.name = tags["display"].ToString();
+                    h.tags.Add(tag);
+                }
+                update(h,
+                    jobject["list"].ToList().IndexOf(tk),
+                    jobject["list"].Count());
+            }
+            end();
+            int pages = (int)Math.Ceiling((jobject.IntValue("count") ?? 0) / ((double)jobject["list"].Count()));
+            pagination?.Invoke(pages);
+        }
+        public void FastParser(JObject jobject)
+        {
+            start(jobject["list"].Count());
+            JArray arr = jobject["list"] as JArray;
+            for (int i = 0; i < arr.Count; i++)
+            {
+                Hitomi h = new InternetP().HiyobiParse(arr[i]);
+                h.type = Hitomi.Type.Hiyobi;
+                Config config = new Config();
+                config.Load();
+                if (!config.ArrayValue<string>(Settings.except_tags).Any(x => h.tags.Select(y => y.full).Contains(x)) || !(config.BoolValue(Settings.block_tags) ?? false))
+                    update(h, i, arr.Count);
+            }
+            end();
+            int pages = (int)Math.Ceiling((jobject.IntValue("count") ?? 0) / ((double)arr.Count));
+            pagination?.Invoke(pages);
+        }
+        public async Task<Hitomi> Parser()
+        {
+            InternetP parser;
+            parser = new InternetP(url: $"https://api.hiyobi.me/gallery/{text}");
+            JObject obj = await parser.LoadJObject();
+            parser = new InternetP(url: $"https://cdn.hiyobi.me/data/json/{text}_list.json");
+            JArray imgs = await parser.TryLoadJArray();
+            if (imgs == null) return null;
+            Hitomi h = new Hitomi
+            {
+                id = obj.StringValue("id"),
+                name = obj.StringValue("title"),
+                type = type,
+                page = imgs.Count,
+                dir = $"https://hiyobi.me/reader/{text}",
+                thumb = ImageProcessor.LoadWebImage($"https://cdn.hiyobi.me/tn/{text}.jpg"),
+                thumbpath = $"https://cdn.hiyobi.me/tn/{text}.jpg",
+                files = imgs.ToList().Select(x => $"https://cdn.hiyobi.me/data/{text}/{x["name"]}").ToArray(),
+                author = string.Join(", ", obj["artists"].Select(x => x["display"].ToString())),
+                authors = obj["artists"].Select(x => x["display"].ToString()).ToArray(),
+                Json = obj,
+                designType = new InternetP().DesignTypeFromInt(obj.IntValue("type") ?? 0),
+                language = obj.StringValue("language")
+            };
+            foreach (JToken tags in obj["tags"])
+            {
+                Tag tag = new Tag();
+                if (tags["value"].ToString().Contains(":"))
+                    tag.types = (Tag.Types)Enum.Parse(typeof(Tag.Types), tags["value"].ToString().Split(':')[0]);
+                else
+                    tag.types = Tag.Types.tag;
+                tag.name = tags["display"].ToString();
+                h.tags.Add(tag);
+            }
+            return h;
+        }
+        public async Task Parser(string[] ids)
+        {
+            start(ids.Length);
+            for (int i = 0; i < ids.Length; i++)
+            {
+                this.text = ids[i];
+                Hitomi h = await Parser();
+                update(h, i, ids.Length);
+            }
+            end();
+        }
+        public void Search()
+        {
+            InternetP parser = new InternetP(keyword: text.Split(' ').ToList(), index: index);
+            parser.HiyobiSearch(data => new InternetP(data: data).ParseJObject(Parser));
+        }
+    }
+}

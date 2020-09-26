@@ -48,7 +48,7 @@ namespace HitomiViewer
         }
         public class Account
         {
-            public static Pixiv Pixiv;
+            public static Api.Pixiv Pixiv;
         }
     }
 }

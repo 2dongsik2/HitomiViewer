@@ -18,7 +18,7 @@ using static HitomiViewer.Api.PixivUser;
 
 namespace HitomiViewer.Api
 {
-    public static partial class MyExtensions
+    public static partial class Extensions
     {
         public static string toString(this SearchTarget target)
         {
@@ -380,5 +380,13 @@ namespace HitomiViewer.Api
                 return this;
             }
         }
+    }
+    public partial class PixivUgoira
+    {
+        public List<byte[]> bytesofimages;
+        public List<int> delays;
+        public List<BitmapImage> images;
+        public string original;
+        public int index = 0;
     }
 }

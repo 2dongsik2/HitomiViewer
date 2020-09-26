@@ -26,31 +26,35 @@ namespace HitomiViewer.Processor
 
         public async Task<Hitomi> HitomiData()
         {
+            Hitomi h = await HitomiData1();
+            h = await HitomiData2(h);
+            return h;
+        }
+        public async Task<Hitomi> HitomiData1()
+        {
             url = url ?? $"https://ltn.hitomi.la/galleryblock/{index}.html";
             string html = await Load(url);
             HtmlDocument doc = new HtmlDocument();
             doc.LoadHtml(html);
             Hitomi h = new Hitomi();
-            h.dir = $"https://hitomi.la/reader/{index}.html";
+            h. = $"https://hitomi.la/reader/{index}.html";
             HtmlNode name = doc.DocumentNode.SelectSingleNode("//h1[@class=\"lillie\"]");
             h.name = name.InnerText;
             HtmlNode image = doc.DocumentNode.SelectSingleNode("//div[@class=\"dj-img1\"]/img");
             image = image ?? doc.DocumentNode.SelectSingleNode("//div[@class=\"cg-img1\"]/img");
-            h.thumbpath = image.GetAttributeValue("src", "");
-            if (!(h.thumbpath.StartsWith("https:") || h.thumbpath.StartsWith("http:")))
-                h.thumbpath = "https:" + h.thumbpath;
-            if (h.thumbpath == "")
-                h.thumbpath = image.GetDataAttribute("src").Value;
+            h.thumbnail.preview_url = image.GetAttributeValue("src", "");
+            if (!(h.thumbnail.preview_url.StartsWith("https:") || h.thumbnail.preview_url.StartsWith("http:")))
+                h.thumbnail.preview_url = "https:" + h.thumbnail.preview_url;
+            if (h.thumbnail.preview_url == "")
+                h.thumbnail.preview_url = image.GetDataAttribute("src").Value;  
             HtmlNodeCollection artists = doc.DocumentNode.SelectNodes("//div[@class=\"artist-list\"]/ul/li");
             if (artists != null)
             {
-                h.authors = artists.Select(x => x.InnerText).ToArray();
-                h.author = string.Join(", ", h.authors);
+                h.authors.SetAuthor(artists.Select(x => x.InnerText));
             }
             else
             {
-                h.authors = new string[0];
-                h.author = "";
+                h.authors.SetAuthor(new string[0]);
             }
             HtmlNode table = doc.DocumentNode.SelectSingleNode("//table[@class=\"dj-desc\"]");
             for (var i = 0; i < table.ChildNodes.Count - 1; i += 2)
@@ -61,6 +65,17 @@ namespace HitomiViewer.Processor
             }
             return h;
         }
+        public async Task<Hitomi> HitomiData2(Hitomi h)
+        {
+            url = $"https://ltn.hitomi.la/galleries/{index}.js";
+            JObject info = await HitomiGalleryInfo();
+            h.tags = Hitomi.HTag.Parse(info);
+            h.files = HitomiFiles(info).ToArray();
+            h.page = h.files.Length;
+            h.thumb = ImageProcessor.LoadWebImage("https:" + h.thumbpath);
+            h.Json = info;
+            return await HitomiGalleryData(h);
+        }
         public async Task<JObject> HitomiGalleryInfo()
         {
             string html = await Load(url);
@@ -70,35 +85,24 @@ namespace HitomiViewer.Processor
         public async Task<Hitomi> HitomiGalleryData(Hitomi org)
         {
             JObject jObject = await HitomiGalleryInfo();
-            List<HitomiFile> files = new List<HitomiFile>();
+            List<Hitomi.HFile> files = new List<Hitomi.HFile>();
             foreach (JToken tag1 in jObject["files"])
             {
-                files.Add(new HitomiFile
+                files.Add(new Hitomi.HFile
                 {
                     hash = tag1["hash"].ToString(),
                     name = tag1["name"].ToString(),
+                    width = tag1.IntValue("width") ?? 0,
+                    height = tag1.IntValue("height") ?? 0,
                     hasavif = Convert.ToBoolean(int.Parse(tag1["hasavif"].ToString())),
+                    hasavifsmalltn = Convert.ToBoolean(int.Parse(tag1["hasavifsmalltn"].ToString())),
                     haswebp = Convert.ToBoolean(int.Parse(tag1["haswebp"].ToString()))
                 });
             }
             org.language = jObject.StringValue("language");
             org.id = jObject.StringValue("id");
-            org.designType = DesignTypeFromString(jObject.StringValue("type"));
+            org.type = Hitomi.HType.Find(jObject.StringValue("type"));
             return org;
-        }
-        public async Task<Hitomi> HitomiData2()
-        {
-            url = $"https://ltn.hitomi.la/galleryblock/{index}.html";
-            Hitomi h = await HitomiData();
-            url = $"https://ltn.hitomi.la/galleries/{index}.js";
-            JObject info = await HitomiGalleryInfo();
-            h.type = Hitomi.Type.Hitomi;
-            h.tags = HitomiTags(info);
-            h.files = HitomiFiles(info).ToArray();
-            h.page = h.files.Length;
-            h.thumb = ImageProcessor.LoadWebImage("https:" + h.thumbpath);
-            h.Json = info;
-            return await HitomiGalleryData(h);
         }
         public List<Tag> HitomiTags(JObject jObject) //반환값 변경으로 인한 코드 수정
         {

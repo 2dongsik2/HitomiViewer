@@ -1,14 +1,13 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HitomiViewer.Pixiv
+namespace HitomiViewer.UserControls.Panels
 {
-    public class Pixiv : Api.Pixiv.Illust
+    class HiyobiPanel : IHitomiPanel
     {
-
+        
     }
 }

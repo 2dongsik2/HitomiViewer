@@ -35,11 +35,10 @@ namespace HitomiViewer.UserControls
     /// <summary>
     /// HitomiPanel.xaml에 대한 상호 작용 논리
     /// </summary>
-    public partial class HitomiPanel : UserControl
+    public partial class HitomiPanel : IHitomiPanel
     {
         public Hitomi h;
         private MainWindow MainWindow;
-        public Hitomi.Type ftype = Hitomi.Type.Folder;
         public bool large;
         public bool afterLoad;
         public bool blur;
@@ -55,7 +54,7 @@ namespace HitomiViewer.UserControls
             InitEvent();
         }
 
-        private void InitEvent()
+        public virtual void InitEvent()
         {
             thumbNail.MouseDown += (object sender, MouseButtonEventArgs e) =>
             {
@@ -63,6 +62,7 @@ namespace HitomiViewer.UserControls
                 if (!reader.IsClosed)
                     reader.Show();
             };
+            /*
             if ((h.type != Hitomi.Type.Pixiv && h.type != Hitomi.Type.Folder) || (!afterLoad && h.ugoiraImage == null))
                 thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
             else if (h.type == Hitomi.Type.Folder)
@@ -70,12 +70,9 @@ namespace HitomiViewer.UserControls
                 if (ftype != Hitomi.Type.Pixiv || h.ugoiraImage == null)
                     thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
             }
-            /*
-            if (h.ugoiraImage == null)
-                thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
             */
         }
-        private async void Init()
+        public override async void Init()
         {
             PluginHandler.FireOnHitomiPanelInit(this);
             if (h.thumb == null)

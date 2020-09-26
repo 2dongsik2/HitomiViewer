@@ -8,6 +8,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using static HitomiViewer.Hitomi;
+using static HitomiViewer.IHitomi;
 
 namespace HitomiViewer.Processor
 {
@@ -27,34 +29,32 @@ namespace HitomiViewer.Processor
             }
             return output;
         }
-        public async Task<List<HitomiFile>> HiyobiFiles()
+        public async Task<List<HFile>> HiyobiFiles()
         {
-            List<HitomiFile> files = new List<HitomiFile>();
+            List<HFile> files = new List<HFile>();
             url = $"https://cdn.hiyobi.me/data/json/{index}_list.json";
             JArray arr = await TryLoadJArray();
             if (arr == null)
-                return new List<HitomiFile>();
+                return new List<HFile>();
             foreach (JToken tk in arr)
             {
-                files.Add(new HitomiFile
+                files.Add(new HFile
                 {
                     hasavif = (tk.IntValue("hasavif") ?? 0).ToBool(),
                     hash = tk.StringValue("hash"),
                     haswebp = (tk.IntValue("haswebp") ?? 0).ToBool(),
                     height = tk.IntValue("height") ?? 0,
                     width = tk.IntValue("width") ?? 0,
-                    name = tk.StringValue("name"),
-                    url = $"https://cdn.hiyobi.me/data/{index}/{tk.StringValue("name")}"
+                    name = tk.StringValue("name")
                 });
             }
             return files;
         }
-        public async Task<Hitomi> HiyobiDataNumber(int? index = null)
+        public async Task<Hiyobi> HiyobiDataNumber(int? index = null)
         {
             url = $"https://api.hiyobi.me/gallery/{index ?? this.index}";
             JObject obj = await LoadJObject();
-            Hitomi h = HiyobiParse(obj);
-            h.type = Hitomi.Type.Hiyobi;
+            Hiyobi h = HiyobiParse(obj);
             return h;
         }
         public async Task<string> HiyobiSearch()
@@ -67,19 +67,19 @@ namespace HitomiViewer.Processor
             var pageContents = await response.Content.ReadAsStringAsync();
             return pageContents;
         }
-        public Hitomi HiyobiParse(JToken item)
+        public Hiyobi HiyobiParse(JToken item)
         {
-            Hitomi h = new Hitomi();
+            Hiyobi h = new Hiyobi();
             h.authors = item["artists"].Select(x => x.StringValue("display")).ToArray();
             h.id = item.StringValue("id");
             h.language = item.StringValue("language");
             h.tags = item["tags"].Select(x => Tag.Parse(x.StringValue("display"))).ToList();
             if (item["artists"] != null)
-                h.artists = item["artists"].Select(x => new Hitomi.DisplayValue { Display = x.StringValue("display"), Value = x.StringValue("value") }).ToList();
+                h.artists = item["artists"].Select(x => new DisplayValue { Display = x.StringValue("display"), Value = x.StringValue("value") }).ToList();
             if (item["characters"] != null)
-                h.characters = item["characters"].Select(x => new Hitomi.DisplayValue { Display = x.StringValue("display"), Value = x.StringValue("value") }).ToList();
+                h.characters = item["characters"].Select(x => new DisplayValue { Display = x.StringValue("display"), Value = x.StringValue("value") }).ToList();
             if (item["parodys"] != null)
-                h.parodys = item["parodys"].Select(x => new Hitomi.DisplayValue { Display = x.StringValue("display"), Value = x.StringValue("value") }).ToList();
+                h.parodys = item["parodys"].Select(x => new DisplayValue { Display = x.StringValue("display"), Value = x.StringValue("value") }).ToList();
             h.name = item.StringValue("title");
             h.designType = DesignTypeFromString(item.StringValue("type"));
             h.thumbpath = $"https://cdn.hiyobi.me/tn/{h.id}.jpg";

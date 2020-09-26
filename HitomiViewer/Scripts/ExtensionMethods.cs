@@ -19,7 +19,7 @@ using System.Web;
 
 namespace ExtensionMethods
 {
-    public static partial class MyExtensions
+    public static partial class Extensions
     {
         #region SORT
         [System.Runtime.InteropServices.DllImport("Shlwapi.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
@@ -102,12 +102,13 @@ namespace ExtensionMethods
             return array1.Count() == array2.Count() && !array1.Except(array2).Any();
         }
         #endregion
-
+        
         public static Hitomi Copy(this Hitomi hitomi)
         {
             return Hitomi.Copy(hitomi);
         }
         public static string RemoveSpace(this string s) => s.Replace(" ", string.Empty);
+        #region URL
         public static bool isUrl(this string s)
         {
             Uri uriResult;
@@ -147,47 +148,25 @@ namespace ExtensionMethods
                 ).ToArray();
             return "?" + string.Join("&", array);
         }
+        #endregion
 
         #region JSON
-        public static string StringValue(this JObject config, string path)
+        public static object Value(this JToken config, string path)
         {
-            if (config == null) return null;
-            if (!config.ContainsKey(path)) return null;
-            return config[path].ToString();
+            switch (config[path].Type)
+            {
+                case JTokenType.Integer:
+                    return config.IntValue(path);
+                case JTokenType.Float:
+                    return config.DoubleValue(path);
+                case JTokenType.String:
+                    return config.StringValue(path);
+                case JTokenType.Boolean:
+                    return config.BoolValue(path);
+                default:
+                    return config[path];
+            }
         }
-        public static int? IntValue(this JObject config, string path)
-        {
-            int res;
-            if (config == null) return null;
-            if (!config.ContainsKey(path)) return null;
-            if (!int.TryParse(config[path].ToString(), out res)) return null;
-            return res;
-        }
-        public static double? DoubleValue(this JObject config, string path)
-        {
-            double res;
-            if (config == null) return null;
-            if (!config.ContainsKey(path)) return null;
-            if (double.TryParse(config[path].ToString(), out res)) return null;
-            return res;
-        }
-        public static bool? BoolValue(this JObject config, string path)
-        {
-            if (config == null) return null;
-            if (!config.ContainsKey(path)) return null;
-            if (config[path].Type == JTokenType.Boolean) return (bool?)config[path];
-            bool result;
-            if (!bool.TryParse(config[path].ToString(), out result))
-                return null;
-            return result;
-        }
-        public static IList<T> ArrayValue<T>(this JObject config, string path) where T : class
-        {
-            if (config == null) return new List<T>();
-            if (!config.ContainsKey(path)) return new List<T>();
-            return config[path].ToObject<List<T>>();
-        }
-
         public static string StringValue(this JToken config, string path)
         {
             if (config == null) return null;
@@ -226,6 +205,18 @@ namespace ExtensionMethods
             if (config[path] == null) return null;
             return bool.Parse(config[path].ToString());
         }
+        public static bool? BoolSValue(this JToken config, string path)
+        {
+            if (config == null) return null;
+            if (config[path] == null) return null;
+            if (config[path].Type == JTokenType.Integer)
+                return Convert.ToBoolean(int.Parse(config[path].ToString()));
+            if (config[path].ToString() == "1")
+                return true;
+            if (config[path].ToString() == "0")
+                return false;
+            return bool.Parse(config[path].ToString());
+        }
         public static IList<T> ArrayValue<T>(this JToken config, string path) where T : class
         {
             if (config == null) return new List<T>();
@@ -236,16 +227,8 @@ namespace ExtensionMethods
 
         public static async void TaskCallback<T>(this Task<T> Task, Action<T> callback) where T : class => callback(await Task);
         public static async void then<T>(this Task<T> Task, Action<T> callback) where T : class => callback(await Task);
-        public static Task<T> tthen<T>(this Task<T> Task, Action<T> callback) where T : class
-        {
-            try
-            {
-                Task.then(callback);
-            }
-            catch { }
-            return Task;
-        }
-        public static async Task<Task<T>> tcatch<T>(this Task<T> Task, Action<T> callback) where T : class
+        public static async void then<T>(this Task<T> Task, Action<T, object> callback, object data) where T : class => callback(await Task, data);
+        public static async Task<Task<T>> Catch<T>(this Task<T> Task, Action<T> callback) where T : class
         {
             try
             {
@@ -257,7 +240,6 @@ namespace ExtensionMethods
             }
             return Task;
         }
-        public static async void then<T>(this Task<T> Task, Action<T, object> callback, object data) where T : class => callback(await Task, data);
         public static bool ToBool(this int i) => Convert.ToBoolean(i);
         public static void RemoveAllEvents(this EventHandler events)
         {
