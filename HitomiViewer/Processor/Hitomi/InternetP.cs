@@ -131,15 +131,12 @@ namespace HitomiViewer.Processor
             }
             return tags;
         }
-        public List<string> HitomiFiles(JObject jObject)
+        public List<Hitomi.HFile> HitomiFiles(JObject jObject)
         {
-            List<string> files = new List<string>();
-            foreach (JToken tag1 in jObject["files"])
+            List<Hitomi.HFile> files = new List<Hitomi.HFile>();
+            foreach (JToken tk in jObject["files"])
             {
-                string name = tag1.StringValue("name");
-                string hash = tag1.StringValue("hash");
-                bool haswebp = Convert.ToBoolean(tag1.IntValue("haswebp") ?? 0);
-                files.Add(ImageUrlFromImage(name, hash, haswebp, false));
+                files.Add(new Hitomi.HFile().JsonParseFromName(tk))
             }
             return files;
         }
@@ -352,6 +349,10 @@ namespace HitomiViewer.Processor
             return galleryids.ToArray();
         }
 
+        public string UrlFromUrlFromHash(Hitomi.HFile file)
+        {
+            return UrlFromUrl(UrlFromHash(file.name, file.hash));
+        }
         public string ImageUrlFromImage(string name, string hash, bool haswebp, bool no_webp)
         {
             string webp = null;

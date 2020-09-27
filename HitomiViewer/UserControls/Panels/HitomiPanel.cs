@@ -37,24 +37,18 @@ namespace HitomiViewer.UserControls
     /// </summary>
     public partial class HitomiPanel : IHitomiPanel
     {
-        public Hitomi h;
-        private MainWindow MainWindow;
-        public bool large;
-        public bool afterLoad;
-        public bool blur;
-        public HitomiPanel(Hitomi h, MainWindow sender, bool large = true, bool afterLoad = false, bool blur = false)
+        public HitomiPanel(Hitomi h, bool large = true, bool file = false, bool blur = false)
         {
             this.large = large;
-            this.afterLoad = afterLoad;
+            this.file = file;
             this.blur = blur;
             this.h = h;
-            this.MainWindow = sender;
             InitializeComponent();
             Init();
             InitEvent();
         }
 
-        public virtual void InitEvent()
+        public override void InitEvent()
         {
             thumbNail.MouseDown += (object sender, MouseButtonEventArgs e) =>
             {
@@ -75,16 +69,16 @@ namespace HitomiViewer.UserControls
         public override async void Init()
         {
             PluginHandler.FireOnHitomiPanelInit(this);
-            if (h.thumb == null)
+            if (h.thumbnail.preview_img == null)
             {
-                if (h.thumbpath == null)
-                    h.thumb = ImageProcessor.FromResource("NoImage.jpg");
+                if (h.thumbnail.preview_url == null)
+                    h.thumbnail.preview_img = ImageProcessor.FromResource("NoImage.jpg");
                 else
-                    h.thumb = await ImageProcessor.ProcessEncryptAsync(h.thumbpath);
+                    h.thumbnail.preview_img = await ImageProcessor.ProcessEncryptAsync(h.thumbnail.preview_url);
             }
             panel.Height = 100;
-            thumbNail.Source = h.thumb;
-            thumbBrush.ImageSource = h.thumb;
+            thumbNail.Source = h.thumbnail.preview_img;
+            thumbBrush.ImageSource = h.thumbnail.preview_img;
 
             authorsPanel.Children.Clear();
             authorsPanel.Children.Add(new Label { Content = "작가 :" });
@@ -97,14 +91,14 @@ namespace HitomiViewer.UserControls
             {
                 if (config.BoolValue(Settings.block_tags) ?? false)
                 {
-                    MainWindow.MainPanel.Children.Remove(this);
+                    Global.MainWindow.MainPanel.Children.Remove(this);
                     return;
                 }
                 else
                     thumbNail.BitmapEffect = new BlurBitmapEffect { Radius = 5, KernelType = KernelType.Gaussian };
             }
 
-            pageLabel.Content = h.page + "p";
+            pageLabel.Content = h.files.Length + "p";
 
             int GB = 1024 * 1024 * 1024;
             int MB = 1024 * 1024;
@@ -127,69 +121,9 @@ namespace HitomiViewer.UserControls
             if (SizePerPage > GB)
                 sizeperpageLabel.Content = Math.Round(SizePerPage / GB, 2) + "GB";
 
-            HitomiInfo hInfo = null;
-            Uri uriResult;
-            bool result = Uri.TryCreate(h.dir, UriKind.Absolute, out uriResult)
-                && ((uriResult.Scheme == Uri.UriSchemeHttp) || (uriResult.Scheme == Uri.UriSchemeHttps));
-            if (h.tags.Count <= 0)
-            {
-                if (File.Exists(System.IO.Path.Combine(h.dir, "info.json")))
-                {
-                    string org = File.ReadAllText(System.IO.Path.Combine(h.dir, "info.json"));
-                    if (!string.IsNullOrWhiteSpace(org))
-                    {
-                        JObject jobject = JObject.Parse(org);
 
-                        h.id = jobject.StringValue("id");
-                        h.name = jobject.StringValue("name");
-                        HitomiInfoOrg hInfoOrg = new HitomiInfoOrg();
-                        foreach (JToken tags in jobject["tags"])
-                        {
-                            Tag tag = new Tag();
-                            tag.types = (Tag.Types)int.Parse(tags.StringValue("types"));
-                            tag.FullNameParse(tags.StringValue("name"));
-                            h.tags.Add(tag);
-                        }
-                        ftype = (Hitomi.Type)int.Parse(jobject["type"].ToString());
-                        if (jobject.ContainsKey("authors"))
-                            h.authors = jobject["authors"].Select(x => x.ToString()).ToArray();
-                        else if (jobject.ContainsKey("author"))
-                            h.authors = jobject["author"].ToString().Split(new string[] { ", " }, StringSplitOptions.None);
-                        else
-                            h.authors = new string[0];
-                        h.Ugoira(jobject);
-                    }
-                }
-                else if (File.Exists(System.IO.Path.Combine(h.dir, "info.txt")))
-                {
-                    HitomiInfoOrg hitomiInfoOrg = new HitomiInfoOrg();
-                    string[] lines = File.ReadAllLines(System.IO.Path.Combine(h.dir, "info.txt")).Where(x => x.Length > 0).ToArray();
-                    foreach (string line in lines)
-                    {
-                        if (line.StartsWith("태그: "))
-                            hitomiInfoOrg.Tags = line.Remove(0, "태그: ".Length);
-                        if (line.StartsWith("작가: "))
-                            hitomiInfoOrg.Author = line.Remove(0, "작가: ".Length);
-                        if (line.StartsWith("갤러리 넘버: "))
-                            hitomiInfoOrg.Number = line.Remove(0, "갤러리 넘버: ".Length);
-                        if (line.StartsWith("제목: "))
-                            hitomiInfoOrg.Title = line.Remove(0, "제목: ".Length);
-                    }
-                    hInfo = HitomiInfo.Parse(hitomiInfoOrg);
-                    h.name = hInfo.Title;
-                    h.id = hInfo.Number.ToString();
-                    h.author = hInfo.Author;
-                    h.authors = hInfo.Author.Split(new string[] { ", " }, StringSplitOptions.None);
-                }
-            }
-
-            foreach (Tag tag in h.tags)
+            foreach (Hitomi.HTag tag in h.tags)
             {
-                tag tag1 = new tag
-                {
-                    TagType = tag.types,
-                    TagName = tag.name
-                };
                 switch (tag.types)
                 {
                     case Structs.Tag.Types.female:
@@ -214,7 +148,7 @@ namespace HitomiViewer.UserControls
                     authorsStackPanel.Visibility = Visibility.Visible;
                     foreach (string artist in h.authors)
                     {
-                        if (h.authors.ToList().IndexOf(artist) != 0)
+                        if (h.authors.Get<List<string>>().IndexOf(artist) != 0)
                         {
                             Label dot = new Label();
                             dot.Content = ", ";
@@ -232,13 +166,7 @@ namespace HitomiViewer.UserControls
                 }
             }
 
-            if ((h.type != Hitomi.Type.Pixiv && h.type != Hitomi.Type.Folder) || (!afterLoad && h.ugoiraImage == null))
-                thumbNail.ToolTip = GetToolTip(panel.Height);
-            if (h.type == Hitomi.Type.Folder)
-            {
-                if (ftype != Hitomi.Type.Pixiv || h.ugoiraImage == null)
-                    thumbNail.ToolTip = GetToolTip(panel.Height);
-            }
+            thumbNail.ToolTip = GetToolTip(panel.Height);
             nameLabel.Width = panel.Width - border.Width;
             nameLabel.Content = h.name;
             ContextSetup();
@@ -253,32 +181,20 @@ namespace HitomiViewer.UserControls
             Folder_Remove.Visibility = Visibility.Collapsed;
             Folder_Hiyobi_Search.Visibility = Visibility.Collapsed;
             Hiyobi_Download.Visibility = Visibility.Collapsed;
-            Hitomi_Download.Visibility = Visibility.Collapsed;
+            Hitomi_Download.Visibility = Visibility.Visible;
             Pixiv_Download.Visibility = Visibility.Collapsed;
             AtHitomi.Visibility = Visibility.Collapsed;
             Encrypt.Visibility = Visibility.Collapsed;
             Decrypt.Visibility = Visibility.Collapsed;
             CopyNumber.Visibility = Visibility.Visible;
-            switch (h.type)
+            if (file)
             {
-                case Hitomi.Type.Folder:
-                    Folder_Remove.Visibility = Visibility.Visible;
-                    if (Global.Password != null)
-                    {
-                        Encrypt.Visibility = Visibility.Visible;
-                        Decrypt.Visibility = Visibility.Visible;
-                    }
-                    break;
-                case Hitomi.Type.Hiyobi:
-                    Hiyobi_Download.Visibility = Visibility.Visible;
-                    AtHitomi.Visibility = Visibility.Visible;
-                    break;
-                case Hitomi.Type.Hitomi:
-                    Hitomi_Download.Visibility = Visibility.Visible;
-                    break;
-                case Hitomi.Type.Pixiv:
-                    Pixiv_Download.Visibility = Visibility.Visible;
-                    break;
+                Folder_Remove.Visibility = Visibility.Visible;
+                if (Global.Password != null)
+                {
+                    Encrypt.Visibility = Visibility.Visible;
+                    Decrypt.Visibility = Visibility.Visible;
+                }
             }
             if (h.id == null || h.id == "")
             {
@@ -286,65 +202,17 @@ namespace HitomiViewer.UserControls
                 DownloadImage.Visibility = Visibility.Collapsed;
                 CopyNumber.Visibility = Visibility.Collapsed;
             }
-            if (ftype == Hitomi.Type.Hiyobi)
-                Folder_Hiyobi_Search.Visibility = Visibility.Visible;
             Config cfg = new Config();
             JObject obj = cfg.Load();
             List<string> favs = cfg.ArrayValue<string>(Settings.favorites).ToList();
-            if (favs.Contains(h.dir))
+            if (favs.Contains(h.id))
             {
                 Favorite.Visibility = Visibility.Collapsed;
                 FavoriteRemove.Visibility = Visibility.Visible;
             }
         }
 
-        public ToolTip GetToolTip(double height)
-        {
-            if (h.thumb == null) return null;
-            if (!thumbNail.IsVisible) return null;
-            //b = 비율
-            //Magnif = 배율
-            double b = height / h.thumb.Height;
-            double top = thumbNail.PointToScreen(new Point(0, 0)).Y;
-            double bottom = top + thumbNail.ActualHeight;
-            double WorkHeight = SystemParameters.WorkArea.Bottom;
-            double MagnifSize = height * Global.Magnif;
-            double Len = WorkHeight / 2 - (bottom - thumbNail.ActualHeight / 2);
-            bool up = Len <= 0;
-            double VisualMaxSize = 0;
-            if (up)
-                VisualMaxSize = top;
-            else
-                VisualMaxSize = WorkHeight - bottom;
-            double size = MagnifSize > VisualMaxSize ? VisualMaxSize : MagnifSize;
-            FrameworkElementFactory image = new FrameworkElementFactory(typeof(Image));
-            {
-                image.SetValue(Image.HeightProperty, size);
-                image.SetValue(Image.HorizontalAlignmentProperty, HorizontalAlignment.Left);
-                image.SetValue(Image.SourceProperty, h.thumb);
-            }
-            FrameworkElementFactory elemborder = new FrameworkElementFactory(typeof(Border));
-            {
-                elemborder.SetValue(Border.BorderThicknessProperty, new Thickness(1));
-                elemborder.SetValue(Border.BorderBrushProperty, new SolidColorBrush(Global.outlineclr));
-                elemborder.AppendChild(image);
-            }
-            FrameworkElementFactory panel = new FrameworkElementFactory(typeof(StackPanel));
-            {
-                panel.AppendChild(elemborder);
-            }
-            ToolTip toolTip = new ToolTip
-            {
-                Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
-                Template = new ControlTemplate
-                {
-                    VisualTree = panel
-                }
-            };
-            return toolTip;
-        }
-
-        public void ChangeColor()
+        public override void ChangeColor()
         {
             PluginHandler.FireOnHitomiChangeColor(this);
             panel.Background = new SolidColorBrush(Global.background);
@@ -394,9 +262,8 @@ namespace HitomiViewer.UserControls
             tagPanel.Background = new SolidColorBrush(Global.Menuground);
         }
 
-        private async void HitomiPanel_Loaded(object sender, RoutedEventArgs e)
+        public override async void HitomiPanel_Loaded(object sender, RoutedEventArgs e)
         {
-            if (!afterLoad) return;
             this.nameLabel.Content = h.name + " (로딩중)";
             if (h.type == Hitomi.Type.Hiyobi)
             {
@@ -417,7 +284,7 @@ namespace HitomiViewer.UserControls
                 h.Json = info;
                 h = await parser.HitomiGalleryData(h);
                 if (!(Global.OriginThumb && h.files != null && h.files[0] != null))
-                    h.thumb = await ImageProcessor.ProcessEncryptAsync(h.thumbpath.https());
+                    h.thumbnail.preview_img = await ImageProcessor.ProcessEncryptAsync(h.thumbnail.preview_url.https());
             }
             if (h.type == Hitomi.Type.Pixiv)
             {
@@ -449,7 +316,7 @@ namespace HitomiViewer.UserControls
                 this.nameLabel.Content = h.name + " (썸네일 로딩중)";
                 ImageProcessor.ProcessEncryptAsync(h.files[0]).then((BitmapImage image) =>
                 {
-                    h.thumb = image;
+                    h.thumbnail.preview_img = image;
                     this.nameLabel.Content = h.name;
                     if (h.type != Hitomi.Type.Hiyobi)
                         thumbNail.Source = image;
@@ -458,7 +325,8 @@ namespace HitomiViewer.UserControls
             else
                 this.nameLabel.Content = h.name;
             Init();
-            using (Config config = new Config()) {
+            using (Config config = new Config())
+            {
                 config.Load();
                 if (config.ArrayValue<string>(Settings.except_tags).Any(x => h.tags.Select(y => y.full).Contains(x.Replace("_", " "))))
                 {
@@ -470,17 +338,19 @@ namespace HitomiViewer.UserControls
             }
         }
 
-        private void Folder_Remove_Click(object sender, RoutedEventArgs e)
+        public override void Folder_Remove_Click(object sender, RoutedEventArgs e)
         {
-            Global.MainWindow.MainPanel.Children.Remove(this);
-            Directory.Delete(h.dir, true);
+            if (!file) return;
+            //Global.MainWindow.MainPanel.Children.Remove(this);
+            //Directory.Delete(h.dir, true);
         }
-        private void Folder_Open_Click(object sender, RoutedEventArgs e)
+        public override void Folder_Open_Click(object sender, RoutedEventArgs e)
         {
-            Process.Start(h.dir);
+            if (!file) return;
+            //Process.Start(h.dir);
         }
-        private void CopyNumber_Click(object sender, RoutedEventArgs e) => Clipboard.SetText(h.id);
-        private void Hiyobi_Download_Click(object sender, RoutedEventArgs e)
+        public override void CopyNumber_Click(object sender, RoutedEventArgs e) => Clipboard.SetText(h.id);
+        public override void Hitomi_Download_Click(object sender, RoutedEventArgs e)
         {
             Task.Factory.StartNew(() =>
             {
@@ -492,33 +362,7 @@ namespace HitomiViewer.UserControls
                 h.Save($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/info.json");
                 for (int i = 0; i < h.files.Length; i++)
                 {
-                    string file = h.files[i];
-                    WebClient wc = new WebClient();
-                    if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/{i}.jpg"))
-                    {
-                        h.encrypted = Global.AutoFileEn;
-                        if (Global.AutoFileEn)
-                            FileEncrypt.DownloadAsync(new Uri(file), $"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/{i}.jpg.lock");
-                        else
-                            wc.DownloadFileAsync(new Uri(file), $"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/{i}.jpg");
-                    }
-                }
-                Process.Start($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}");
-            });
-        }
-        private void Hitomi_Download_Click(object sender, RoutedEventArgs e)
-        {
-            Task.Factory.StartNew(() =>
-            {
-                string filename = File2.GetDownloadTitle(File2.SaftyFileName(h.name));
-                if (!Directory.Exists($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}"))
-                    Directory.CreateDirectory($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}");
-                Directory.CreateDirectory($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}");
-                h.dir = $"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}";
-                h.Save($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/info.json");
-                for (int i = 0; i < h.files.Length; i++)
-                {
-                    string file = h.files[i];
+                    string file = h.files[i].url;
                     WebClient wc = new WebClient();
                     wc.Headers.Add("referer", "https://hitomi.la/");
                     if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/{i}.jpg"))
@@ -532,7 +376,7 @@ namespace HitomiViewer.UserControls
                 Process.Start($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}");
             });
         }
-        private void Pixiv_Download_Click(object sender, RoutedEventArgs e)
+        public override void Pixiv_Download_Click(object sender, RoutedEventArgs e)
         {
             Task.Factory.StartNew(() =>
             {
@@ -559,7 +403,7 @@ namespace HitomiViewer.UserControls
                 Process.Start($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}");
             });
         }
-        private void Folder_Hiyobi_Search_Click(object sender, RoutedEventArgs e)
+        public override void Folder_Hiyobi_Search_Click(object sender, RoutedEventArgs e)
         {
             MainWindow.MainPanel.Children.Clear();
             MainWindow.label.Visibility = Visibility.Visible;
@@ -577,20 +421,13 @@ namespace HitomiViewer.UserControls
                     parser.url = $"https://cdn.hiyobi.me/data/json/{tk["id"]}_list.json";
                     JArray imgs = await parser.TryLoadJArray();
                     if (imgs == null) continue;
-                    Hitomi h = new Hitomi
-                    {
-                        id = tk["id"].ToString(),
-                        name = tk["title"].ToString(),
-                        dir = $"https://hiyobi.me/reader/{tk["id"]}",
-                        page = imgs.Count,
-                        thumbpath = $"https://cdn.hiyobi.me/tn/{tk["id"]}.jpg",
-                        thumb = await ImageProcessor.LoadWebImageAsync($"https://cdn.hiyobi.me/tn/{tk["id"]}.jpg"),
-                        type = Hitomi.Type.Hiyobi
-                    };
-                    Int64 size = 0;
+                    Hiyobi h = new Hiyobi();
+                    h.id = tk["id"].ToString();
+                    h.name = tk["title"].ToString();
+                    h.url = $"https://hiyobi.me/reader/{tk["id"]}";
+                    h.thumbnail = $"https://cdn.hiyobi.me/tn/{tk["id"]}.jpg";
+                    h.thumb = await ImageProcessor.LoadWebImageAsync($"https://cdn.hiyobi.me/tn/{tk["id"]}.jpg");
                     h.files = imgs.ToList().Select(x => $"https://cdn.hiyobi.me/data/{tk["id"]}/{x["name"]}").ToArray();
-                    h.FolderByte = size;
-                    h.SizePerPage = size / imgs.Count;
                     foreach (JToken tags in tk["tags"])
                     {
                         Tag tag = new Tag();
@@ -606,13 +443,13 @@ namespace HitomiViewer.UserControls
                         }
                         h.tags.Add(tag);
                     }
-                    MainWindow.MainPanel.Children.Add(new HitomiPanel(h, MainWindow));
+                    Global.MainWindow.MainPanel.Children.Add(new HitomiPanel(h));
                     Console.WriteLine($"Completed: https://cdn.hiyobi.me/tn/{tk["id"]}.jpg");
                 }
-                MainWindow.label.Visibility = Visibility.Hidden;
+                Global.MainWindow.label.Visibility = Visibility.Hidden;
             }));
         }
-        private void Encrypt_Click(object sender, RoutedEventArgs e)
+        public override void Encrypt_Click(object sender, RoutedEventArgs e)
         {
             string[] files = Directory.GetFiles(h.dir);
             foreach (string file in files)
@@ -629,7 +466,7 @@ namespace HitomiViewer.UserControls
             h.encrypted = true;
             Process.Start(h.dir);
         }
-        private void Decrypt_Click(object sender, RoutedEventArgs e)
+        public override void Decrypt_Click(object sender, RoutedEventArgs e)
         {
             bool err = FileDecrypt.TryFiles(h.dir);
             if (err)
@@ -642,14 +479,14 @@ namespace HitomiViewer.UserControls
                     if (FileDecrypt.TryFiles(h.dir, SHA256.Hash(password), excepts: new string[] { ".txt", ".json" })) break;
                 }
             }
-            h.thumb = ImageProcessor.ProcessEncrypt(File2.GetImages(h.dir).First());
+            h.thumbnail.preview_img = ImageProcessor.ProcessEncrypt(File2.GetImages(h.dir).First());
             h.files = h.files.Select(x => Path.Combine(Path.GetDirectoryName(x), Path.GetFileNameWithoutExtension(x))).ToArray();
             h.encrypted = false;
-            thumbNail.Source = h.thumb;
+            thumbNail.Source = h.thumbnail.preview_img;
             thumbNail.ToolTip = GetToolTip(panel.Height);
             Process.Start(h.dir);
         }
-        private void Favorite_Click(object sender, RoutedEventArgs e)
+        public override void Favorite_Click(object sender, RoutedEventArgs e)
         {
             Config cfg = new Config();
             JObject obj = cfg.Load();
@@ -661,7 +498,7 @@ namespace HitomiViewer.UserControls
             cfg.Save(obj);
             ContextSetup();
         }
-        private void FavoriteRemove_Click(object sender, RoutedEventArgs e)
+        public override void FavoriteRemove_Click(object sender, RoutedEventArgs e)
         {
             Config cfg = new Config();
             JObject obj = cfg.Load();
@@ -778,13 +615,13 @@ namespace HitomiViewer.UserControls
             }
             Process.Start(folder);
         }
-        private async void ImageDownloadCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
+        public override async void ImageDownloadCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
         {
-            h.thumbpath = h.files.First();
-            h.thumb = await ImageProcessor.ProcessEncryptAsync(h.thumbpath);
+            h.thumbnail.preview_url = h.files.First().url;
+            h.thumbnail.preview_img = await ImageProcessor.ProcessEncryptAsync(h.thumbnail.preview_url);
             Init();
         }
-        private void tagScroll_MouseWheel(object sender, MouseWheelEventArgs e)
+        public override void tagScroll_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             ScrollViewer scroll = Global.MainWindow.MainScroll;
             double offset = 0.45;
@@ -794,13 +631,13 @@ namespace HitomiViewer.UserControls
                 scroll.ScrollToVerticalOffset(scroll.VerticalOffset - (offset * e.Delta));
             e.Handled = true;
         }
-        private void thumbNail_MouseEnter(object sender, MouseEventArgs e)
+        public override void thumbNail_MouseEnter(object sender, MouseEventArgs e)
         {
             if (h.ugoiraImage != null)
                 Task.Factory.StartNew(() =>
                     Ugoira(this.Dispatcher));
         }
-        private void Ugoira(Dispatcher dispatcher)
+        public override void Ugoira(Dispatcher dispatcher)
         {
             if (this.Visibility != Visibility.Visible)
                 return;

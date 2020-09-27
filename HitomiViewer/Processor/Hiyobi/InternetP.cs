@@ -16,15 +16,14 @@ namespace HitomiViewer.Processor
     partial class InternetP
     {
         public async void HiyobiSearch(Action<string> callback) => callback(await HiyobiSearch());
-        public async Task<List<Hitomi>> HiyobiList()
+        public async Task<List<Hiyobi>> HiyobiList()
         {
-            List<Hitomi> output = new List<Hitomi>();
+            List<Hiyobi> output = new List<Hiyobi>();
             url = $"https://api.hiyobi.me/list/{index}";
             JObject obj = await LoadJObject();
             foreach (JToken item in obj["list"])
             {
-                Hitomi h = HiyobiParse(item);
-                h.type = Hitomi.Type.Hiyobi;
+                Hiyobi h = HiyobiParse(item);
                 output.Add(h);
             }
             return output;
@@ -70,7 +69,7 @@ namespace HitomiViewer.Processor
         public Hiyobi HiyobiParse(JToken item)
         {
             Hiyobi h = new Hiyobi();
-            h.authors = item["artists"].Select(x => x.StringValue("display")).ToArray();
+            h.authors.Set(item["artists"].Select(x => x.StringValue("display")));
             h.id = item.StringValue("id");
             h.language = item.StringValue("language");
             h.tags = item["tags"].Select(x => Tag.Parse(x.StringValue("display"))).ToList();

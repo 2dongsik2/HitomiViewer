@@ -172,11 +172,9 @@
       <DependentUpon>Settings.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\IgnoreWheelScrollViewer.cs" />
+    <Compile Include="UserControls\Panels\HitomiPanel.cs" />
     <Compile Include="UserControls\Panels\IHitomiPanel .xaml.cs">
       <DependentUpon>IHitomiPanel .xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UserControls\Panels\HitomiPanel.xaml.cs">
-      <DependentUpon>HitomiPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="Scripts\ExtensionMethods.cs" />
     <Compile Include="Scripts\Global.cs" />
@@ -215,10 +213,6 @@
     <Page Include="UserControls\Panels\IHitomiPanel .xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="UserControls\Panels\HitomiPanel.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -325,10 +319,6 @@
     <ProjectReference Include="..\Updater\Updater.csproj">
       <Project>{75dffafd-b3f3-41b3-938f-fb38ff4cb18e}</Project>
       <Name>Updater</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WebPTest\WebPTest.csproj">
-      <Project>{38700B2B-939E-439F-A975-E6FA91703BDB}</Project>
-      <Name>WebPTest</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

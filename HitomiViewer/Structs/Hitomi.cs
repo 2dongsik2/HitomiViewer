@@ -15,6 +15,48 @@ using System.Windows.Media.Imaging;
 
 namespace HitomiViewer
 {
+    public static class Extensions
+    {
+        public static T JsonParseFromName<T>(this T t, JToken obj)
+        {
+            var items = typeof(HiyobiGallery).GetProperties()
+                .Where(x => x.GetCustomAttributes(true)
+                .Where(y => y.GetType() == typeof(JsonInfo)).Any())
+                .ToList();
+            foreach (var item in items)
+            {
+                JsonInfo attr = (JsonInfo)item.GetCustomAttributes(true).Where(x => x is JsonInfo).First();
+                if (attr.ignore) continue;
+                item.SetValue(t, obj[item.Name].ToObject(item.PropertyType));
+            }
+            return t;
+        }
+        public static T JsonParseFromAttr<T>(this T t, JToken obj) where T : IHitomi
+        {
+            var items = typeof(HiyobiGallery).GetProperties()
+                .Where(x => x.GetCustomAttributes(true)
+                .Where(y => y.GetType() == typeof(JsonInfo)).Any())
+                .ToList();
+            foreach (var item in items)
+            {
+                JsonInfo attr = (JsonInfo)item.GetCustomAttributes(true).Where(x => x is JsonInfo).First();
+                if (attr.ignore) continue;
+                item.SetValue(t, obj[attr.path].ToObject(item.PropertyType));
+            }
+            return t;
+        }
+        public static void Save<T>(this T t, string path) where T : IHitomi => File.WriteAllText(path, JObject.FromObject(t).ToString());
+    }
+    public class JsonInfo : Attribute
+    {
+        public string path;
+        public bool ignore = false;
+
+        public JsonInfo(string path = null)
+        {
+            if (path != null) this.path = path;
+        }
+    }
     public class IHitomi
     {
         public class DisplayValue
@@ -30,23 +72,38 @@ namespace HitomiViewer
         public class Authors
         {
             private string[] authors;
-            public void SetAuthor(string[] authors) => this.authors = authors;
-            public void SetAuthor(IEnumerable<string> authors) => this.authors = authors.ToArray();
-            public T GetAuthor<T>() where T : struct
+            public void Set(string[] authors) => this.authors = authors;
+            public void Set(IEnumerable<string> authors) => this.authors = authors.ToArray();
+            public T Get<T>()
             {
                 if (typeof(T) == typeof(string))
                     return (T)Convert.ChangeType(string.Join("", authors), typeof(T));
                 else if (typeof(T) == typeof(string[]))
                     return (T)Convert.ChangeType(authors, typeof(T));
+                else if (typeof(T) == typeof(List<string>))
+                    return (T)Convert.ChangeType(authors.ToList(), typeof(T));
                 else
-                    return default;
+                    return (T)Convert.ChangeType(authors, typeof(T));
             }
+            public IEnumerator<string> GetEnumerator()
+            {
+                for (int i = 0; i < authors.Length; i++)
+                    yield return authors[i];
+            }
+        }
+        public class InFile
+        {
+            public string dir { get; set; }
+            public bool encrypted { get; set; }
         }
 
         public string id { get; set; }
+        public string url { get; set; }
         public string name { get; set; }
         public Thumbnail thumbnail { get; set; }
         public Authors authors = new Authors();
+        [JsonInfo(ignore = true)]
+        public InFile inFile = null;
     }
     public class Hitomi : IHitomi
     {
@@ -61,7 +118,7 @@ namespace HitomiViewer
         }
         public HType type { get; set; }
         public HTag tags { get; set; }
-        public HFile files { get; set; }
+        public HFile[] files { get; set; }
 
         public class HType
         {
@@ -105,6 +162,7 @@ namespace HitomiViewer
         }
         public class HTag
         {
+            public TType ttype = TType.tag;
             public string type { get; set; }
             public string tag { get; set; }
             public string url { get; set; }
@@ -134,6 +192,47 @@ namespace HitomiViewer
                 }
                 return tag;
             }
+            public class TType
+            {
+                public static readonly TType tag = new TType(0, "tag");
+                public static readonly TType female = new TType(1, "female");
+                public static readonly TType male = new TType(2, "male");
+                public static readonly TType language = new TType(3, "language");
+                public static readonly TType none = tag;
+
+                public static IEnumerable<TType> Values
+                {
+                    get
+                    {
+                        yield return tag;
+                        yield return female;
+                        yield return male;
+                        yield return language;
+                    }
+                }
+
+                public static TType Find(string name)
+                {
+                    foreach (TType type in Values)
+                        if (type.Name.Equals(name))
+                            return type;
+                    return none;
+                }
+                public static TType Find(int index)
+                {
+                    foreach (TType type in Values)
+                        if (type.Index.Equals(index))
+                            return type;
+                    return none;
+                }
+
+                public int Index { get; private set; }
+                public string Name { get; private set; }
+
+                TType(int index, string name) => (Index, Name) = (index, name);
+
+                public override string ToString() => Name;
+            }
         }
         public class HFile
         {
@@ -144,19 +243,10 @@ namespace HitomiViewer
             public bool hasavif { get; set; }
             public bool hasavifsmalltn { get; set; }
             public bool haswebp { get; set; }
-
-            public static HFile Parse(JToken obj)
+            [JsonInfo(ignore = true)]
+            public string url
             {
-                return new HFile
-                {
-                    hash = obj.StringValue("hash"),
-                    name = obj.StringValue("name"),
-                    width = obj.IntValue("width") ?? 0,
-                    height = obj.IntValue("height") ?? 0,
-                    hasavif = obj.BoolSValue("hasavif") ?? false,
-                    hasavifsmalltn = obj.BoolSValue("hasavifsmalltn") ?? false,
-                    haswebp = obj.BoolSValue("haswebp") ?? false
-                }
+                get => new InternetP().UrlFromUrlFromHash(this);
             }
         }
     }

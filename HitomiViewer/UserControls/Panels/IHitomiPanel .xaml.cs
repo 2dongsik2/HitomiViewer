@@ -38,9 +38,8 @@ namespace HitomiViewer.UserControls
     public partial class IHitomiPanel : UserControl
     {
         public Hitomi h;
-        private MainWindow MainWindow;
         public bool large;
-        public bool afterLoad;
+        public bool file;
         public bool blur;
         public IHitomiPanel()
         {
@@ -64,11 +63,11 @@ namespace HitomiViewer.UserControls
 
         public ToolTip GetToolTip(double height)
         {
-            if (h.thumb == null) return null;
+            if (h.thumbnail.preview_img == null) return null;
             if (!thumbNail.IsVisible) return null;
             //b = 비율
             //Magnif = 배율
-            double b = height / h.thumb.Height;
+            double b = height / h.thumbnail.preview_img.Height;
             double top = thumbNail.PointToScreen(new Point(0, 0)).Y;
             double bottom = top + thumbNail.ActualHeight;
             double WorkHeight = SystemParameters.WorkArea.Bottom;
@@ -85,7 +84,7 @@ namespace HitomiViewer.UserControls
             {
                 image.SetValue(Image.HeightProperty, size);
                 image.SetValue(Image.HorizontalAlignmentProperty, HorizontalAlignment.Left);
-                image.SetValue(Image.SourceProperty, h.thumb);
+                image.SetValue(Image.SourceProperty, h.thumbnail.preview_img);
             }
             FrameworkElementFactory elemborder = new FrameworkElementFactory(typeof(Border));
             {
@@ -109,39 +108,8 @@ namespace HitomiViewer.UserControls
         }
 
         public virtual void ChangeColor() { }
-        public static void ChangeColor(HitomiPanel hpanel)
-        {
-            DockPanel panel = hpanel.panel as DockPanel;
 
-            Border border = panel.Children[0] as Border;
-            DockPanel InfoPanel = panel.Children[1] as DockPanel;
-
-            StackPanel bottomPanel = InfoPanel.Children[1] as StackPanel;
-            StackPanel authorsStackPanel = InfoPanel.Children[2] as StackPanel;
-
-            DockPanel authorsPanel = authorsStackPanel.Children[0] as DockPanel;
-
-            Label nameLabel = InfoPanel.Children[0] as Label;
-
-            Label sizeLabel = bottomPanel.Children[0] as Label;
-            Label pageLabel = bottomPanel.Children[2] as Label;
-            Label sizeperpageLabel = bottomPanel.Children[4] as Label;
-
-            StackPanel tagPanel = InfoPanel.Children[2] as StackPanel;
-
-            panel.Background = new SolidColorBrush(Global.background);
-            border.Background = new SolidColorBrush(Global.imagecolor);
-            InfoPanel.Background = new SolidColorBrush(Global.Menuground);
-            bottomPanel.Background = new SolidColorBrush(Global.Menuground);
-            nameLabel.Foreground = new SolidColorBrush(Global.fontscolor);
-            sizeLabel.Foreground = new SolidColorBrush(Global.fontscolor);
-            pageLabel.Foreground = new SolidColorBrush(Global.fontscolor);
-            sizeperpageLabel.Foreground = new SolidColorBrush(Global.fontscolor);
-            authorsPanel.Children.Cast<UIElement>().Select(x => (x as Label).Foreground = new SolidColorBrush(Global.artistsclr));
-            tagPanel.Background = new SolidColorBrush(Global.Menuground);
-        }
-
-        public virtual async void HitomiPanel_Loaded(object sender, RoutedEventArgs e) { }
+        public virtual void HitomiPanel_Loaded(object sender, RoutedEventArgs e) { }
 
         public virtual void Folder_Remove_Click(object sender, RoutedEventArgs e) { }
         public virtual void Folder_Open_Click(object sender, RoutedEventArgs e) { }
@@ -154,14 +122,14 @@ namespace HitomiViewer.UserControls
         public virtual void Decrypt_Click(object sender, RoutedEventArgs e) { }
         public virtual void Favorite_Click(object sender, RoutedEventArgs e) { }
         public virtual void FavoriteRemove_Click(object sender, RoutedEventArgs e) { }
-        public virtual async void authorLabel_MouseDown(object sender, MouseButtonEventArgs e) { }
-        public virtual async void DownloadData_Click(object sender, RoutedEventArgs e) { }
-        public virtual async void DownloadImage_Click(object sender, RoutedEventArgs e) { }
-        public virtual async void ImageDownloadCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e) { }
+        public virtual void authorLabel_MouseDown(object sender, MouseButtonEventArgs e) { }
+        public virtual void DownloadData_Click(object sender, RoutedEventArgs e) { }
+        public virtual void DownloadImage_Click(object sender, RoutedEventArgs e) { }
+        public virtual void ImageDownloadCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e) { }
         public virtual void tagScroll_MouseWheel(object sender, MouseWheelEventArgs e) { }
         public virtual void thumbNail_MouseEnter(object sender, MouseEventArgs e) { }
 
-        public virtual async void AtHitomi_Click(object sender, RoutedEventArgs e) { }
+        public virtual void AtHitomi_Click(object sender, RoutedEventArgs e) { }
     }
 }
 #pragma warning restore CS0618 // 형식 또는 멤버는 사용되지 않습니다.
