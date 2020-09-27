@@ -17,6 +17,7 @@ namespace HitomiViewer
         public int uid { get; set; }
         [JsonInfo("language")]
         public string language { get; set; }    
+        public DisplayValue[] artists { get; set; }
         public DisplayValue[] characters { get; set; }
         public DisplayValue[] groups { get; set; }
         public DisplayValue[] parodys { get; set; }

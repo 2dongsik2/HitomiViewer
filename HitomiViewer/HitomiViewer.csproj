@@ -316,6 +316,10 @@
     <Resource Include="Resources\loading2.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Modules\WebP-wrapper\WebPTest\WebPTest.csproj">
+      <Project>{38700B2B-939E-439F-A975-E6FA91703BDB}</Project>
+      <Name>WebPTest</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Updater\Updater.csproj">
       <Project>{75dffafd-b3f3-41b3-938f-fb38ff4cb18e}</Project>
       <Name>Updater</Name>

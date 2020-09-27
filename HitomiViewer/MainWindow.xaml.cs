@@ -144,7 +144,8 @@ namespace HitomiViewer
         }
         public void LoadHitomi(string[] files)
         {
-            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => label.Visibility = Visibility.Hidden));
+            /*
+             Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => label.Visibility = Visibility.Hidden));
             if (files.Length <= 0)
             {
                 Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => label.Visibility = Visibility.Hidden));
@@ -209,7 +210,7 @@ namespace HitomiViewer
                 }).Pagination(SelectedPage);
                 int pages = (int)Math.Ceiling(files.Length / ((double)Page_itemCount));
                 pagination(pages);
-            }));
+            }));*/
         }
 
         public int GetPage() => (int) new CountBox("페이지", "원하는 페이지 수", 1).ShowDialog();
@@ -228,43 +229,15 @@ namespace HitomiViewer
 
         public void HiyobiMain(int index)
         {
-            InternetP parser = new InternetP(url: "https://api.hiyobi.me/list/" + index);
-            HiyobiLoader hiyobi = new HiyobiLoader();
-            hiyobi.FastDefault();
-            hiyobi.pagination = new CommonLoader().Search((int i) =>
-            {
-                MainPanel.Children.Clear();
-                LabelSetup();
-                HiyobiMain(i);
-            }).Pagination(index);
-            parser.LoadJObject(hiyobi.FastParser);
+            
         }
         public void HitomiMain(int index)
         {
-            HitomiLoader hitomi = new HitomiLoader();
-            hitomi.index = index;
-            hitomi.count = (int)Page_itemCount;
-            hitomi.pagination = new CommonLoader().Search((int i) =>
-            {
-                MainPanel.Children.Clear();
-                LabelSetup();
-                HitomiMain(i);
-            }).Pagination(hitomi.index);
-            hitomi.FastDefault();
-            hitomi.FastParser();
+            
         }
         public void HiyobiSearch(List<string> keyword, int index)
         {
-            InternetP parser = new InternetP(keyword: keyword, index: index);
-            HiyobiLoader hiyobi = new HiyobiLoader();
-            hiyobi.FastDefault();
-            hiyobi.pagination = new CommonLoader().Search((int i) =>
-            {
-                MainPanel.Children.Clear();
-                LabelSetup();
-                HiyobiSearch(keyword, i);
-            }).Pagination(index);
-            parser.HiyobiSearch(data => new InternetP(data: data).ParseJObject(hiyobi.FastParser));
+            
         }
         public void HitomiSearch(string[] tags, int index)
         {
@@ -523,12 +496,11 @@ namespace HitomiViewer
             {
                 MainPanel.Children.Clear();
                 InternetP parser = new InternetP(index: number);
-                Tuple<bool, Hitomi> data = await parser.isHiyobiData();
+                Tuple<bool, HiyobiGallery> data = await parser.isHiyobiData();
                 bool result = data.Item1;
-                Hitomi h = data.Item2;
+                HiyobiGallery h = data.Item2;
                 if (!result)
-                    h = await parser.HitomiData();
-                MainPanel.Children.Add(new HitomiPanel(h, this, true));
+                    MainPanel.Children.Add(new HitomiPanel(await parser.HitomiData(), true));
             }
             else File_Search_Button_Click(sender, e);
         }
@@ -605,7 +577,7 @@ namespace HitomiViewer
             parser.update = (Hitomi h, int index, int max) =>
             {
                 label.Content = $"{index}/{max}";
-                MainPanel.Children.Add(new HitomiPanel(h, this));
+                MainPanel.Children.Add(new HitomiPanel(h));
             };
             parser.end = () => label.Visibility = Visibility.Collapsed;
             await parser.LoadCompre(favs);
@@ -662,6 +634,7 @@ namespace HitomiViewer
         }
         private async void ExportNumber_Click(object sender, RoutedEventArgs e)
         {
+            /*
             JArray export = new JArray();
             foreach (string item in Directory.GetDirectories(path))
             {
@@ -688,9 +661,11 @@ namespace HitomiViewer
             sfd.Filter = "번호 파일|*.json";
             if (!sfd.ShowDialog() ?? false) return;
             File.WriteAllText(sfd.FileName, export.ToString());
+            */
         }
         private async void ImportNumber_Click(object sender, RoutedEventArgs e)
         {
+            /*
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "번호 파일|*.json";
             if (!ofd.ShowDialog() ?? false) return;
@@ -721,6 +696,7 @@ namespace HitomiViewer
             {
                 MessageBox.Show("잘못된 형식 입니다.");
             }
+            */
         }
         private void CacheDownload_Click(object sender, RoutedEventArgs e)
         {
@@ -743,6 +719,7 @@ namespace HitomiViewer
         }
         private async void PixivFollow_Click(object sender, RoutedEventArgs e)
         {
+            /*
             if (Global.Account.Pixiv == null)
                 if (await Login() == false)
                     return;
@@ -751,9 +728,11 @@ namespace HitomiViewer
             PixivLoader loader = new PixivLoader();
             loader.Default()
                 .Parser(data);
+            */
         }
         private async void PixivRecommend_Click(object sender, RoutedEventArgs e)
         {
+            /*
             if (Global.Account.Pixiv == null)
                 if (await Login() == false)
                     return;
@@ -762,6 +741,7 @@ namespace HitomiViewer
             PixivLoader loader = new PixivLoader();
             loader.Default()
                 .Parser(data);
+            */
         }
         private void PixivUser_Search_Text_KeyDown(object sender, KeyEventArgs e)
         {
@@ -773,6 +753,7 @@ namespace HitomiViewer
         }
         public async void PixivUser_Search_Button_Click(object sender, RoutedEventArgs e)
         {
+            /*
             if (Global.Account.Pixiv == null)
                 if (await Login() == false)
                     return;
@@ -780,6 +761,7 @@ namespace HitomiViewer
             JObject data = await Global.Account.Pixiv.searchUser(PixivUser_Search_Text.Text);
             PixivLoader loader = new PixivLoader();
             loader.UserDefault().UserParser(data);
+            */
         }
         private void PixivIllust_Search_Text_KeyDown(object sender, KeyEventArgs e)
         {
@@ -791,6 +773,7 @@ namespace HitomiViewer
         }
         public async void PixivIllust_Search_Button_Click(object sender, RoutedEventArgs e)
         {
+            /*
             if (Global.Account.Pixiv == null)
                 if (await Login() == false)
                     return;
@@ -798,6 +781,7 @@ namespace HitomiViewer
             JObject data = await Global.Account.Pixiv.searchIllust(PixivIllust_Search_Text.Text);
             PixivLoader loader = new PixivLoader();
             loader.FastDefault().FastParser(data);
+            */
         }
         #endregion
     }

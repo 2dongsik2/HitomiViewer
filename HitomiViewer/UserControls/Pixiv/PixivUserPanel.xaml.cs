@@ -40,6 +40,7 @@ namespace HitomiViewer.UserControls
 
         private void Init()
         {
+            /*
             nameLabel.Content = user.user.name;
             follow.IsChecked = user.user.is_followed;
             if (user.user.is_followed)
@@ -112,6 +113,7 @@ namespace HitomiViewer.UserControls
                 PixivLoader loader = new PixivLoader();
                 loader.Default().Parser(data);
             };
+            */
         }
         private void Ugoira(Dispatcher dispatcher, PixivUgoira ugoiraImage, Image image)
         {

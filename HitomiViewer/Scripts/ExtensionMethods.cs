@@ -65,7 +65,7 @@ namespace ExtensionMethods
             Dictionary<string, Hitomi> hitomiKey = new Dictionary<string, Hitomi>();
             foreach (Hitomi h in hlist)
             {
-                string name = h.dir;
+                string name = h.url;
                 hitomiKey.Add(name, h);
             }
             string[] names = hitomiKey.Select(h => h.Key).ESort();
@@ -105,7 +105,7 @@ namespace ExtensionMethods
         
         public static Hitomi Copy(this Hitomi hitomi)
         {
-            return Hitomi.Copy(hitomi);
+            return null;//Hitomi.Copy(hitomi);
         }
         public static string RemoveSpace(this string s) => s.Replace(" ", string.Empty);
         #region URL

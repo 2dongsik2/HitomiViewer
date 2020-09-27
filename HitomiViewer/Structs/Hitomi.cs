@@ -17,6 +17,7 @@ namespace HitomiViewer
 {
     public static class Extensions
     {
+        [Obsolete]
         public static T JsonParseFromName<T>(this T t, JToken obj)
         {
             var items = typeof(HiyobiGallery).GetProperties()
@@ -31,6 +32,7 @@ namespace HitomiViewer
             }
             return t;
         }
+        [Obsolete]
         public static T JsonParseFromAttr<T>(this T t, JToken obj) where T : IHitomi
         {
             var items = typeof(HiyobiGallery).GetProperties()
@@ -51,6 +53,7 @@ namespace HitomiViewer
     {
         public string path;
         public bool ignore = false;
+        public Type Type = null;
 
         public JsonInfo(string path = null)
         {
@@ -117,7 +120,7 @@ namespace HitomiViewer
             set => name = value;
         }
         public HType type { get; set; }
-        public HTag tags { get; set; }
+        public HTag[] tags { get; set; }
         public HFile[] files { get; set; }
 
         public class HType

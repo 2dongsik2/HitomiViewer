@@ -37,7 +37,7 @@ namespace HitomiViewer.Processor
             HtmlDocument doc = new HtmlDocument();
             doc.LoadHtml(html);
             Hitomi h = new Hitomi();
-            h. = $"https://hitomi.la/reader/{index}.html";
+            h.url = $"https://hitomi.la/reader/{index}.html";
             HtmlNode name = doc.DocumentNode.SelectSingleNode("//h1[@class=\"lillie\"]");
             h.name = name.InnerText;
             HtmlNode image = doc.DocumentNode.SelectSingleNode("//div[@class=\"dj-img1\"]/img");
@@ -50,11 +50,11 @@ namespace HitomiViewer.Processor
             HtmlNodeCollection artists = doc.DocumentNode.SelectNodes("//div[@class=\"artist-list\"]/ul/li");
             if (artists != null)
             {
-                h.authors.SetAuthor(artists.Select(x => x.InnerText));
+                h.authors.Set(artists.Select(x => x.InnerText));
             }
             else
             {
-                h.authors.SetAuthor(new string[0]);
+                h.authors.Set(new string[0]);
             }
             HtmlNode table = doc.DocumentNode.SelectSingleNode("//table[@class=\"dj-desc\"]");
             for (var i = 0; i < table.ChildNodes.Count - 1; i += 2)
@@ -69,11 +69,9 @@ namespace HitomiViewer.Processor
         {
             url = $"https://ltn.hitomi.la/galleries/{index}.js";
             JObject info = await HitomiGalleryInfo();
-            h.tags = Hitomi.HTag.Parse(info);
+            h.tags = HitomiTags(info).ToArray();
             h.files = HitomiFiles(info).ToArray();
-            h.page = h.files.Length;
-            h.thumb = ImageProcessor.LoadWebImage("https:" + h.thumbpath);
-            h.Json = info;
+            h.thumbnail.preview_img = ImageProcessor.LoadWebImage("https:" + h.thumbnail.preview_url);
             return await HitomiGalleryData(h);
         }
         public async Task<JObject> HitomiGalleryInfo()
@@ -104,31 +102,11 @@ namespace HitomiViewer.Processor
             org.type = Hitomi.HType.Find(jObject.StringValue("type"));
             return org;
         }
-        public List<Tag> HitomiTags(JObject jObject) //반환값 변경으로 인한 코드 수정
+        public List<Hitomi.HTag> HitomiTags(JObject obj) //반환값 변경으로 인한 코드 수정
         {
-            List<Tag> tags = new List<Tag>();
-            foreach (JToken tag1 in jObject["tags"])
-            {
-                Tag tag = new Tag();
-                tag.types = Tag.Types.tag;
-                if (tag1["female"] != null || tag1["male"] != null)
-                {
-                    if (tag1.SelectToken("female") != null && tag1["female"].ToString() == "1")
-                        tag.types = Tag.Types.female;
-                    if (tag1.SelectToken("male") != null && tag1["male"].ToString() == "1")
-                        tag.types = Tag.Types.male;
-                    tag.full = tag.types.ToString() + ":" + tag1.StringValue("tag");
-                    tag.name = tag1.StringValue("tag");
-                }
-                else
-                {
-                    string org = tag1.StringValue("url");
-                    string type = org.Split('/').Skip(1).First();
-                    tag.name = tag1.StringValue("tag");
-                    tag.full = type + ":" + tag.name;
-                }
-                tags.Add(tag);
-            }
+            List<Hitomi.HTag> tags = new List<Hitomi.HTag>();
+            foreach (JToken tag1 in obj["tags"])
+                tags.Add(Hitomi.HTag.Parse(obj));
             return tags;
         }
         public List<Hitomi.HFile> HitomiFiles(JObject jObject)
@@ -136,7 +114,7 @@ namespace HitomiViewer.Processor
             List<Hitomi.HFile> files = new List<Hitomi.HFile>();
             foreach (JToken tk in jObject["files"])
             {
-                files.Add(new Hitomi.HFile().JsonParseFromName(tk))
+                files.Add(new Hitomi.HFile().JsonParseFromName(tk));
             }
             return files;
         }
@@ -423,9 +401,7 @@ namespace HitomiViewer.Processor
         public char SubdomainFromGalleryId(int g, int number_of_frontends)
         {
             if (adapose)
-            {
                 return '0';
-            }
 
             var o = g % number_of_frontends;
 

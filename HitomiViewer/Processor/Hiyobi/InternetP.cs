@@ -16,14 +16,14 @@ namespace HitomiViewer.Processor
     partial class InternetP
     {
         public async void HiyobiSearch(Action<string> callback) => callback(await HiyobiSearch());
-        public async Task<List<Hiyobi>> HiyobiList()
+        public async Task<List<HiyobiGallery>> HiyobiList()
         {
-            List<Hiyobi> output = new List<Hiyobi>();
+            List<HiyobiGallery> output = new List<HiyobiGallery>();
             url = $"https://api.hiyobi.me/list/{index}";
             JObject obj = await LoadJObject();
             foreach (JToken item in obj["list"])
             {
-                Hiyobi h = HiyobiParse(item);
+                HiyobiGallery h = HiyobiParse(item);
                 output.Add(h);
             }
             return output;
@@ -49,11 +49,11 @@ namespace HitomiViewer.Processor
             }
             return files;
         }
-        public async Task<Hiyobi> HiyobiDataNumber(int? index = null)
+        public async Task<HiyobiGallery> HiyobiDataNumber(int? index = null)
         {
             url = $"https://api.hiyobi.me/gallery/{index ?? this.index}";
             JObject obj = await LoadJObject();
-            Hiyobi h = HiyobiParse(obj);
+            HiyobiGallery h = HiyobiParse(obj);
             return h;
         }
         public async Task<string> HiyobiSearch()
@@ -66,13 +66,15 @@ namespace HitomiViewer.Processor
             var pageContents = await response.Content.ReadAsStringAsync();
             return pageContents;
         }
-        public Hiyobi HiyobiParse(JToken item)
+        public HiyobiGallery HiyobiParse(JToken item)
         {
-            Hiyobi h = new Hiyobi();
+            return item.ToObject<HiyobiGallery>();
+            /*
+            HiyobiGallery h = new HiyobiGallery();
             h.authors.Set(item["artists"].Select(x => x.StringValue("display")));
             h.id = item.StringValue("id");
             h.language = item.StringValue("language");
-            h.tags = item["tags"].Select(x => Tag.Parse(x.StringValue("display"))).ToList();
+            h.tags.JsonParseFromName(item["tags"]);
             if (item["artists"] != null)
                 h.artists = item["artists"].Select(x => new DisplayValue { Display = x.StringValue("display"), Value = x.StringValue("value") }).ToList();
             if (item["characters"] != null)
@@ -86,6 +88,7 @@ namespace HitomiViewer.Processor
             h.page = 0;
             h.AutoAuthor();
             return h;
+            */
         }
         public async Task<JArray> HiyobiTags()
         {
@@ -97,14 +100,14 @@ namespace HitomiViewer.Processor
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
-        public async Task<Tuple<bool, Hitomi>> isHiyobiData(int? index = null)
+        public async Task<Tuple<bool, HiyobiGallery>> isHiyobiData(int? index = null)
         {
             try
             {
-                Hitomi h = await HiyobiDataNumber(index);
-                return new Tuple<bool, Hitomi>(true, h);
+                HiyobiGallery h = await HiyobiDataNumber(index);
+                return new Tuple<bool, HiyobiGallery>(true, h);
             }
-            catch { return new Tuple<bool, Hitomi>(false, null); }
+            catch { return new Tuple<bool, HiyobiGallery>(false, null); }
         }
         public async Task<bool> isHiyobi(int? index = null)
         {

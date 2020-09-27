@@ -19,7 +19,7 @@ namespace HitomiViewer.Processor.Loaders
             this.update = (Hitomi h, int index, int max) =>
             {
                 Global.MainWindow.label.Content = $"{index}/{max}";
-                Global.MainWindow.MainPanel.Children.Add(new UserControls.HitomiPanel(h, Global.MainWindow, true, true));
+                Global.MainWindow.MainPanel.Children.Add(new UserControls.HitomiPanel(h, true, true));
             };
             return this;
         }
@@ -34,7 +34,7 @@ namespace HitomiViewer.Processor.Loaders
             this.update = (Hitomi h, int index, int max) =>
             {
                 Global.MainWindow.label.Content = $"{index}/{max}";
-                Global.MainWindow.MainPanel.Children.Add(new UserControls.HitomiPanel(h, Global.MainWindow, true));
+                Global.MainWindow.MainPanel.Children.Add(new UserControls.HitomiPanel(h, true));
             };
             this.end = () =>
             {
@@ -64,7 +64,6 @@ namespace HitomiViewer.Processor.Loaders
                 InternetP parser = new InternetP();
                 parser.index = ids[i];
                 Hitomi h = await parser.HitomiData();
-                h.type = Hitomi.Type.Hitomi;
                 h.id = ids[i].ToString();
                 update(h, i, ids.Count());
             }
@@ -81,7 +80,7 @@ namespace HitomiViewer.Processor.Loaders
             foreach (int id in ids)
             {
                 parser.index = id;
-                Hitomi h = await parser.HitomiData2();
+                Hitomi h = await parser.HitomiData();
                 update(h, ids.ToList().IndexOf(id), ids.Count());
             }
             end();
@@ -93,7 +92,7 @@ namespace HitomiViewer.Processor.Loaders
             for (int i = 0; i < ids.Length; i++)
             {
                 parser.index = ids[i];
-                Hitomi h = await parser.HitomiData2();
+                Hitomi h = await parser.HitomiData();
                 update(h, i, ids.Count());
             }
             end();
@@ -119,7 +118,7 @@ namespace HitomiViewer.Processor.Loaders
             this.update = (Hitomi h, int index, int max) =>
             {
                 Global.MainWindow.label.Content = $"{index}/{max}";
-                Global.MainWindow.MainPanel.Children.Add(new UserControls.HitomiPanel(h, Global.MainWindow, true, true));
+                Global.MainWindow.MainPanel.Children.Add(new UserControls.HitomiPanel(h, true, true));
             };
             this.end = () =>
             {

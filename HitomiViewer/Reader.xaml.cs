@@ -20,7 +20,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using WebPWrapper;
 
 namespace HitomiViewer
 {
@@ -61,9 +60,8 @@ namespace HitomiViewer
             this.Closing += (object sender, System.ComponentModel.CancelEventArgs e) =>
             {
                 window.Readers.Remove(this);
-                hitomi.images = new BitmapImage[] { };
             };
-            this.image.Source = hitomi.thumb;
+            this.image.Source = hitomi.thumbnail.preview_img;
             this.Title = hitomi.name;
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
             if (hitomi.files == null || hitomi.files.Length <= 0)
@@ -71,15 +69,9 @@ namespace HitomiViewer
                 MessageBox.Show("이미지를 불러올 수 없습니다.");
                 Close();
             }
-            if (hitomi.ugoiraImage != null)
-                Task.Factory.StartNew(() =>
-                {
-                    System.Threading.Thread.Sleep(1000);
-                    Ugoira(this.Dispatcher);
-                });
             new TaskFactory().StartNew(() => {
                 while (hitomi.files == null || hitomi.files.Length <= 0) { }
-                if (hitomi.thumb == null) this.image.Source = ImageProcessor.ProcessEncrypt(hitomi.files[0]);
+                if (hitomi.thumbnail.preview_img == null) this.image.Source = ImageProcessor.ProcessEncrypt(hitomi.files[0].url);
                 System.Threading.Thread.Sleep(100);
                 this.Dispatcher.Invoke(() =>
                 {
@@ -87,64 +79,18 @@ namespace HitomiViewer
                     this.WindowStyle = WindowStyle.None;
                     this.WindowState = WindowState.Maximized;
                 });
-            });
-            new TaskFactory().StartNew(async () =>
-            {
-                Uri uriResult;
-                bool result = Uri.TryCreate(hitomi.dir, UriKind.Absolute, out uriResult)
-                    && ((uriResult.Scheme == Uri.UriSchemeHttp) || (uriResult.Scheme == Uri.UriSchemeHttps));
-                if (result)
+                System.Threading.Thread.Sleep(500);
+                this.Dispatcher.Invoke(() =>
                 {
-                    try
-                    {
-                        this.Title = hitomi.name + " 0/" + (hitomi.files.Length - 1);
-                        for (int i = 0; i < hitomi.files.Length; i++)
-                        {
-                            this.Title = hitomi.name + " " + i + "/" + (hitomi.files.Length - 1);
-                            if (hitomi.images == null || hitomi.images.Length < hitomi.page)
-                                hitomi.images = new BitmapImage[hitomi.page];
-                            if (hitomi.images[i] == null)
-                            {
-                                BitmapImage image;
-                                if (hitomi.type == Hitomi.Type.Pixiv)
-                                    image = await ImageProcessor.PixivImage(hitomi.files[i]);
-                                else
-                                    image = await ImageProcessor.ProcessEncryptAsync(hitomi.files[i]);
-                                image.Freeze();
-                                hitomi.images[i] = image;
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                    }
-                }
+                    this.Activate();
+                    this.WindowStyle = WindowStyle.None;
+                    this.WindowState = WindowState.Maximized;
+                });
             });
-        }
-        private void Ugoira(Dispatcher dispatcher)
-        {
-            if (this.Visibility != Visibility.Visible || this.IsClosed)
-                return;
-            dispatcher.Invoke(() =>
-            {
-                if (hitomi.ugoiraImage.index >= hitomi.ugoiraImage.bytesofimages.Count)
-                    hitomi.ugoiraImage.index = 0;
-                this.image.Source = ImageProcessor.Bytes2Image2(hitomi.ugoiraImage.bytesofimages[hitomi.ugoiraImage.index]);
-            });
-            Thread.Sleep(hitomi.ugoiraImage.delays[hitomi.ugoiraImage.index++]);
-            Ugoira(dispatcher);
         }
         private void ClearMemory()
         {
-            for (int i = 0; i < hitomi.images.Length; i++)
-            {
-                if (page - 10 > i)
-                {
-                    hitomi.images[i] = null;
-                }
-            }
-            GC.Collect();
+
         }
 
         public void ChangeMode()
@@ -156,22 +102,16 @@ namespace HitomiViewer
         {
             if (e.Key == Key.Right)
             {
-                if (page < hitomi.page - 1)
-                {
-                    page++;
-                }
+                
             }
             else if (e.Key == Key.Left)
             {
-                if (page > 0)
-                {
-                    page--;
-                }
+                
             }
             if (e.Key == Key.Right || e.Key == Key.Left)
             {
                 PreLoad();
-                SetImage(hitomi.files[page]);
+                SetImage(hitomi.files[page].url);
             }
             if (e.Key == Key.F11)
             {
@@ -204,32 +144,7 @@ namespace HitomiViewer
             }
             else if (e.Key == Key.Enter)
             {
-                Uri uriResult;
-                bool result = Uri.TryCreate(hitomi.dir, UriKind.Absolute, out uriResult)
-                    && ((uriResult.Scheme == Uri.UriSchemeHttp) || (uriResult.Scheme == Uri.UriSchemeHttps));
-                if (result) {
-                    try
-                    {
-                        this.Title = hitomi.name + " 0/" + (hitomi.files.Length - 1);
-                        for (int i = 0; i < hitomi.files.Length; i++)
-                        {
-                            this.Title = hitomi.name + " " + i + "/" + (hitomi.files.Length - 1);
-                            if (hitomi.images == null || hitomi.images.Length < hitomi.page)
-                                hitomi.images = new BitmapImage[hitomi.page];
-                            if (hitomi.images[i] == null)
-                            {
-                                BitmapImage image;
-                                if (hitomi.type == Hitomi.Type.Pixiv)
-                                    image = await ImageProcessor.PixivImage(hitomi.files[i]);
-                                else
-                                    image = await ImageProcessor.ProcessEncryptAsync(hitomi.files[i]);
-                                image.Freeze();
-                                hitomi.images[i] = image;
-                            }
-                        }
-                    }
-                    catch { }
-                }
+                
             }
             if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.C)
             {
@@ -261,66 +176,13 @@ namespace HitomiViewer
 
         private async void SetImage(string link)
         {
-            BitmapImage LoadingImage = new BitmapImage(new Uri("/Resources/loading2.gif", UriKind.RelativeOrAbsolute));
-            LoadingImage.Freeze();
-            image.Source = LoadingImage;
-            WpfAnimatedGif.ImageBehavior.SetAnimatedSource(image, LoadingImage);
-            int copypage = page;
-            if (hitomi.images == null || hitomi.images.Length < hitomi.page)
-                hitomi.images = new BitmapImage[hitomi.page];
-            if (hitomi.images[copypage] == null)
-            {
-                BitmapImage image;
-                if (hitomi.type == Hitomi.Type.Pixiv)
-                    image = await ImageProcessor.PixivImage(link);
-                else
-                    image = await ImageProcessor.ProcessEncryptAsync(link);
-                image.Freeze();
-                if (hitomi.images.Length == hitomi.page)
-                    hitomi.images[copypage] = image;
-            }
-            if (copypage == page && hitomi.images.Length == hitomi.page)
-            {
-                if (link.EndsWith(".gif"))
-                    WpfAnimatedGif.ImageBehavior.SetAnimatedSource(image, hitomi.images[page]);
-                else
-                {
-                    WpfAnimatedGif.ImageBehavior.SetAnimatedSource(image, null);
-                    image.Source = hitomi.images[page];
-                }
-                ClearMemory();
-            }
-            /*
-            if (result)
-            {
-                int copypage = page;
-                if (hitomi.images == null)
-                    hitomi.images = new BitmapImage[hitomi.page];
-                if (hitomi.images[copypage] == null)
-                {
-                    if (link.EndsWith(".webp"))
-                        hitomi.images[copypage] = await LoadWebP(link);
-                    else
-                        hitomi.images[copypage] = await LoadWebImageAsync(link);
-                }
-                if (copypage == page)
-                    image.Source = hitomi.images[page];
-            }
-            if (!result)
-                image.Source = ImageSourceLoad(link);
-            */
-
-            //Bitmap test = new Bitmap(link);
-            //image.Source = ImageSourceFromBitmap(test);
+            
         }
         private void Image_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-                if (page < hitomi.page - 1)
-                {
-                    page++;
-                }
+
             }
             else if (e.RightButton == MouseButtonState.Pressed)
             {
@@ -335,7 +197,7 @@ namespace HitomiViewer
                 if (hitomi.files == null || hitomi.files.Length <= 0)
                     SetImage(new Uri("/Resources/loading2.png", UriKind.Relative));
                 else
-                    SetImage(hitomi.files[page]);
+                    SetImage(hitomi.files[page].url);
             }
         }
         private void PreLoad()

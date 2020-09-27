@@ -45,6 +45,7 @@ namespace HitomiViewer.Processor
         
         public async Task<List<Hitomi>> LoadCompre(List<string> items)
         {
+            /*
             List<Hitomi> res = new List<Hitomi>();
             start(items.Count);
             foreach (string item in items)
@@ -54,10 +55,12 @@ namespace HitomiViewer.Processor
                     Uri uri = new Uri(item);
                     if (uri.Host == "hiyobi.me")
                     {
+                        /*
                         string id = Path.GetFileNameWithoutExtension(uri.AbsolutePath);
                         Hitomi h = await new HiyobiLoader(text: id).Parser();
                         res.Add(h);
                         update(h, items.IndexOf(item), items.Count);
+                        /
                     }
                     if (uri.Host == "hitomi.la")
                     {
@@ -95,6 +98,8 @@ namespace HitomiViewer.Processor
             }
             end();
             return res;
+            */
+            return null;
         }
 
         public long GetWebSize(string url = null)

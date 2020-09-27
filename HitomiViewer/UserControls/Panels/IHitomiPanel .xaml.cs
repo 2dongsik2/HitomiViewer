@@ -57,7 +57,7 @@ namespace HitomiViewer.UserControls
                     reader.Show();
             };
         }
-        public virtual async void Init() { }
+        public virtual void Init() { }
 
         public virtual void ContextSetup() { }
 

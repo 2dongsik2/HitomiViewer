@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HitomiViewer.Pixiv
+namespace HitomiViewer.Structs.Pixiv
 {
     public class Pixiv : Api.Pixiv.Illust
     {
