@@ -11,7 +11,9 @@ namespace HitomiViewer.Processor.Parser
     {
         public static HiyobiGallery Parse(JToken obj)
         {
-            return obj.ToObject<HiyobiGallery>();
+            HiyobiGallery res = obj.ToObject<HiyobiGallery>();
+            res.thumbnail = new IHitomi.Thumbnail { preview_url = $"https://cdn.hiyobi.me/tn/{res.id}.jpg" };
+            return res;
         }
     }
 }

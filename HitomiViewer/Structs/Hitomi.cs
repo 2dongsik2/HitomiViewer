@@ -20,14 +20,12 @@ namespace HitomiViewer
         [Obsolete]
         public static T JsonParseFromName<T>(this T t, JToken obj)
         {
-            var items = typeof(HiyobiGallery).GetProperties()
-                .Where(x => x.GetCustomAttributes(true)
-                .Where(y => y.GetType() == typeof(JsonInfo)).Any())
+            var items = typeof(T).GetProperties()
                 .ToList();
             foreach (var item in items)
             {
-                JsonInfo attr = (JsonInfo)item.GetCustomAttributes(true).Where(x => x is JsonInfo).First();
-                if (attr.ignore) continue;
+                JsonInfo attr = item.GetCustomAttributes(true).Length >= 1 ? (JsonInfo)item.GetCustomAttributes(true).Where(x => x is JsonInfo).First() : null;
+                if (attr != null && attr.ignore) continue;
                 item.SetValue(t, obj[item.Name].ToObject(item.PropertyType));
             }
             return t;
@@ -70,7 +68,12 @@ namespace HitomiViewer
         public class Thumbnail
         {
             public string preview_url;
-            public BitmapImage preview_img;
+            private BitmapImage private_preview_img;
+            public BitmapImage preview_img
+            {
+                get => private_preview_img;
+                set => private_preview_img = value;
+            }
         }
         public class Authors
         {
@@ -103,7 +106,7 @@ namespace HitomiViewer
         public string id { get; set; }
         public string url { get; set; }
         public string name { get; set; }
-        public Thumbnail thumbnail { get; set; }
+        public Thumbnail thumbnail = new Thumbnail();
         public Authors authors = new Authors();
         [JsonInfo(ignore = true)]
         public InFile inFile = null;
@@ -174,7 +177,7 @@ namespace HitomiViewer
                 get => type + ":" + tag;
             }
 
-            public static HTag Parse(JObject obj)
+            public static HTag Parse(JToken obj)
             {
                 HTag tag = new HTag();
                 if (obj["female"] != null || obj["male"] != null)

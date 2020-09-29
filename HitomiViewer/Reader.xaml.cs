@@ -31,6 +31,7 @@ namespace HitomiViewer
         private Hitomi hitomi;
         private MainWindow window;
         private int page;
+        private BitmapImage[] images;
         public bool IsClosed { get; private set; }
 
         protected override void OnSourceInitialized(EventArgs e)
@@ -49,6 +50,7 @@ namespace HitomiViewer
             this.hitomi = hitomi;
             this.window = Global.MainWindow;
             this.page = 0;
+            this.images = new BitmapImage[hitomi.files.Length];
             InitializeComponent();
             Init();
         }
@@ -102,16 +104,22 @@ namespace HitomiViewer
         {
             if (e.Key == Key.Right)
             {
-                
+                if (page < hitomi.files.Length - 1)
+                {
+                    page++;
+                }
             }
             else if (e.Key == Key.Left)
             {
-                
+                if (page > 0)
+                {
+                    page--;
+                }
             }
             if (e.Key == Key.Right || e.Key == Key.Left)
             {
                 PreLoad();
-                SetImage(hitomi.files[page].url);
+                SetImage(hitomi.files[page]);
             }
             if (e.Key == Key.F11)
             {
@@ -174,15 +182,42 @@ namespace HitomiViewer
             image.Source = src;
         }
 
-        private async void SetImage(string link)
+        private async void SetImage(Hitomi.HFile file)
         {
-            
+            BitmapImage LoadingImage = new BitmapImage(new Uri("/Resources/loading2.gif", UriKind.RelativeOrAbsolute));
+            LoadingImage.Freeze();
+            image.Source = LoadingImage;
+            WpfAnimatedGif.ImageBehavior.SetAnimatedSource(image, LoadingImage);
+            int copypage = page;
+            if (images == null || images.Length < hitomi.files.Length)
+                images = new BitmapImage[hitomi.files.Length];
+            if (images[copypage] == null)
+            {
+                BitmapImage image = await ImageProcessor.ProcessEncryptAsync(file.url);
+                image.Freeze();
+                if (images.Length == hitomi.files.Length)
+                    images[copypage] = image;
+            }
+            if (copypage == page && images.Length == hitomi.files.Length)
+            {
+                if (file.url.EndsWith(".gif"))
+                    WpfAnimatedGif.ImageBehavior.SetAnimatedSource(image, images[page]);
+                else
+                {
+                    WpfAnimatedGif.ImageBehavior.SetAnimatedSource(image, null);
+                    image.Source = images[page];
+                }
+                ClearMemory();
+            }
         }
         private void Image_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-
+                if (page < hitomi.files.Length - 1)
+                {
+                    page++;
+                }
             }
             else if (e.RightButton == MouseButtonState.Pressed)
             {
@@ -197,7 +232,7 @@ namespace HitomiViewer
                 if (hitomi.files == null || hitomi.files.Length <= 0)
                     SetImage(new Uri("/Resources/loading2.png", UriKind.Relative));
                 else
-                    SetImage(hitomi.files[page].url);
+                    SetImage(hitomi.files[page]);
             }
         }
         private void PreLoad()

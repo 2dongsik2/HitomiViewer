@@ -46,7 +46,7 @@ namespace HitomiViewer.Processor
                 }
                 catch
                 {
-                    return ProcessFile(url);
+                    return ProcessEncrypt(url);
                 }
             }
             return ProcessFile(url);
@@ -225,6 +225,7 @@ namespace HitomiViewer.Processor
                 if (string.IsNullOrEmpty(url))
                     return null;
                 System.Net.WebClient wc = new System.Net.WebClient();
+                wc.Headers.Add("Referer", new Uri(url).Host);
                 Byte[] MyData = await wc.DownloadDataTaskAsync(url);
                 wc.Dispose();
                 BitmapImage bimgTemp = new BitmapImage();
@@ -271,7 +272,7 @@ namespace HitomiViewer.Processor
                 if (string.IsNullOrEmpty(url))
                     return null;
                 System.Net.WebClient wc = new System.Net.WebClient();
-                wc.Headers.Add("Referer", "https://hitomi.la/");
+                wc.Headers.Add("Referer", "https://" + new Uri(url).Host);
                 Byte[] MyData = await wc.DownloadDataTaskAsync(url);
                 wc.Dispose();
                 WebP webP = new WebP();

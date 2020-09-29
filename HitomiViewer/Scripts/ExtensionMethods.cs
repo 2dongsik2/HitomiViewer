@@ -148,6 +148,24 @@ namespace ExtensionMethods
                 ).ToArray();
             return "?" + string.Join("&", array);
         }
+        public static string GetSubDomain(this Uri url)
+        {
+
+            if (url.HostNameType == UriHostNameType.Dns)
+            {
+
+                string host = url.Host;
+
+                var nodes = host.Split('.');
+                int startNode = 0;
+                if (nodes[0] == "www") startNode = 1;
+
+                return string.Format("{0}.{1}", nodes[startNode], nodes[startNode + 1]);
+
+            }
+
+            return null;
+        }
         #endregion
 
         #region JSON
@@ -211,6 +229,8 @@ namespace ExtensionMethods
             if (config[path] == null) return null;
             if (config[path].Type == JTokenType.Integer)
                 return Convert.ToBoolean(int.Parse(config[path].ToString()));
+            if (config[path].ToString() == "")
+                return false;
             if (config[path].ToString() == "1")
                 return true;
             if (config[path].ToString() == "0")

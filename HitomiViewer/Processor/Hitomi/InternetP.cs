@@ -40,8 +40,8 @@ namespace HitomiViewer.Processor
             h.url = $"https://hitomi.la/reader/{index}.html";
             HtmlNode name = doc.DocumentNode.SelectSingleNode("//h1[@class=\"lillie\"]");
             h.name = name.InnerText;
-            HtmlNode image = doc.DocumentNode.SelectSingleNode("//div[@class=\"dj-img1\"]/img");
-            image = image ?? doc.DocumentNode.SelectSingleNode("//div[@class=\"cg-img1\"]/img");
+            HtmlNode image = doc.DocumentNode.SelectSingleNode("//div[@class=\"dj-img1\"]/picture/img");
+            image = image ?? doc.DocumentNode.SelectSingleNode("//div[@class=\"cg-img1\"]/picture/img");
             h.thumbnail.preview_url = image.GetAttributeValue("src", "");
             if (!(h.thumbnail.preview_url.StartsWith("https:") || h.thumbnail.preview_url.StartsWith("http:")))
                 h.thumbnail.preview_url = "https:" + h.thumbnail.preview_url;
@@ -65,13 +65,13 @@ namespace HitomiViewer.Processor
             }
             return h;
         }
-        public async Task<Hitomi> HitomiData2(Hitomi h)
+        public async Task<Hitomi> HitomiData2(Hitomi h, int? index = null)
         {
-            url = $"https://ltn.hitomi.la/galleries/{index}.js";
+            url = $"https://ltn.hitomi.la/galleries/{index ?? this.index}.js";
             JObject info = await HitomiGalleryInfo();
             h.tags = HitomiTags(info).ToArray();
             h.files = HitomiFiles(info).ToArray();
-            h.thumbnail.preview_img = ImageProcessor.LoadWebImage("https:" + h.thumbnail.preview_url);
+            h.thumbnail.preview_img = await ImageProcessor.LoadWebImageAsync("https:" + h.thumbnail.preview_url);
             return await HitomiGalleryData(h);
         }
         public async Task<JObject> HitomiGalleryInfo()
@@ -105,8 +105,8 @@ namespace HitomiViewer.Processor
         public List<Hitomi.HTag> HitomiTags(JObject obj) //반환값 변경으로 인한 코드 수정
         {
             List<Hitomi.HTag> tags = new List<Hitomi.HTag>();
-            foreach (JToken tag1 in obj["tags"])
-                tags.Add(Hitomi.HTag.Parse(obj));
+            foreach (JToken tag in obj["tags"])
+                tags.Add(Hitomi.HTag.Parse(tag));
             return tags;
         }
         public List<Hitomi.HFile> HitomiFiles(JObject jObject)
@@ -327,9 +327,17 @@ namespace HitomiViewer.Processor
             return galleryids.ToArray();
         }
 
+        public string GetDirFromHFile(Hitomi.HFile file)
+        {
+            if (file.hasavif)
+                return "avif";
+            if (file.haswebp)
+                return "webp";
+            return null;
+        }
         public string UrlFromUrlFromHash(Hitomi.HFile file)
         {
-            return UrlFromUrl(UrlFromHash(file.name, file.hash));
+            return UrlFromUrl(UrlFromHash(file.name, file.hash, GetDirFromHFile(file)));
         }
         public string ImageUrlFromImage(string name, string hash, bool haswebp, bool no_webp)
         {

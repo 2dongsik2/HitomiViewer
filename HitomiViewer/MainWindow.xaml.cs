@@ -59,6 +59,7 @@ namespace HitomiViewer
             //new Config().GetConfig().Save();
             //CheckUpdate.Auto();
             //HiyobiTags.LoadTags();
+            Global.Setup();
             Account.Load();
             InitializeComponent();
             PluginHandler.FireOnInit(this);

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace HitomiViewer
@@ -40,6 +41,7 @@ namespace HitomiViewer
         public static bool CacheSearch = false;
         public static bool OriginThumb = false;
         public static Dispatcher dispatcher;
+        public static BitmapImage NoImage { private get; set; }
 
         public class Config
         {
@@ -49,6 +51,11 @@ namespace HitomiViewer
         public class Account
         {
             public static Api.Pixiv Pixiv;
+        }
+
+        public static void Setup()
+        {
+            NoImage = Processor.ImageProcessor.FromResource("NoImage.jpg");
         }
     }
 }

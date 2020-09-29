@@ -45,6 +45,7 @@ namespace HitomiViewer.UserControls
             this.file = file;
             this.blur = blur;
             this.h = h;
+            base.h = h;
             InitializeComponent();
             Init();
             InitEvent();
@@ -58,95 +59,20 @@ namespace HitomiViewer.UserControls
                 if (!reader.IsClosed)
                     reader.Show();
             };
-            /*
-            if ((h.type != Hitomi.Type.Pixiv && h.type != Hitomi.Type.Folder) || (!afterLoad && h.ugoiraImage == null))
-                thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
-            else if (h.type == Hitomi.Type.Folder)
-            {
-                if (ftype != Hitomi.Type.Pixiv || h.ugoiraImage == null)
-                    thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
-            }
-            */
         }
         public override async void Init()
         {
             PluginHandler.FireOnHitomiPanelInit(this);
-            if (h.thumbnail.preview_img == null)
-            {
-                if (h.thumbnail.preview_url == null)
-                    h.thumbnail.preview_img = ImageProcessor.FromResource("NoImage.jpg");
-                else
-                    h.thumbnail.preview_img = await ImageProcessor.ProcessEncryptAsync(h.thumbnail.preview_url);
-            }
-            panel.Height = 100;
             thumbNail.Source = h.thumbnail.preview_img;
             thumbBrush.ImageSource = h.thumbnail.preview_img;
-
-            authorsPanel.Children.Clear();
-            authorsPanel.Children.Add(new Label { Content = "작가 :" });
-            tagPanel.Children.Clear();
-            if (blur)
-                thumbNail.BitmapEffect = new BlurBitmapEffect { Radius = 5, KernelType = KernelType.Gaussian };
-
-            pageLabel.Content = h.files.Length + "p";
-
-            foreach (Hitomi.HTag tag in h.tags)
-            {
-                tag tagP = new tag
-                {
-                    TagName = tag.tag
-                };
-                if (tag.ttype == Hitomi.HTag.TType.female)
-                    tagP.TagColor = new SolidColorBrush(Color.FromRgb(255, 94, 94));
-                else if (tag.ttype == Hitomi.HTag.TType.male)
-                    tagP.TagColor = new SolidColorBrush(Color.FromRgb(65, 149, 244));
-                else
-                    tagP.TagColor = new SolidColorBrush(Color.FromRgb(153, 153, 153));
-                tagPanel.Children.Add(tagP);
-            }
-
-            if (large)
-            {
-                panel.Height += 50;
-                if (h.authors != null)
-                {
-                    authorsStackPanel.Visibility = Visibility.Visible;
-                    foreach (string artist in h.authors)
-                    {
-                        if (h.authors.Get<List<string>>().IndexOf(artist) != 0)
-                        {
-                            Label dot = new Label();
-                            dot.Content = ", ";
-                            dot.Padding = new Thickness(0, 5, 2.5, 5);
-                            authorsPanel.Children.Add(dot);
-                        }
-                        Label lb = new Label();
-                        lb.Content = artist;
-                        lb.Foreground = new SolidColorBrush(Global.artistsclr);
-                        lb.Cursor = Cursors.Hand;
-                        lb.MouseDown += authorLabel_MouseDown;
-                        lb.Padding = new Thickness(0, 5, 0, 5);
-                        authorsPanel.Children.Add(lb);
-                    }
-                }
-            }
-
-            thumbNail.ToolTip = GetToolTip(panel.Height);
-            nameLabel.Width = panel.Width - border.Width;
-            nameLabel.Content = h.name;
-            ContextSetup();
-            ChangeColor();
             PluginHandler.FireOnHitomiPanelDelayInit(this);
         }
 
         public override void ContextSetup()
         {
-            Favorite.Visibility = Visibility.Visible;
-            FavoriteRemove.Visibility = Visibility.Collapsed;
             Folder_Remove.Visibility = Visibility.Collapsed;
             Folder_Hiyobi_Search.Visibility = Visibility.Collapsed;
             Hiyobi_Download.Visibility = Visibility.Collapsed;
-            Hitomi_Download.Visibility = Visibility.Visible;
             Pixiv_Download.Visibility = Visibility.Collapsed;
             AtHitomi.Visibility = Visibility.Collapsed;
             Encrypt.Visibility = Visibility.Collapsed;
@@ -174,6 +100,11 @@ namespace HitomiViewer.UserControls
             {
                 Favorite.Visibility = Visibility.Collapsed;
                 FavoriteRemove.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                Favorite.Visibility = Visibility.Visible;
+                FavoriteRemove.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -229,28 +160,19 @@ namespace HitomiViewer.UserControls
 
         public override async void HitomiPanel_Loaded(object sender, RoutedEventArgs e)
         {
+            thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
             this.nameLabel.Content = h.name + " (로딩중)";
             InternetP parser = new InternetP();
-            parser.url = $"https://ltn.hitomi.la/galleries/{h.id}.js";
-            JObject info = await parser.HitomiGalleryInfo();
-            h.tags = parser.HitomiTags(info).ToArray();
-            h.files = parser.HitomiFiles(info).ToArray();
-            h = await parser.HitomiGalleryData(h);
-            if (!(Global.OriginThumb && h.files != null && h.files[0] != null))
-                h.thumbnail.preview_img = await ImageProcessor.ProcessEncryptAsync(h.thumbnail.preview_url.https());
-            thumbNail.ToolTip = GetToolTip(panel.Height);
-            thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
-            if (Global.OriginThumb &&
-                h.files != null &&
-                h.files.Length >= 1 &&
-                h.files[0] != null)
+            h = await parser.HitomiData2(h, int.Parse(h.id));
+            if (Global.OriginThumb && h.files != null && h.files.Length >= 1 && h.files[0] != null)
             {
                 this.nameLabel.Content = h.name + " (썸네일 로딩중)";
                 ImageProcessor.ProcessEncryptAsync(h.files[0].url).then((BitmapImage image) =>
                 {
                     h.thumbnail.preview_img = image;
-                    this.nameLabel.Content = h.name;
                     thumbNail.Source = image;
+                    thumbBrush.ImageSource = image;
+                    this.nameLabel.Content = h.name;
                 });
             }
             else

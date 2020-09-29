@@ -44,8 +44,6 @@ namespace HitomiViewer.UserControls
         public IHitomiPanel()
         {
             InitializeComponent();
-            Init();
-            InitEvent();
         }
 
         public virtual void InitEvent() { }
@@ -53,20 +51,20 @@ namespace HitomiViewer.UserControls
 
         public virtual void ContextSetup() { }
 
-        public ToolTip GetToolTip(double height)
+        public virtual ToolTip GetToolTip(double height)
         {
             if (h.thumbnail.preview_img == null) return null;
             if (!thumbNail.IsVisible) return null;
             //b = 비율
             //Magnif = 배율
-            double b = height / h.thumbnail.preview_img.Height;
+            //double b = height / h.thumbnail.preview_img.Height;
             double top = thumbNail.PointToScreen(new Point(0, 0)).Y;
             double bottom = top + thumbNail.ActualHeight;
             double WorkHeight = SystemParameters.WorkArea.Bottom;
             double MagnifSize = height * Global.Magnif;
             double Len = WorkHeight / 2 - (bottom - thumbNail.ActualHeight / 2);
             bool up = Len <= 0;
-            double VisualMaxSize = 0;
+            double VisualMaxSize;
             if (up)
                 VisualMaxSize = top;
             else
