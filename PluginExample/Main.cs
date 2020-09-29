@@ -27,48 +27,11 @@ namespace PluginExample
         {
             base.OnHitomiPanelInit(panel);
             if (!panel.large) return;
-            if (panel.h.parodys != null && panel.h.parodys.Count > 0)
-            {
-                StackPanel parodysStack = new StackPanel();
-                DockPanel parodysPanel = new DockPanel();
-                parodysStack.Name = "parodysStack";
-                {
-                    Label parodysLabel = new Label();
-                    parodysLabel.Content = "원작 : ";
-                    parodysPanel.Children.Add(parodysLabel);
-                }
-                parodysStack.Children.Add(parodysPanel);
-                for (int i = 0; i < panel.h.parodys.Count; i++)
-                {
-                    Hitomi.DisplayValue dv = panel.h.parodys[i];
-                    if (i != 0)
-                    {
-                        Label dot = new Label();
-                        dot.Content = ", ";
-                        dot.Padding = new Thickness(0, 5, 2.5, 5);
-                        parodysPanel.Children.Add(dot);
-                    }
-                    Label lb = new Label();
-                    lb.Content = dv.Display;
-                    lb.Foreground = new SolidColorBrush(Global.artistsclr);
-                    lb.Cursor = Cursors.Hand;
-                    lb.Padding = new Thickness(0, 5, 0, 5);
-                    parodysPanel.Children.Add(lb);
-                }
-                parodysStack.Orientation = Orientation.Vertical;
-                DockPanel.SetDock(parodysStack, Dock.Top);
-                parodysDict.Add(panel, parodysStack);
-                panel.AdditionalPanel.Children.Add(parodysStack);
-                panel.AdditionalPanel.Visibility = Visibility.Visible;
-            }
         }
 
         public override void OnHitomiPanelDelayInit(HitomiPanel panel)
         {
             base.OnHitomiPanelDelayInit(panel);
-            if (!panel.large) return;
-            if (panel.h.parodys != null && panel.h.parodys.Count > 0)
-                panel.panel.Height += 26;
         }
 
         public override void OnHitomiChangeColor(HitomiPanel panel)

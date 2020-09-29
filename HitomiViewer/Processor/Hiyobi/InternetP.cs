@@ -16,11 +16,26 @@ namespace HitomiViewer.Processor
     partial class InternetP
     {
         public async void HiyobiSearch(Action<string> callback) => callback(await HiyobiSearch());
-        public async Task<List<HiyobiGallery>> HiyobiList()
+        /// <summary>
+        /// Fetch recently data(Json)
+        /// </summary>
+        /// <typeparam name="T">JObject</typeparam>
+        /// <param name="index"></param>
+        /// <returns>return recently galleries data to json</returns>
+        public async Task<JObject> HiyobiList<T>(int? index = null) where T : JObject
+        {
+            url = $"https://api.hiyobi.me/list/{index ?? this.index}";
+            return await LoadJObject();
+        }
+        /// <summary>
+        /// Fetch recently data
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public async Task<List<HiyobiGallery>> HiyobiList(int? index = null)
         {
             List<HiyobiGallery> output = new List<HiyobiGallery>();
-            url = $"https://api.hiyobi.me/list/{index}";
-            JObject obj = await LoadJObject();
+            JObject obj = await HiyobiList<JObject>(index);
             foreach (JToken item in obj["list"])
             {
                 HiyobiGallery h = HiyobiParse(item);
@@ -28,10 +43,15 @@ namespace HitomiViewer.Processor
             }
             return output;
         }
-        public async Task<List<HFile>> HiyobiFiles()
+        /// <summary>
+        /// Fetch HFiles from id
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public async Task<List<HFile>> HiyobiFiles(int? index = null)
         {
             List<HFile> files = new List<HFile>();
-            url = $"https://cdn.hiyobi.me/data/json/{index}_list.json";
+            url = $"https://cdn.hiyobi.me/data/json/{index ?? this.index}_list.json";
             JArray arr = await TryLoadJArray();
             if (arr == null)
                 return new List<HFile>();
@@ -49,19 +69,34 @@ namespace HitomiViewer.Processor
             }
             return files;
         }
-        public async Task<HiyobiGallery> HiyobiDataNumber(int? index = null)
+        /// <summary>
+        /// Fetch data from id(Json)
+        /// </summary>
+        /// <typeparam name="T">JObject</typeparam>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public async Task<JObject> HiyobiGallery<T>(int? index = null) where T : JObject
         {
             url = $"https://api.hiyobi.me/gallery/{index ?? this.index}";
-            JObject obj = await LoadJObject();
+            return await LoadJObject();
+        }
+        /// <summary>
+        /// Fetch Hiyobi data from id
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public async Task<HiyobiGallery> HiyobiGallery(int? index = null)
+        {
+            JObject obj = await HiyobiGallery<JObject>(index);
             HiyobiGallery h = HiyobiParse(obj);
             return h;
         }
-        public async Task<string> HiyobiSearch()
+        public async Task<string> HiyobiSearch(int? index = null, List<string> keyword = null)
         {
             HttpClient client = new HttpClient();
             JObject body = new JObject();
-            body.Add("search", JToken.FromObject(this.keyword));
-            body.Add("paging", this.index);
+            body.Add("search", JToken.FromObject(keyword ?? this.keyword));
+            body.Add("paging", index ?? this.index);
             var response = await client.PostAsync("https://api.hiyobi.me/search", new StringContent(body.ToString(), Encoding.UTF8, "application/json"));
             var pageContents = await response.Content.ReadAsStringAsync();
             return pageContents;
@@ -69,26 +104,6 @@ namespace HitomiViewer.Processor
         public HiyobiGallery HiyobiParse(JToken item)
         {
             return item.ToObject<HiyobiGallery>();
-            /*
-            HiyobiGallery h = new HiyobiGallery();
-            h.authors.Set(item["artists"].Select(x => x.StringValue("display")));
-            h.id = item.StringValue("id");
-            h.language = item.StringValue("language");
-            h.tags.JsonParseFromName(item["tags"]);
-            if (item["artists"] != null)
-                h.artists = item["artists"].Select(x => new DisplayValue { Display = x.StringValue("display"), Value = x.StringValue("value") }).ToList();
-            if (item["characters"] != null)
-                h.characters = item["characters"].Select(x => new DisplayValue { Display = x.StringValue("display"), Value = x.StringValue("value") }).ToList();
-            if (item["parodys"] != null)
-                h.parodys = item["parodys"].Select(x => new DisplayValue { Display = x.StringValue("display"), Value = x.StringValue("value") }).ToList();
-            h.name = item.StringValue("title");
-            h.designType = DesignTypeFromString(item.StringValue("type"));
-            h.thumbpath = $"https://cdn.hiyobi.me/tn/{h.id}.jpg";
-            h.dir = $"https://hiyobi.me/reader/{h.id}";
-            h.page = 0;
-            h.AutoAuthor();
-            return h;
-            */
         }
         public async Task<JArray> HiyobiTags()
         {
@@ -98,25 +113,17 @@ namespace HitomiViewer.Processor
         /// <summary>
         /// Hiyobi 에서 불러올 수 있는지와 불러올 수 있다면 Hitomi 데이터까지 반환합니다.
         /// </summary>
-        /// <param name="index"></param>
+        /// <param name="index">id</param>
         /// <returns></returns>
         public async Task<Tuple<bool, HiyobiGallery>> isHiyobiData(int? index = null)
         {
             try
             {
-                HiyobiGallery h = await HiyobiDataNumber(index);
+                HiyobiGallery h = await HiyobiGallery(index);
                 return new Tuple<bool, HiyobiGallery>(true, h);
             }
             catch { return new Tuple<bool, HiyobiGallery>(false, null); }
         }
-        public async Task<bool> isHiyobi(int? index = null)
-        {
-            try
-            {
-                _ = await Load($"https://cdn.hiyobi.me/data/json/{index ?? this.index}.json");
-                return true;
-            }
-            catch { return false; }
-        }
+        public async Task<bool> isHiyobi(int? index = null) => (await isHiyobiData(index)).Item1;
     }
 }

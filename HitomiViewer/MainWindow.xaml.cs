@@ -55,8 +55,11 @@ namespace HitomiViewer
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(ResolveAssembly);
             PluginHandler.LoadPlugins();
             Global.dispatcher = Dispatcher;
-            new LoginClass().Run();
-            new Config().GetConfig().Save();
+            //new LoginClass().Run();
+            //new Config().GetConfig().Save();
+            //CheckUpdate.Auto();
+            //HiyobiTags.LoadTags();
+            Account.Load();
             InitializeComponent();
             PluginHandler.FireOnInit(this);
             Init();
@@ -64,15 +67,10 @@ namespace HitomiViewer
             InitEvents();
         }
 
-        public void Init()
+        public bool Argument()
         {
-            CheckUpdate.Auto();
-            HiyobiTags.LoadTags();
-            Account.Load();
-            this.MinWidth = 300;
-            Global.MainWindow = this;
-            string[] args = Environment.GetCommandLineArgs();
             bool relative = false;
+            string[] args = Environment.GetCommandLineArgs();
             for (int i = 0; i < args.Length; i++)
             {
                 string arg = args[i];
@@ -83,11 +81,16 @@ namespace HitomiViewer
                 }
                 if (arg == "/r") relative = true;
             }
+            return relative;
+        }
+        public void Init()
+        {
+            this.MinWidth = 300;
+            Global.MainWindow = this;
+            bool relative = Argument();
+            
             if (path == string.Empty) path = Path.Combine(rootDir, "hitomi_downloaded");
-            else
-            {
-                if (relative) path = Path.Combine(rootDir, path);
-            }
+            if (relative) path = Path.Combine(rootDir, path);
             if (!Directory.Exists(path))
             {
                 Console.WriteLine("Invaild Path");
@@ -225,28 +228,6 @@ namespace HitomiViewer
         public void Searching(bool tf)
         {
             MainMenu.IsEnabled = !tf;
-        }
-
-        public void HiyobiMain(int index)
-        {
-            
-        }
-        public void HitomiMain(int index)
-        {
-            
-        }
-        public void HiyobiSearch(List<string> keyword, int index)
-        {
-            
-        }
-        public void HitomiSearch(string[] tags, int index)
-        {
-            SearchLoader loader = new SearchLoader();
-            loader.tags = tags;
-            loader.itemCount = (int)Page_itemCount;
-            loader.index = index;
-            loader.Default()
-                  .HitomiSearch();
         }
 
         private void SetColor()
@@ -519,46 +500,6 @@ namespace HitomiViewer
                 new TaskFactory().StartNew(() => LoadHitomi(files));
             }
         }
-        private void MenuHiyobi_Click(object sender, RoutedEventArgs e)
-        {
-            MainPanel.Children.Clear();
-            LabelSetup();
-            HiyobiMain(GetPage());
-        }
-        private void Hiyobi_Search_Text_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter) Task.Factory.StartNew(() =>
-            {
-                Thread.Sleep(500);
-                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => Hiyobi_Search_Button_Click(null, null)));
-            });
-        }
-        public void Hiyobi_Search_Button_Click(object sender, RoutedEventArgs e)
-        {
-            MainPanel.Children.Clear();
-            LabelSetup();
-            HiyobiSearch(keyword: Hiyobi_Search_Text.Text.Split(' ').ToList(), index: GetPage());
-        }
-        private void MenuHitomi_Click(object sender, RoutedEventArgs e)
-        {
-            MainPanel.Children.Clear();
-            LabelSetup();
-            HitomiMain(GetPage());
-        }
-        private void Hitomi_Search_Text_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter) Task.Factory.StartNew(() =>
-            {
-                Thread.Sleep(500);
-                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => Hitomi_Search_Button_Click(null, null)));
-            });
-        }
-        public void Hitomi_Search_Button_Click(object sender, RoutedEventArgs e)
-        {
-            MainPanel.Children.Clear();
-            LabelSetup();
-            HitomiSearch(Hitomi_Search_Text.Text.Split(' '), GetPage());
-        }
         private void OpenSetting_Click(object sender, RoutedEventArgs e)
         {
             new Settings().Show();
@@ -702,6 +643,86 @@ namespace HitomiViewer
         {
             Task.Factory.StartNew(new Cache().TagCache);
         }
+
+        #region Hiyobi
+        public void HiyobiMain(int index)
+        {
+            InternetP parser = new InternetP(url: "https://api.hiyobi.me/list/" + index);
+            HiyobiLoader hiyobi = new HiyobiLoader();
+            hiyobi.Default();
+            hiyobi.pagination = hiyobi.Search((int i) =>
+            {
+                MainPanel.Children.Clear();
+                LabelSetup();
+                HiyobiMain(i);
+            }).Pagination(index);
+            parser.LoadJObject(hiyobi.Parser);
+        }
+        public void HiyobiSearch(List<string> keyword, int index)
+        {
+            
+        }
+        private void MenuHiyobi_Click(object sender, RoutedEventArgs e)
+        {
+            MainPanel.Children.Clear();
+            LabelSetup();
+            HiyobiMain(GetPage());
+        }
+        private void Hiyobi_Search_Text_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter) Task.Factory.StartNew(() =>
+            {
+                Thread.Sleep(500);
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => Hiyobi_Search_Button_Click(null, null)));
+            });
+        }
+        public void Hiyobi_Search_Button_Click(object sender, RoutedEventArgs e)
+        {
+            MainPanel.Children.Clear();
+            LabelSetup();
+            HiyobiSearch(keyword: Hiyobi_Search_Text.Text.Split(' ').ToList(), index: GetPage());
+        }
+        #endregion
+
+        #region Hitomi
+        public void HitomiMain(int index)
+        {
+            HitomiLoader loader = new HitomiLoader();
+            loader.index = index;
+            loader.count = (int)Page_itemCount;
+            loader.Default();
+            loader.Parser();
+        }
+        public void HitomiSearch(string[] tags, int index)
+        {
+            SearchLoader loader = new SearchLoader();
+            loader.tags = tags;
+            loader.itemCount = (int)Page_itemCount;
+            loader.index = index;
+            loader.Default()
+                  .HitomiSearch();
+        }
+        private void MenuHitomi_Click(object sender, RoutedEventArgs e)
+        {
+            MainPanel.Children.Clear();
+            LabelSetup();
+            HitomiMain(GetPage());
+        }
+        private void Hitomi_Search_Text_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter) Task.Factory.StartNew(() =>
+            {
+                Thread.Sleep(500);
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => Hitomi_Search_Button_Click(null, null)));
+            });
+        }
+        public void Hitomi_Search_Button_Click(object sender, RoutedEventArgs e)
+        {
+            MainPanel.Children.Clear();
+            LabelSetup();
+            HitomiSearch(Hitomi_Search_Text.Text.Split(' '), GetPage());
+        }
+        #endregion
 
         #region Pixiv
         private async Task<bool> Login()

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HitomiViewer
 {
-    class HiyobiGallery : IHitomi
+    public class HiyobiGallery : IHitomi
     {
         [JsonInfo("category")]
         public int category { get; set; }

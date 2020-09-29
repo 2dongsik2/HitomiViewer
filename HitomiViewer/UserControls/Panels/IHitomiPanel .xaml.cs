@@ -37,7 +37,7 @@ namespace HitomiViewer.UserControls
     /// </summary>
     public partial class IHitomiPanel : UserControl
     {
-        public Hitomi h;
+        public IHitomi h;
         public bool large;
         public bool file;
         public bool blur;
@@ -48,15 +48,7 @@ namespace HitomiViewer.UserControls
             InitEvent();
         }
 
-        public virtual void InitEvent()
-        {
-            thumbNail.MouseDown += (object sender, MouseButtonEventArgs e) =>
-            {
-                Reader reader = new Reader(h);
-                if (!reader.IsClosed)
-                    reader.Show();
-            };
-        }
+        public virtual void InitEvent() { }
         public virtual void Init() { }
 
         public virtual void ContextSetup() { }

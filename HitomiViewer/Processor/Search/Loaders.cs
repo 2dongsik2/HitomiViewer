@@ -154,8 +154,8 @@ namespace HitomiViewer.Processor.Loaders
                 Global.dispatcher.Invoke(delegate
                 {
                     HitomiLoader hitomi = new HitomiLoader();
-                    hitomi.FastDefault();
-                    hitomi.FastParser(new_idlist.ToArray());
+                    hitomi.Default();
+                    hitomi.Parser(new_idlist.ToArray());
                 });
             });
         }
