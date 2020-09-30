@@ -49,7 +49,7 @@ namespace HitomiViewer
         public uint Page_itemCount = 25;
         public int Page = 1;
         public Func<string[], string[]> FolderSort;
-        public List<Reader> Readers = new List<Reader>();
+        public List<IReader> Readers = new List<IReader>();
         public MainWindow()
         {
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(ResolveAssembly);
@@ -201,23 +201,29 @@ namespace HitomiViewer
                     MainPanel.Children.Add(new HitomiPanel(h, this, true));
                     Console.WriteLine("Completed: {0}", folder);
                 }));
-            }
+            }*/
             Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
             {
                 label.Visibility = Visibility.Hidden;
-                var pagination = new CommonLoader().Search((int ind) =>
+                var pagination = new ILoader().Search((int ind) =>
                 {
                     MainPanel.Children.Clear();
                     LabelSetup();
                     Page_Index.SelectedIndex = ind - 1; //Page_Index_SelectionChanged 이벤트 호출
-                    //new TaskFactory().StartNew(() => LoadHitomi(path));
-                }).Pagination(SelectedPage);
+                }).Pagination(Page_Index.SelectedIndex + 1);
                 int pages = (int)Math.Ceiling(files.Length / ((double)Page_itemCount));
                 pagination(pages);
-            }));*/
+            }));
         }
 
         public int GetPage() => (int) new CountBox("페이지", "원하는 페이지 수", 1).ShowDialog();
+        public int GetPage(ref bool success)
+        {
+            CountBox countBox = new CountBox("페이지", "원하는 페이지 수", 1);
+            int val = (int)countBox.ShowDialog();
+            success = countBox.success;
+            return val;
+        }
         public void LabelSetup()
         {
             label.FlowDirection = FlowDirection.RightToLeft;
@@ -242,7 +248,7 @@ namespace HitomiViewer
                 foreach (MenuItem item in menuItem.Items)
                     item.Foreground = new SolidColorBrush(Colors.Black);
             }
-            foreach (Reader reader in Readers)
+            foreach (IReader reader in Readers)
                 reader.ChangeMode();
             foreach (UIElement hitomiPanel in MainPanel.Children)
             {
@@ -665,9 +671,14 @@ namespace HitomiViewer
         }
         private void MenuHiyobi_Click(object sender, RoutedEventArgs e)
         {
-            MainPanel.Children.Clear();
-            LabelSetup();
-            HiyobiMain(GetPage());
+            bool success = false;
+            int page = GetPage(ref success);
+            if (success)
+            {
+                MainPanel.Children.Clear();
+                LabelSetup();
+                HiyobiMain(page);
+            }
         }
         private void Hiyobi_Search_Text_KeyDown(object sender, KeyEventArgs e)
         {
@@ -705,9 +716,14 @@ namespace HitomiViewer
         }
         private void MenuHitomi_Click(object sender, RoutedEventArgs e)
         {
-            MainPanel.Children.Clear();
-            LabelSetup();
-            HitomiMain(GetPage());
+            bool success = false;
+            int page = GetPage(ref success);
+            if (success)
+            {
+                MainPanel.Children.Clear();
+                LabelSetup();
+                HitomiMain(page);
+            }
         }
         private void Hitomi_Search_Text_KeyDown(object sender, KeyEventArgs e)
         {

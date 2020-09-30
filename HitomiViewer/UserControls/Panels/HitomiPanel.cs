@@ -6,6 +6,7 @@ using HitomiViewer.Processor;
 using HitomiViewer.Processor.Loaders;
 using HitomiViewer.Scripts;
 using HitomiViewer.Structs;
+using HitomiViewer.UserControls.Reader;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -55,7 +56,7 @@ namespace HitomiViewer.UserControls
         {
             thumbNail.MouseDown += (object sender, MouseButtonEventArgs e) =>
             {
-                Reader reader = new Reader(h);
+                HitomiReader reader = new HitomiReader(h);
                 if (!reader.IsClosed)
                     reader.Show();
             };
@@ -63,6 +64,8 @@ namespace HitomiViewer.UserControls
         public override async void Init()
         {
             PluginHandler.FireOnHitomiPanelInit(this);
+            if (h.thumbnail.preview_img == null)
+                h.thumbnail.preview_img = await ImageProcessor.LoadWebImageAsync("https:" + h.thumbnail.preview_url);
             thumbNail.Source = h.thumbnail.preview_img;
             thumbBrush.ImageSource = h.thumbnail.preview_img;
             PluginHandler.FireOnHitomiPanelDelayInit(this);
@@ -177,6 +180,7 @@ namespace HitomiViewer.UserControls
             }
             else
                 this.nameLabel.Content = h.name;
+            this.pageLabel.Content = h.files.Length;
             Init();
         }
 

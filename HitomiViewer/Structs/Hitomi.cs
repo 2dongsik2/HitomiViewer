@@ -68,12 +68,7 @@ namespace HitomiViewer
         public class Thumbnail
         {
             public string preview_url;
-            private BitmapImage private_preview_img;
-            public BitmapImage preview_img
-            {
-                get => private_preview_img;
-                set => private_preview_img = value;
-            }
+            public BitmapImage preview_img { get; set; }
         }
         public class Authors
         {

@@ -71,7 +71,6 @@ namespace HitomiViewer.Processor
             JObject info = await HitomiGalleryInfo();
             h.tags = HitomiTags(info).ToArray();
             h.files = HitomiFiles(info).ToArray();
-            h.thumbnail.preview_img = await ImageProcessor.LoadWebImageAsync("https:" + h.thumbnail.preview_url);
             return await HitomiGalleryData(h);
         }
         public async Task<JObject> HitomiGalleryInfo()

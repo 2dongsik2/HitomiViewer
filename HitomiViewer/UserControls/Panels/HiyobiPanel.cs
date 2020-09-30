@@ -1,4 +1,7 @@
-﻿using System;
+﻿using HitomiViewer.Processor;
+using HitomiViewer.Processor.Loaders;
+using HitomiViewer.UserControls.Reader;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +15,7 @@ namespace HitomiViewer.UserControls.Panels
 {
     class HiyobiPanel : IHitomiPanel
     {
+        private new readonly HiyobiGallery h;
 
         public HiyobiPanel(HiyobiGallery h, bool large = true, bool file = false, bool blur = false)
         {
@@ -19,16 +23,39 @@ namespace HitomiViewer.UserControls.Panels
             this.file = file;
             this.blur = blur;
             this.h = h;
+            base.h = h;
             
             Init();
             InitEvent();
         }
 
-        public override void Init()
+        public override async void Init()
         {
+            if (h.thumbnail.preview_img == null)
+            {
+                if (h.thumbnail.preview_url == null)
+                    h.thumbnail.preview_img = ImageProcessor.FromResource("NoImage.jpg");
+                else
+                    h.thumbnail.preview_img = await ImageProcessor.ProcessEncryptAsync(h.thumbnail.preview_url);
+            }
+            if (h.files == null)
+            {
+                h.files = (await new InternetP().HiyobiFiles(int.Parse(h.id))).ToArray();
+            }
             thumbNail.Source = h.thumbnail.preview_img;
             thumbBrush.ImageSource = h.thumbnail.preview_img;
             nameLabel.Content = h.name;
+            pageLabel.Content = h.files.Length;
+        }
+        public override void InitEvent()
+        {
+            base.InitEvent();
+            thumbNail.MouseDown += (object sender, MouseButtonEventArgs e) =>
+            {
+                HiyobiReader reader = new HiyobiReader(h);
+                if (!reader.IsClosed)
+                    reader.Show();
+            };
         }
 
         public override void ChangeColor()

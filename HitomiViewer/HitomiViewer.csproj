@@ -182,8 +182,10 @@
     <Compile Include="Scripts\Global.cs" />
     <Compile Include="Structs\Hitomi.cs" />
     <Compile Include="UserControls\InputBox.cs" />
-    <Compile Include="Reader.xaml.cs">
-      <DependentUpon>Reader.xaml</DependentUpon>
+    <Compile Include="UserControls\Reader\HitomiReader.cs" />
+    <Compile Include="UserControls\Reader\HiyobiReader.cs" />
+    <Compile Include="UserControls\Reader\IReader.xaml.cs">
+      <DependentUpon>IReader.xaml</DependentUpon>
     </Compile>
     <Compile Include="Processor\Internet\InternetP.cs" />
     <Compile Include="Scripts\LoginClass.cs" />
@@ -228,7 +230,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Reader.xaml">
+    <Page Include="UserControls\Reader\IReader.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
