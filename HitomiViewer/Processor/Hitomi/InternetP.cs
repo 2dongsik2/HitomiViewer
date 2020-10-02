@@ -34,8 +34,8 @@ namespace HitomiViewer.Processor
             h.dir = $"https://hitomi.la/reader/{index}.html";
             HtmlNode name = doc.DocumentNode.SelectSingleNode("//h1[@class=\"lillie\"]");
             h.name = name.InnerText;
-            HtmlNode image = doc.DocumentNode.SelectSingleNode("//div[@class=\"dj-img1\"]/img");
-            image = image ?? doc.DocumentNode.SelectSingleNode("//div[@class=\"cg-img1\"]/img");
+            HtmlNode image = doc.DocumentNode.SelectSingleNode("//div[@class=\"dj-img1\"]/picture/img");
+            image = image ?? doc.DocumentNode.SelectSingleNode("//div[@class=\"cg-img1\"]/picture/img");
             h.thumbpath = image.GetAttributeValue("src", "");
             if (!(h.thumbpath.StartsWith("https:") || h.thumbpath.StartsWith("http:")))
                 h.thumbpath = "https:" + h.thumbpath;
