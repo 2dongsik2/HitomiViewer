@@ -139,6 +139,7 @@
     <Compile Include="Processor\Hitomi\InternetP.cs" />
     <Compile Include="Processor\Hiyobi\InternetP.cs" />
     <Compile Include="Processor\Hiyobi\JParser.cs" />
+    <Compile Include="Processor\Loaders\FileLoader.cs" />
     <Compile Include="Processor\Loaders\HitomiLoader.cs" />
     <Compile Include="Processor\Loaders\HiyobiLoader.cs" />
     <Compile Include="Processor\Loaders\ILoader.cs" />
@@ -173,7 +174,6 @@
     <Compile Include="Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\IgnoreWheelScrollViewer.cs" />
     <Compile Include="UserControls\Panels\HitomiPanel.cs" />
     <Compile Include="UserControls\Panels\IHitomiPanel .xaml.cs">
       <DependentUpon>IHitomiPanel .xaml</DependentUpon>

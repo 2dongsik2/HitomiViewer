@@ -68,6 +68,10 @@ namespace HitomiViewer.UserControls
                 h.thumbnail.preview_img = await ImageProcessor.LoadWebImageAsync(h.thumbnail.preview_url.https());
             thumbNail.Source = h.thumbnail.preview_img;
             thumbBrush.ImageSource = h.thumbnail.preview_img;
+            nameLabel.Content = h.name;
+            pageLabel.Content = h.files.Length;
+            sizeLabel.Content = File2.SizeStr(h.FileInfo.size);
+            sizeperpageLabel.Content = File2.SizeStr(h.FileInfo.size / h.files.Length);
             PluginHandler.FireOnHitomiPanelDelayInit(this);
         }
 
@@ -204,7 +208,7 @@ namespace HitomiViewer.UserControls
                 if (!Directory.Exists($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}"))
                     Directory.CreateDirectory($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}");
                 Directory.CreateDirectory($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}");
-                h.inFile.dir = $"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}";
+                h.FileInfo.dir = $"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}";
                 h.Save($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/info.json");
                 for (int i = 0; i < h.files.Length; i++)
                 {
@@ -213,7 +217,7 @@ namespace HitomiViewer.UserControls
                     wc.Headers.Add("referer", "https://hitomi.la/");
                     if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/{i}.jpg"))
                     {
-                        h.inFile.encrypted = Global.AutoFileEn;
+                        h.FileInfo.encrypted = Global.AutoFileEn;
                         if (Global.AutoFileEn)
                             FileEncrypt.DownloadAsync(wc, new Uri(file), $"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/{i}.jpg.lock");
                         else wc.DownloadFileAsync(new Uri(file), $"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/{i}.jpg");

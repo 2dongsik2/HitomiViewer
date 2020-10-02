@@ -17,6 +17,11 @@ namespace HitomiViewer
 
     public class HiyobiGallery : IHitomi
     {
+        public HiyobiGallery()
+        {
+            base.fileType = HFileType.Hiyobi;
+        }
+
         [JsonInfo("category")]
         public int category { get; set; }
         [JsonInfo("type")]

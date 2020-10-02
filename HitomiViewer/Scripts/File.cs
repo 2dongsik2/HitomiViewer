@@ -75,5 +75,19 @@ namespace HitomiViewer.Scripts
             }
             return items.ToArray();
         }
+        public static string SizeStr(object val) => SizeStr((double)val);
+        public static string SizeStr(double val)
+        {
+            const int KB = 1024;
+            const int MB = 1024 * 1024;
+            const int GB = 1024 * 1024 * 1024;
+            if (val > KB)
+                return Math.Round(val / KB, 2) + "KB";
+            if (val > MB)
+                return Math.Round(val / MB, 2) + "MB";
+            if (val > GB)
+                return Math.Round(val / GB, 2) + "GB";
+            return val + "B";
+        }
     }
 }

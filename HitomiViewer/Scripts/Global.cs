@@ -42,6 +42,7 @@ namespace HitomiViewer
         public static bool OriginThumb = false;
         public static Dispatcher dispatcher;
         public static BitmapImage NoImage { private get; set; }
+        public static Func<string[], string[]> FolderSort;
 
         public class Config
         {

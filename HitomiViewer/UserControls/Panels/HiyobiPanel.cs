@@ -46,6 +46,8 @@ namespace HitomiViewer.UserControls.Panels
             thumbBrush.ImageSource = h.thumbnail.preview_img;
             nameLabel.Content = h.name;
             pageLabel.Content = h.files.Length;
+            sizeLabel.Content = Scripts.File2.SizeStr(h.FileInfo.size);
+            sizeperpageLabel.Content = Scripts.File2.SizeStr(h.FileInfo.size / h.files.Length);
         }
         public override void InitEvent()
         {

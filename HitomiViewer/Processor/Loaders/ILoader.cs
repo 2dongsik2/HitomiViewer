@@ -29,12 +29,13 @@ namespace HitomiViewer.Processor.Loaders
             };
         }
         public virtual void Parser() { }
-        public ILoader Search(Action<int> search)
+        public virtual void Search() { }
+        public ILoader SetSearch(Action<int> search)
         {
             this.search = search;
             return this;
         }
-        public virtual Action<int> Pagination(int page)
+        public virtual Action<int> SetPagination(int page)
         {
             return (int pages) =>
             {

@@ -60,6 +60,13 @@ namespace HitomiViewer
     }
     public class IHitomi
     {
+        public enum HFileType
+        {
+            Hitomi,
+            Hiyobi,
+            Pixiv,
+            None
+        }
         public class DisplayValue
         {
             public string Display;
@@ -92,22 +99,29 @@ namespace HitomiViewer
                     yield return authors[i];
             }
         }
-        public class InFile
+        public class DFileInfo
         {
+            public long size { get; set; }
             public string dir { get; set; }
-            public bool encrypted { get; set; }
+            public bool encrypted = false;
         }
 
         public string id { get; set; }
         public string url { get; set; }
         public string name { get; set; }
+        public HFileType fileType;
         public Thumbnail thumbnail = new Thumbnail();
         public Authors authors = new Authors();
         [JsonInfo(ignore = true)]
-        public InFile inFile = null;
+        public DFileInfo FileInfo = new DFileInfo();
     }
     public class Hitomi : IHitomi
     {
+        public Hitomi()
+        {
+            base.fileType = HFileType.Hitomi;
+        }
+
         public string date { get; set; }
         public string japanese_title { get; set; }
         public string language { get; set; }

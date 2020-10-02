@@ -44,11 +44,25 @@ namespace HitomiViewer
             SizePerPage
         }
 
+        public enum SearchType
+        {
+            normal,
+            reversal
+        }
+
         public static readonly string rootDir = AppDomain.CurrentDomain.BaseDirectory;
         public string path = string.Empty;
-        public uint Page_itemCount = 25;
-        public int Page = 1;
-        public Func<string[], string[]> FolderSort;
+        public uint Page_itemCount => uint.Parse(((ComboBoxItem)Page_ItemCount.SelectedItem).Content.ToString());
+        public int Page => Page_Index.SelectedIndex + 1;
+        public SearchType searchType
+        {
+            get => SearchMode2.SelectedIndex switch
+            {
+                0 => SearchType.normal,
+                1 => SearchType.reversal,
+                _ => SearchType.normal,
+            };
+        }
         public List<IReader> Readers = new List<IReader>();
         public MainWindow()
         {
@@ -57,8 +71,8 @@ namespace HitomiViewer
             Global.dispatcher = Dispatcher;
             //new LoginClass().Run();
             //new Config().GetConfig().Save();
-            //CheckUpdate.Auto();
-            //HiyobiTags.LoadTags();
+            CheckUpdate.Auto();
+            HiyobiTags.LoadTags();
             Global.Setup();
             Account.Load();
             InitializeComponent();
@@ -205,12 +219,12 @@ namespace HitomiViewer
             Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
             {
                 label.Visibility = Visibility.Hidden;
-                var pagination = new ILoader().Search((int ind) =>
+                var pagination = new ILoader().SetSearch((int ind) =>
                 {
                     MainPanel.Children.Clear();
                     LabelSetup();
                     Page_Index.SelectedIndex = ind - 1; //Page_Index_SelectionChanged 이벤트 호출
-                }).Pagination(Page_Index.SelectedIndex + 1);
+                }).SetPagination(Page);
                 int pages = (int)Math.Ceiling(files.Length / ((double)Page_itemCount));
                 pagination(pages);
             }));
@@ -261,7 +275,7 @@ namespace HitomiViewer
             switch (sorts)
             {
                 case FolderSorts.Name:
-                    FolderSort = (string[] arr) =>
+                    Global.FolderSort = (string[] arr) =>
                     {
                         Dictionary<string, string> Match = new Dictionary<string, string>();
                         for (int i = 0; i < arr.Length; i++)
@@ -292,7 +306,7 @@ namespace HitomiViewer
                     };
                     break;
                 case FolderSorts.Creation:
-                    FolderSort = (string[] arr) =>
+                    Global.FolderSort = (string[] arr) =>
                     {
                         var arr2 = arr.Select(f => new FileInfo(f)).ToArray();
                         Array.Sort(arr2, delegate (FileInfo x, FileInfo y) { return DateTime.Compare(x.CreationTime, y.CreationTime); });
@@ -300,7 +314,7 @@ namespace HitomiViewer
                     };
                     break;
                 case FolderSorts.LastWrite:
-                    FolderSort = (string[] arr) =>
+                    Global.FolderSort = (string[] arr) =>
                     {
                         var arr2 = arr.Select(f => new FileInfo(f)).ToArray();
                         Array.Sort(arr2, delegate (FileInfo x, FileInfo y) { return DateTime.Compare(x.LastWriteTime, y.LastWriteTime); });
@@ -308,7 +322,7 @@ namespace HitomiViewer
                     };
                     break;
                 case FolderSorts.Size:
-                    FolderSort = (string[] arr) =>
+                    Global.FolderSort = (string[] arr) =>
                     {
                         var arr2 = arr.Select(f => new DirectoryInfo(f)).ToArray();
                         Array.Sort(arr2, delegate (DirectoryInfo x, DirectoryInfo y)
@@ -324,7 +338,7 @@ namespace HitomiViewer
                     };
                     break;
                 case FolderSorts.Pages:
-                    FolderSort = (string[] arr) =>
+                    Global.FolderSort = (string[] arr) =>
                     {
                         var arr2 = arr.ToArray();
                         Array.Sort(arr2, delegate (string x, string y)
@@ -340,7 +354,7 @@ namespace HitomiViewer
                     };
                     break;
                 case FolderSorts.SizePerPage:
-                    FolderSort = (string[] arr) =>
+                    Global.FolderSort = (string[] arr) =>
                     {
                         var arr2 = arr.Select(f => new DirectoryInfo(f)).ToArray();
                         Array.Sort(arr2, delegate (DirectoryInfo x, DirectoryInfo y)
@@ -469,7 +483,6 @@ namespace HitomiViewer
         }
         private void Page_ItemCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Page_itemCount = uint.Parse(((ComboBoxItem)Page_ItemCount.SelectedItem).Content.ToString());
             new TaskFactory().StartNew(() => LoadHitomi(path));
         }
         private void LoadBtn_Click(object sender, RoutedEventArgs e)
@@ -657,12 +670,12 @@ namespace HitomiViewer
             InternetP parser = new InternetP(url: "https://api.hiyobi.me/list/" + index);
             HiyobiLoader hiyobi = new HiyobiLoader();
             hiyobi.Default();
-            hiyobi.pagination = hiyobi.Search((int i) =>
+            hiyobi.pagination = hiyobi.SetSearch((int i) =>
             {
                 MainPanel.Children.Clear();
                 LabelSetup();
                 HiyobiMain(i);
-            }).Pagination(index);
+            }).SetPagination(index);
             parser.LoadJObject(hiyobi.Parser);
         }
         public void HiyobiSearch(List<string> keyword, int index)
