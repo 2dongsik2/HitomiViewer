@@ -247,8 +247,9 @@ namespace HitomiViewer
             [JsonInfo(ignore = true)]
             public string url
             {
-                get => new InternetP().UrlFromUrlFromHash(this);
+                get => GetURL();
             }
+            public virtual string GetURL() => new InternetP().UrlFromUrlFromHash(this);
         }
     }
 }

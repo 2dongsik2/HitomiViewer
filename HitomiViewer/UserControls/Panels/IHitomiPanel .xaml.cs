@@ -116,7 +116,16 @@ namespace HitomiViewer.UserControls
         public virtual void DownloadData_Click(object sender, RoutedEventArgs e) { }
         public virtual void DownloadImage_Click(object sender, RoutedEventArgs e) { }
         public virtual void ImageDownloadCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e) { }
-        public virtual void tagScroll_MouseWheel(object sender, MouseWheelEventArgs e) { }
+        public virtual void tagScroll_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            ScrollViewer scroll = Global.MainWindow.MainScroll;
+            double offset = 0.45;
+            if (e.Delta > 0)
+                scroll.ScrollToVerticalOffset(scroll.VerticalOffset - (offset * e.Delta));
+            else
+                scroll.ScrollToVerticalOffset(scroll.VerticalOffset - (offset * e.Delta));
+            e.Handled = true;
+        }
         public virtual void thumbNail_MouseEnter(object sender, MouseEventArgs e) { }
 
         public virtual void AtHitomi_Click(object sender, RoutedEventArgs e) { }

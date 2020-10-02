@@ -15,6 +15,8 @@ namespace HitomiViewer.UserControls.Reader
     {
         private HiyobiGallery hiyobi;
 
+        private double averageSize = 10;
+
         public HiyobiReader(HiyobiGallery hiyobi)
         {
             base.Background = new SolidColorBrush(Global.background);
@@ -71,9 +73,12 @@ namespace HitomiViewer.UserControls.Reader
             if (images[copypage] == null)
             {
                 BitmapImage image = await ImageProcessor.ProcessEncryptAsync(file.url);
-                image.Freeze();
-                if (images.Length == hiyobi.files.Length)
-                    images[copypage] = image;
+                if (image != null)
+                {
+                    image.Freeze();
+                    if (images.Length == hiyobi.files.Length)
+                        images[copypage] = image;
+                }
             }
             if (copypage == page && images.Length == hiyobi.files.Length)
             {
@@ -98,12 +103,47 @@ namespace HitomiViewer.UserControls.Reader
                     images = new BitmapImage[hiyobi.files.Length];
                 if (images[i] == null)
                 {
-                    BitmapImage image;
-                    image = await ImageProcessor.ProcessEncryptAsync(hiyobi.files[i].url);
-                    image.Freeze();
-                    images[i] = image;
+                    BitmapImage image = null;
+                    Task<BitmapImage> task = null;
+                    for (int m = 0; m < 10 && image == null; m++)
+                    {
+                        task = ImageProcessor.ProcessEncryptAsyncException(hiyobi.files[i].url);
+                        try { image = await task; } catch { }
+                    }
+                    if (image == null)
+                    {
+                        MessageBox.Show($"{i + 1}번 이미지를 불러오는데 실패했습니다.\nexcept.log 에 정보가 기록됩니다.\n{hiyobi.files[i].url}\n{task.Exception.InnerException.Message}");
+                        System.IO.File.WriteAllText("except.log", Newtonsoft.Json.Linq.JObject.FromObject(hiyobi.files[i]).ToString() + "\n" + task.Exception.InnerException.Message + "\n" + task.Exception.InnerException.StackTrace);
+                    }
+                    else
+                    {
+                        image.Freeze();
+                        images[i] = image;
+                    }
                 }
             }
+        }
+        private Task CLMRunner = null;
+        protected override void ClearMemory()
+        {
+            base.ClearMemory();
+            if (CLMRunner != null && !CLMRunner.IsCompleted) return;
+            CLMRunner = Task.Factory.StartNew(() =>
+            {
+                BitmapImage[] notnullimages = images.Where(x => x != null).ToArray();
+                long size = notnullimages.Select(x => ImageProcessor.Image2Bytes(x).LongLength).Sum() / notnullimages.LongLength;
+                double byteperimage = ((double)size) / 1024 / 1024;
+                averageSize = byteperimage;
+                for (int i = 0; i < page; i++)
+                {
+                    if (byteperimage == 0) byteperimage = 10;
+                    if (page - (1024 * 0.7 / byteperimage) > i)
+                    {
+                        images[i] = null;
+                    }
+                }
+                GC.Collect();
+            });
         }
 
         protected override void Image_KeyDown(object sender, KeyEventArgs e)

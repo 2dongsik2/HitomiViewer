@@ -65,7 +65,7 @@ namespace HitomiViewer.UserControls
         {
             PluginHandler.FireOnHitomiPanelInit(this);
             if (h.thumbnail.preview_img == null)
-                h.thumbnail.preview_img = await ImageProcessor.LoadWebImageAsync("https:" + h.thumbnail.preview_url);
+                h.thumbnail.preview_img = await ImageProcessor.LoadWebImageAsync(h.thumbnail.preview_url.https());
             thumbNail.Source = h.thumbnail.preview_img;
             thumbBrush.ImageSource = h.thumbnail.preview_img;
             PluginHandler.FireOnHitomiPanelDelayInit(this);

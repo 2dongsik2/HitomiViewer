@@ -48,23 +48,24 @@ namespace HitomiViewer.Processor
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
-        public async Task<List<HFile>> HiyobiFiles(int? index = null)
+        public async Task<List<Hiyobi.HFile>> HiyobiFiles(int? index = null)
         {
-            List<HFile> files = new List<HFile>();
+            List<Hiyobi.HFile> files = new List<Hiyobi.HFile>();
             url = $"https://cdn.hiyobi.me/data/json/{index ?? this.index}_list.json";
             JArray arr = await TryLoadJArray();
             if (arr == null)
-                return new List<HFile>();
+                return new List<Hiyobi.HFile>();
             foreach (JToken tk in arr)
             {
-                files.Add(new HFile
+                files.Add(new Hiyobi.HFile
                 {
                     hasavif = (tk.IntValue("hasavif") ?? 0).ToBool(),
                     hash = tk.StringValue("hash"),
                     haswebp = (tk.IntValue("haswebp") ?? 0).ToBool(),
                     height = tk.IntValue("height") ?? 0,
                     width = tk.IntValue("width") ?? 0,
-                    name = tk.StringValue("name")
+                    name = tk.StringValue("name"),
+                    id = index ?? this.index
                 });
             }
             return files;

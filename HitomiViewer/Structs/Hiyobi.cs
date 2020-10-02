@@ -7,6 +7,14 @@ using System.Threading.Tasks;
 
 namespace HitomiViewer
 {
+    public class Hiyobi
+    {
+        public class HFile : Hitomi.HFile
+        {
+            public int id { get; set; }
+        }
+    }
+
     public class HiyobiGallery : IHitomi
     {
         [JsonInfo("category")]
@@ -22,7 +30,7 @@ namespace HitomiViewer
         public DisplayValue[] groups { get; set; }
         public DisplayValue[] parodys { get; set; }
         public DisplayValue[] tags { get; set; }
-        public Hitomi.HFile[] files { get; set; }
+        public Hiyobi.HFile[] files { get; set; }
         public string title
         {
             get => name;
