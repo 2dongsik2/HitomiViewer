@@ -28,11 +28,11 @@ namespace HitomiViewer.Processor.Loaders
             Tuple<byte[], long?> result = await parser.LoadNozomiAndRangeMax();
             if (result == null) return;
             int[] ids = parser.ByteArrayToIntArray(result.Item1);
-            await Parser(ids);
+            Parser(ids);
             int pages = (int)Math.Ceiling((result.Item2 ?? 0) / ((double)count));
             pagination?.Invoke(pages);
         }
-        public async Task Parser(int[] ids)
+        public void Parser(int[] ids)
         {
             start(ids.Length);
             for (int i = 0; i < ids.Length; i++)

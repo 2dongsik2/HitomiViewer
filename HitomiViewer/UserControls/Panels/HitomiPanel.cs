@@ -274,14 +274,14 @@ namespace HitomiViewer.UserControls
             e.Handled = true;
         }
 
-        public override async void AtHitomi_Click(object sender, RoutedEventArgs e)
+        public override void AtHitomi_Click(object sender, RoutedEventArgs e)
         {
             //HiyobiLoader hiyobi = new HiyobiLoader();
             //hiyobi.Default();
             //await hiyobi.Parser(hiyobiList.ToArray());
             HitomiLoader hitomi = new HitomiLoader();
             hitomi.Default();
-            await hitomi.Parser(new int[] { int.Parse(h.id) });
+            hitomi.Parser(new int[] { int.Parse(h.id) });
         }
     }
 }
