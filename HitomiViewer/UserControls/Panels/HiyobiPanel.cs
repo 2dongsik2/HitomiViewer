@@ -1,9 +1,11 @@
-﻿using HitomiViewer.Processor;
+﻿using ExtensionMethods;
+using HitomiViewer.Processor;
 using HitomiViewer.Processor.Loaders;
 using HitomiViewer.UserControls.Reader;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -36,7 +38,7 @@ namespace HitomiViewer.UserControls.Panels
                 if (h.thumbnail.preview_url == null)
                     h.thumbnail.preview_img = ImageProcessor.FromResource("NoImage.jpg");
                 else
-                    h.thumbnail.preview_img = await ImageProcessor.ProcessEncryptAsync(h.thumbnail.preview_url);
+                    h.thumbnail.preview_img = await ImageProcessor.ProcessEncryptAsync(h.thumbnail.preview_url).@catch(null, sourceName: MethodBase.GetCurrentMethod().FullName());
             }
             if (h.files == null)
             {

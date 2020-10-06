@@ -16,6 +16,8 @@ using HitomiViewer.UserControls;
 using Newtonsoft.Json.Linq;
 using System.Collections.Specialized;
 using System.Web;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace ExtensionMethods
 {
@@ -248,18 +250,48 @@ namespace ExtensionMethods
         public static async void TaskCallback<T>(this Task<T> Task, Action<T> callback) where T : class => callback(await Task);
         public static async void then<T>(this Task<T> Task, Action<T> callback) where T : class => callback(await Task);
         public static async void then<T>(this Task<T> Task, Action<T, object> callback, object data) where T : class => callback(await Task, data);
-        public static async Task<Task<T>> Catch<T>(this Task<T> Task, Action<T> callback) where T : class
+        public static async void then<T>(this Task<T> Task, Action<T> resolve, Action<Exception> reject,
+            [CallerMemberName] string sourceName = "",
+            [CallerFilePath] string sourcePath = "",
+            [CallerLineNumber] int sourceLine = 0) where T : class
         {
             try
             {
-                await Task;
+                resolve(await Task);
             }
-            catch
+            catch (Exception ex)
             {
-                callback(await Task);
+                ex.WriteExcept(sourceName, sourcePath, sourceLine);
+                reject?.Invoke(ex);
             }
-            return Task;
         }
+        public static async Task<T> @catch<T>(this Task<T> Task, Action<T> reject,
+            [CallerMemberName] string sourceName = "",
+            [CallerFilePath] string sourcePath = "",
+            [CallerLineNumber] int sourceLine = 0) where T : class
+        {
+            try
+            {
+                return await Task;
+            }
+            catch (Exception ex)
+            {
+                ex.WriteExcept(sourceName, sourcePath, sourceLine);
+                reject?.Invoke(await Task);
+                return null;
+            }
+        }
+        public static void WriteExcept(this Exception ex,
+            [CallerMemberName] string sourceName = "",
+            [CallerFilePath] string sourcePath = "",
+            [CallerLineNumber] int sourceLine = 0)
+        {
+            Debug.WriteLine(ex.GetType().FullName + ": " + ex.Message + " (" + ex.HResult + ")");
+            Debug.WriteLine(string.Format("   위치: {0} 파일 {1}:줄 {2}", sourceName, sourcePath, sourceLine));
+            Debug.WriteLine(ex.StackTrace);
+            Debug.WriteLine(ex.HelpLink);
+        }
+        public static string FullName(this System.Reflection.MethodBase @base) => @base.ReflectedType.FullName + "." + @base.Name + "()";
         public static bool ToBool(this int i) => Convert.ToBoolean(i);
         public static void RemoveAllEvents(this EventHandler events)
         {

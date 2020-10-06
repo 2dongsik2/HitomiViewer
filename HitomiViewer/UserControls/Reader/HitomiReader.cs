@@ -1,4 +1,5 @@
-﻿using HitomiViewer.Processor;
+﻿using ExtensionMethods;
+using HitomiViewer.Processor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,10 +71,25 @@ namespace HitomiViewer.UserControls.Reader
                 images = new BitmapImage[hitomi.files.Length];
             if (images[copypage] == null)
             {
-                BitmapImage image = await ImageProcessor.ProcessEncryptAsync(file.url);
-                image.Freeze();
-                if (images.Length == hitomi.files.Length)
-                    images[copypage] = image;
+                BitmapImage image = null;
+                Task<BitmapImage> task = null;
+                for (int m = 0; m < 10 && image == null; m++)
+                {
+                    task = ImageProcessor.ProcessEncryptAsync(file.url);
+                    try { image = await task; } catch { }
+                }
+                if (image == null && task.IsFaulted)
+                {
+                    MessageBox.Show($"{copypage + 1}번 이미지를 불러오는데 실패했습니다.\nlatest.log 에 정보가 기록됩니다.\n{file.url}\n{task.Exception.InnerException.ToString()}");
+                    System.Reflection.MethodBase current = System.Reflection.MethodBase.GetCurrentMethod();
+                    task.Exception.InnerException.WriteExcept(sourceName: current.FullName());
+                }
+                else
+                {
+                    image.Freeze();
+                    if (images.Length == hitomi.files.Length)
+                        images[copypage] = image;
+                }
             }
             if (copypage == page && images.Length == hitomi.files.Length)
             {
@@ -85,6 +101,38 @@ namespace HitomiViewer.UserControls.Reader
                     image.Source = images[page];
                 }
                 ClearMemory();
+            }
+        }
+        protected override async void PreLoadAll(int start)
+        {
+            base.PreLoadAll(start);
+            this.Title = hitomi.name + " 0/" + (hitomi.files.Length - 1);
+            for (int i = start; i < hitomi.files.Length; i++)
+            {
+                this.Title = hitomi.name + " " + i + "/" + (hitomi.files.Length - 1);
+                if (images == null || images.Length < hitomi.files.Length)
+                    images = new BitmapImage[hitomi.files.Length];
+                if (images[i] == null)
+                {
+                    BitmapImage image = null;
+                    Task<BitmapImage> task = null;
+                    for (int m = 0; m < 10 && image == null; m++)
+                    {
+                        task = ImageProcessor.ProcessEncryptAsync(hitomi.files[i].url);
+                        try { image = await task; } catch { }
+                    }
+                    if (image == null && task.IsFaulted)
+                    {
+                        MessageBox.Show($"{i + 1}번 이미지를 불러오는데 실패했습니다.\nexcept.log 에 정보가 기록됩니다.\n{hitomi.files[i].url}\n{task.Exception.InnerException.Message}");
+                        System.Reflection.MethodBase current = System.Reflection.MethodBase.GetCurrentMethod();
+                        task.Exception.InnerException.WriteExcept(sourceName: current.FullName());
+                    }
+                    else
+                    {
+                        image.Freeze();
+                        images[i] = image;
+                    }
+                }
             }
         }
 
@@ -135,7 +183,7 @@ namespace HitomiViewer.UserControls.Reader
             }
             else if (e.Key == Key.Enter)
             {
-
+                PreLoadAll(0);
             }
             if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.C)
             {

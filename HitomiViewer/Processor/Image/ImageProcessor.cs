@@ -131,77 +131,13 @@ namespace HitomiViewer.Processor
             if (url.isUrl())
             {
                 if (url.EndsWith(".webp"))
-                    return await LoadWebWebPImageAsync(url);
-                else
-                    return await LoadWebImageAsync(url);
-            }
-            else if (Global.FileEn)
-            {
-                try
                 {
-                    byte[] org = File.ReadAllBytes(url);
-                    byte[] dec = FileDecrypt.Default(org);
-                    using (var ms = new MemoryStream(dec))
-                    {
-                        var image = new BitmapImage();
-                        image.BeginInit();
-                        image.CacheOption = BitmapCacheOption.OnLoad; // here
-                        image.StreamSource = ms;
-                        image.EndInit();
-                        return image;
-                    }
-                }
-                catch
-                {
-                    try
-                    {
-                        return LoadMemory(url);
-                    }
-                    catch (FileNotFoundException)
-                    {
-                        return FromResource("NoImage.jpg");
-                    }
-                    catch (NotSupportedException)
-                    {
-                        return FromResource("ErrEncrypted.jpg");
-                    }
-                }
-            }
-            else
-            {
-                try
-                {
-                    return LoadMemory(url);
-                }
-                catch (FileNotFoundException)
-                {
-                    return FromResource("NoImage.jpg");
-                }
-                catch (NotSupportedException)
-                {
-                    return FromResource("ErrEncrypted.jpg");
-                }
-            }
-        }
-        public static async Task<BitmapImage> ProcessEncryptAsyncException(string url)
-        {
-            Task<BitmapImage> runner;
-            if (url.isUrl())
-            {
-                if (url.EndsWith(".webp"))
-                {
-                    runner = LoadWebWebPImageAsyncException(url);
-                    BitmapImage result = await runner;
-                    if (runner.IsFaulted)
-                        throw runner.Exception;
+                    BitmapImage result = await LoadWebWebPImageAsyncException(url);
                     return result;
                 }
                 else
                 {
-                    runner = LoadWebImageAsyncException(url);
-                    BitmapImage result = await runner;
-                    if (runner.IsFaulted)
-                        throw runner.Exception;
+                    BitmapImage result = await LoadWebImageAsyncException(url);
                     return result;
                 }
             }
@@ -345,32 +281,6 @@ namespace HitomiViewer.Processor
                 return bi;
             }
             catch
-            {
-                return null;
-            }
-        }
-        public static async Task<BitmapImage> LoadWebWebPImageAsync(string url)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(url))
-                    return null;
-                System.Net.WebClient wc = new System.Net.WebClient();
-                wc.Headers.Add("Referer", "https://" + new Uri(url).Host);
-                Byte[] MyData = await wc.DownloadDataTaskAsync(url);
-                wc.Dispose();
-                WebP webP = new WebP();
-                Bitmap bitmap = webP.Decode(MyData);
-                MemoryStream ms = new MemoryStream();
-                bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
-                var bi = new BitmapImage();
-                bi.BeginInit();
-                bi.StreamSource = ms;
-                bi.CacheOption = BitmapCacheOption.OnLoad;
-                bi.EndInit();
-                return bi;
-            }
-            catch (Exception ex)
             {
                 return null;
             }

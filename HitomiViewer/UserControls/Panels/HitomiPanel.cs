@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -178,7 +179,7 @@ namespace HitomiViewer.UserControls
                     thumbNail.Source = image;
                     thumbBrush.ImageSource = image;
                     this.nameLabel.Content = h.name;
-                });
+                }, null, sourceName: MethodBase.GetCurrentMethod().FullName());
             }
             else
                 this.nameLabel.Content = h.name;
@@ -255,7 +256,7 @@ namespace HitomiViewer.UserControls
         public override async void ImageDownloadCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
         {
             h.thumbnail.preview_url = h.files.First().url;
-            h.thumbnail.preview_img = await ImageProcessor.ProcessEncryptAsync(h.thumbnail.preview_url);
+            h.thumbnail.preview_img = await ImageProcessor.ProcessEncryptAsync(h.thumbnail.preview_url).@catch(null, sourceName: MethodBase.GetCurrentMethod().FullName());
             Init();
         }
         public override void tagScroll_MouseWheel(object sender, MouseWheelEventArgs e)

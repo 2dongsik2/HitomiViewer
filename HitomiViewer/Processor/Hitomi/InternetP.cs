@@ -116,7 +116,7 @@ namespace HitomiViewer.Processor
             List<Hitomi.HFile> files = new List<Hitomi.HFile>();
             foreach (JToken tk in jObject["files"])
             {
-                files.Add(new Hitomi.HFile().JsonParseFromName(tk));
+                files.Add(tk.ToObject<Hitomi.HFile>());
             }
             return files;
         }

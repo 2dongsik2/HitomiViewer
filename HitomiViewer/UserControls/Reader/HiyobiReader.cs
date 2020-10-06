@@ -1,6 +1,8 @@
-﻿using HitomiViewer.Processor;
+﻿using ExtensionMethods;
+using HitomiViewer.Processor;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,8 +16,6 @@ namespace HitomiViewer.UserControls.Reader
     class HiyobiReader : IReader
     {
         private HiyobiGallery hiyobi;
-
-        private double averageSize = 10;
 
         public HiyobiReader(HiyobiGallery hiyobi)
         {
@@ -72,8 +72,20 @@ namespace HitomiViewer.UserControls.Reader
                 images = new BitmapImage[hiyobi.files.Length];
             if (images[copypage] == null)
             {
-                BitmapImage image = await ImageProcessor.ProcessEncryptAsync(file.url);
-                if (image != null)
+                BitmapImage image = null;
+                Task<BitmapImage> task = null;
+                for (int m = 0; m < 10 && image == null; m++)
+                {
+                    task = ImageProcessor.ProcessEncryptAsync(file.url);
+                    try { image = await task; } catch { }
+                }
+                if (image == null && task.IsFaulted)
+                {
+                    MessageBox.Show($"{copypage + 1}번 이미지를 불러오는데 실패했습니다.\nlatest.log 에 정보가 기록됩니다.\n{file.url}\n{task.Exception.InnerException.ToString()}");
+                    System.Reflection.MethodBase current = System.Reflection.MethodBase.GetCurrentMethod();
+                    task.Exception.InnerException.WriteExcept(sourceName: current.FullName());
+                }
+                else
                 {
                     image.Freeze();
                     if (images.Length == hiyobi.files.Length)
@@ -107,16 +119,14 @@ namespace HitomiViewer.UserControls.Reader
                     Task<BitmapImage> task = null;
                     for (int m = 0; m < 10 && image == null; m++)
                     {
-                        task = ImageProcessor.ProcessEncryptAsyncException(hiyobi.files[i].url);
+                        task = ImageProcessor.ProcessEncryptAsync(hiyobi.files[i].url);
                         try { image = await task; } catch { }
                     }
-                    if (image == null)
+                    if (image == null && task.IsFaulted)
                     {
-                        if (task.IsFaulted)
-                        {
-                            MessageBox.Show($"{i + 1}번 이미지를 불러오는데 실패했습니다.\nexcept.log 에 정보가 기록됩니다.\n{hiyobi.files[i].url}\n{task.Exception.InnerException.Message}");
-                            System.IO.File.WriteAllText("except.log", Newtonsoft.Json.Linq.JObject.FromObject(hiyobi.files[i]).ToString() + "\n" + task.Exception.InnerException.Message + "\n" + task.Exception.InnerException.StackTrace);
-                        }
+                        MessageBox.Show($"{i + 1}번 이미지를 불러오는데 실패했습니다.\nexcept.log 에 정보가 기록됩니다.\n{hiyobi.files[i].url}\n{task.Exception.InnerException.Message}");
+                        System.Reflection.MethodBase current = System.Reflection.MethodBase.GetCurrentMethod();
+                        task.Exception.InnerException.WriteExcept(sourceName: current.FullName());
                     }
                     else
                     {
