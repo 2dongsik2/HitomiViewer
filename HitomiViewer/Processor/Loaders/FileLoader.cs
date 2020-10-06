@@ -1,4 +1,5 @@
 ﻿using ExtensionMethods;
+using HitomiViewer.Plugin;
 using HitomiViewer.Scripts;
 using Newtonsoft.Json.Linq;
 using System;
@@ -37,7 +38,13 @@ namespace HitomiViewer.Processor.Loaders
         {
             int SelectedPage = Global.MainWindow.Page;
             uint PageCount = Global.MainWindow.Page_itemCount;
-            string[] files = Directory.GetFiles(directory);
+            string[] files = Directory.GetDirectories(directory);
+            Parser(files);
+        }
+        public void Parser(string[] files)
+        {
+            int SelectedPage = Global.MainWindow.Page;
+            uint PageCount = Global.MainWindow.Page_itemCount;
             files = Global.FolderSort(files);
             if (Global.MainWindow.searchType == MainWindow.SearchType.reversal)
                 files = files.Reverse().ToArray();
@@ -46,17 +53,49 @@ namespace HitomiViewer.Processor.Loaders
             for (; i < files.Length; i++)
             {
                 string folder = files[i];
+                if (!File.Exists(Path.Combine(folder, "info.json"))) continue;
                 Console.WriteLine("{0}: {1}", i, folder);
                 var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif", ".lock" };
                 IEnumerable<string> innerFiles = Directory.GetFiles(folder);
                 innerFiles = innerFiles.Where(file => allowedExtensions.Any(file.ToLower().EndsWith)).ESort();
                 JObject data = JObject.Parse(File.ReadAllText(Path.Combine(folder, "info.json")));
-                CheckType(data, innerFiles);
+                CheckType(data, i, files.Length);
             }
         }
-        private void CheckType(JObject data, IEnumerable<string> files)
+        private void CheckType(JObject data, int index, int length)
         {
-
+            if (data["thumb"] != null)
+            {
+                DeprecatedFile(data, index, length);
+                return;
+            }
+            int? type = (int?)(data["fileType"] ?? data["type"]);
+            switch (type)
+            {
+                case (int)IHitomi.HFileType.Hitomi:
+                    
+                    break;
+                case (int)IHitomi.HFileType.Hiyobi:
+                    hiyobiupdate(data.ToObject<HiyobiGallery>(), index, length);
+                    break;
+                default:
+                    PluginHandler.FireUnknownFileLoaded(type ?? 0, data);
+                    break;
+            }
+        }
+        private void DeprecatedFile(JObject data, int index, int length)
+        {
+            int? type = (int?)(data["fileType"] ?? data["type"]);
+            if (type == 1 || type == 2)
+            {
+                Hitomi h = new Hitomi();
+                h.id = data.Value<string>("id");
+                h.name = data.Value<string>("name") + " (다시 다운로드가 필요함)";
+                h.thumbnail.preview_url = data.Value<string>("thumbpath");
+                h.files = new Hitomi.HFile[0];
+                hitomiupdate(h, index, length);
+            }
+            
         }
         private bool CheckRangePC(int index, int page, int count) => CheckRange(index, (page - 1) * count, page * count);
         private bool CheckRange(int index, int start, int end) => index <= end && index > start;

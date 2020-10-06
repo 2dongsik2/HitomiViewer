@@ -62,10 +62,10 @@ namespace HitomiViewer
     {
         public enum HFileType
         {
-            Hitomi,
-            Hiyobi,
-            Pixiv,
-            None
+            None = 0,
+            Hitomi = 1,
+            Hiyobi = 2,
+            Pixiv = 3
         }
         public class DisplayValue
         {
@@ -109,7 +109,7 @@ namespace HitomiViewer
         public string id { get; set; }
         public string url { get; set; }
         public string name { get; set; }
-        public HFileType fileType;
+        public HFileType fileType { get; protected set; }
         public Thumbnail thumbnail = new Thumbnail();
         public Authors authors = new Authors();
         [JsonInfo(ignore = true)]

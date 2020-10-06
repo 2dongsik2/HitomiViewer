@@ -69,6 +69,7 @@ namespace HitomiViewer.Processor
         {
             url = $"https://ltn.hitomi.la/galleries/{index ?? this.index}.js";
             JObject info = await HitomiGalleryInfo();
+            if (info == null) return h;
             h.tags = HitomiTags(info).ToArray();
             h.files = HitomiFiles(info).ToArray();
             return await HitomiGalleryData(h);
@@ -76,6 +77,7 @@ namespace HitomiViewer.Processor
         public async Task<JObject> HitomiGalleryInfo()
         {
             string html = await Load(url);
+            if (!html.Contains("var galleryinfo = ")) return null;
             JObject jObject = JObject.Parse(html.Replace("var galleryinfo = ", ""));
             return jObject;
         }
@@ -328,8 +330,8 @@ namespace HitomiViewer.Processor
 
         public string GetDirFromHFile(Hitomi.HFile file)
         {
-            if (file.hasavif)
-                return "avif";
+            //if (file.hasavif)
+            //    return "avif";
             if (file.haswebp)
                 return "webp";
             return null;

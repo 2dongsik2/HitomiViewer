@@ -162,72 +162,19 @@ namespace HitomiViewer
         }
         public void LoadHitomi(string[] files)
         {
-            /*
-             Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => label.Visibility = Visibility.Hidden));
-            if (files.Length <= 0)
+            label.Visibility = Visibility.Visible;
+            FileLoader loader = new FileLoader();
+            loader.Default();
+            loader.Parser(files);
+            label.Visibility = Visibility.Hidden;
+            var pagination = new ILoader().SetSearch((int ind) =>
             {
-                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => label.Visibility = Visibility.Hidden));
-                return;
-            }
-            string[] Folders = FolderSort(files);
-            int i = 0;
-            int SelectedPage = 1;
-            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
-            {
-                this.Background = new SolidColorBrush(Global.background);
                 MainPanel.Children.Clear();
-                if (SearchMode2.SelectedIndex == 1)
-                    Folders = Folders.Reverse().ToArray();
-                SelectedPage = Page_Index.SelectedIndex + 1;
-                this.Title = string.Format("MainWindow - {0}페이지", SelectedPage);
-            }));
-            foreach (string folder in Folders.Where(x => Array.IndexOf(Folders, x) + 1 <= Page_itemCount * SelectedPage && Array.IndexOf(Folders, x) + 1 > (SelectedPage - 1) * Page_itemCount))
-            {
-                i++;
-                Console.WriteLine("{0}: {1}", i, folder);
-                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".lock" };
-                string[] innerFiles = Directory.GetFiles(folder).Where(file => allowedExtensions.Any(file.ToLower().EndsWith)).ToArray().ESort();
-                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
-                {
-                    Hitomi h = new Hitomi
-                    {
-                        name = folder.Split(Path.DirectorySeparatorChar).Last(),
-                        dir = folder,
-                        page = innerFiles.Length,
-                        files = innerFiles,
-                        type = Hitomi.Type.Folder,
-                        FolderByte = File2.GetFilesByte(innerFiles),
-                        SizePerPage = File2.GetSizePerPage(folder, allowedExtensions)
-                    };
-                    if (innerFiles.Length <= 0)
-                    {
-                        h.thumb = ImageProcessor.FromResource("NoImage.jpg");
-                        h.thumbpath = "";
-                    }
-                    else
-                    {
-                        h.thumb = ImageProcessor.ProcessEncrypt(innerFiles.First());
-                        h.thumbpath = innerFiles.First();
-                    }
-                    if (h.thumb == null) return;
-                    label.FontSize = 100;
-                    label.Content = i + "/" + Page_itemCount;
-                    MainPanel.Children.Add(new HitomiPanel(h, this, true));
-                    Console.WriteLine("Completed: {0}", folder);
-                }));
-            }*/
-            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() =>
-            {
-                label.Visibility = Visibility.Hidden;
-                var pagination = new ILoader().SetSearch((int ind) =>
-                {
-                    MainPanel.Children.Clear();
-                    LabelSetup();
-                    Page_Index.SelectedIndex = ind - 1; //Page_Index_SelectionChanged 이벤트 호출
-                }).SetPagination(Page);
-                int pages = (int)Math.Ceiling(files.Length / ((double)Page_itemCount));
-                pagination(pages);
-            }));
+                LabelSetup();
+                Page_Index.SelectedIndex = ind - 1; //Page_Index_SelectionChanged 이벤트 호출
+            }).SetPagination(Page);
+            int pages = (int)Math.Ceiling(files.Length / ((double)Page_itemCount));
+            pagination(pages);
         }
 
         public int GetPage() => (int) new CountBox("페이지", "원하는 페이지 수", 1).ShowDialog();
@@ -388,7 +335,7 @@ namespace HitomiViewer
             Page_ItemCount.SelectedIndex = 3;
             SearchMode2.SelectedIndex = 0;
             DelayRegistEvents();
-            new TaskFactory().StartNew(() => LoadHitomi(path));
+            LoadHitomi(path);
         }
         private void MenuItem_Checked(object sender, RoutedEventArgs e)
         {
@@ -471,23 +418,23 @@ namespace HitomiViewer
                     break;
             }
             SetFolderSort(SortTypes);
-            new TaskFactory().StartNew(() => LoadHitomi(path));
+            LoadHitomi(path);
         }
         private void SearchMode2_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            new TaskFactory().StartNew(() => LoadHitomi(path));
+            LoadHitomi(path);
         }
         private void Page_Index_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            new TaskFactory().StartNew(() => LoadHitomi(path));
+            LoadHitomi(path);
         }
         private void Page_ItemCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            new TaskFactory().StartNew(() => LoadHitomi(path));
+            LoadHitomi(path);
         }
         private void LoadBtn_Click(object sender, RoutedEventArgs e)
         {
-            new TaskFactory().StartNew(() => LoadHitomi(path));
+            LoadHitomi(path);
         }
         private async void Search_Button_Click(object sender, RoutedEventArgs e)
         {

@@ -1,4 +1,5 @@
 ﻿using HitomiViewer.UserControls;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,17 +12,13 @@ namespace HitomiViewer.Plugin
     {
         void OnInit(MainWindow main);
         void OnDelayInit(MainWindow main);
-        void OnHitomiPanelInit(HitomiPanel panel);
-        void OnHitomiPanelDelayInit(HitomiPanel panel);
-        void OnHitomiChangeColor(HitomiPanel panel);
+        void UnknownFileLoaded(int TypeId, JObject data);
     }
 
     public abstract class Plugin : IPlugin
     {
         public virtual void OnInit(MainWindow main) { }
         public virtual void OnDelayInit(MainWindow main) { }
-        public virtual void OnHitomiPanelInit(HitomiPanel panel) { }
-        public virtual void OnHitomiPanelDelayInit(HitomiPanel panel) { }
-        public virtual void OnHitomiChangeColor(HitomiPanel panel) { }
+        public virtual void UnknownFileLoaded(int TypeId, JObject data) { }
     }
 }

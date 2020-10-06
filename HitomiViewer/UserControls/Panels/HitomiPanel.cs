@@ -63,7 +63,6 @@ namespace HitomiViewer.UserControls
         }
         public override async void Init()
         {
-            PluginHandler.FireOnHitomiPanelInit(this);
             if (h.thumbnail.preview_img == null)
                 h.thumbnail.preview_img = await ImageProcessor.LoadWebImageAsync(h.thumbnail.preview_url.https());
             thumbNail.Source = h.thumbnail.preview_img;
@@ -71,8 +70,8 @@ namespace HitomiViewer.UserControls
             nameLabel.Content = h.name;
             pageLabel.Content = h.files.Length;
             sizeLabel.Content = File2.SizeStr(h.FileInfo.size);
-            sizeperpageLabel.Content = File2.SizeStr(h.FileInfo.size / h.files.Length);
-            PluginHandler.FireOnHitomiPanelDelayInit(this);
+            if (h.files.Length > 0)
+                sizeperpageLabel.Content = File2.SizeStr(h.FileInfo.size / h.files.Length);
         }
 
         public override void ContextSetup()
@@ -117,7 +116,6 @@ namespace HitomiViewer.UserControls
 
         public override void ChangeColor()
         {
-            PluginHandler.FireOnHitomiChangeColor(this);
             panel.Background = new SolidColorBrush(Global.background);
             border.Background = new SolidColorBrush(Global.imagecolor);
             InfoPanel.Background = new SolidColorBrush(Global.Menuground);
