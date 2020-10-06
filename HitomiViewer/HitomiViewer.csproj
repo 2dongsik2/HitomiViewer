@@ -166,7 +166,6 @@
     <Compile Include="Processor\Hiyobi\Tags.cs" />
     <Compile Include="Structs\Images.cs" />
     <Compile Include="Structs\Hiyobi.cs" />
-    <Compile Include="Structs\Pixiv.cs" />
     <Compile Include="UserControls\CountBox.cs" />
     <Compile Include="Scripts\FileEncryptDecrypt.cs" />
     <Compile Include="Processor\Internet\Github.cs" />
@@ -183,6 +182,7 @@
     <Compile Include="Scripts\Global.cs" />
     <Compile Include="Structs\Hitomi.cs" />
     <Compile Include="UserControls\InputBox.cs" />
+    <Compile Include="UserControls\Pixiv\PixivIllustPanel.cs" />
     <Compile Include="UserControls\Reader\HitomiReader.cs" />
     <Compile Include="UserControls\Reader\HiyobiReader.cs" />
     <Compile Include="UserControls\Reader\IReader.xaml.cs">

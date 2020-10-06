@@ -178,41 +178,9 @@ namespace HitomiViewer.UserControls.Reader
                 PreLoad();
                 SetImage(hiyobi.files[page]);
             }
-            if (e.Key == Key.F11)
-            {
-                if (base.WindowStyle == WindowStyle.None && base.WindowState == WindowState.Maximized)
-                {
-                    base.WindowStyle = WindowStyle.SingleBorderWindow;
-                    base.WindowState = WindowState.Normal;
-                }
-                else if (base.WindowStyle == WindowStyle.SingleBorderWindow && base.WindowState == WindowState.Normal)
-                {
-                    base.WindowStyle = WindowStyle.None;
-                    base.WindowState = WindowState.Maximized;
-                }
-                else if (base.WindowStyle == WindowStyle.SingleBorderWindow && base.WindowState == WindowState.Maximized)
-                {
-                    base.WindowStyle = WindowStyle.None;
-                    base.WindowState = WindowState.Normal;
-                    base.WindowState = WindowState.Maximized;
-                }
-            }
-            else if (e.Key == Key.Escape)
-            {
-                if (base.WindowStyle == WindowStyle.None && base.WindowState == WindowState.Maximized)
-                {
-                    base.WindowStyle = WindowStyle.SingleBorderWindow;
-                    base.WindowState = WindowState.Normal;
-                }
-            }
-            else if (e.Key == Key.Enter)
-            {
-
-            }
+            if (e.Key == Key.Enter) PreLoadAll(0);
             if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.C)
-            {
                 Clipboard.SetImage((BitmapSource)this.image.Source);
-            }
         }
         protected override void Image_MouseDown(object sender, MouseEventArgs e)
         {

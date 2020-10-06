@@ -38,6 +38,7 @@ namespace HitomiViewer.UserControls
     public partial class IHitomiPanel : UserControl
     {
         public IHitomi h;
+
         public bool large;
         public bool file;
         public bool blur;

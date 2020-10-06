@@ -5,7 +5,7 @@ using System.Windows.Controls;
 
 namespace HitomiViewer.Processor.Loaders
 {
-    class ILoader
+    public class ILoader
     {
         public int index = 0;
         public int count = 0;

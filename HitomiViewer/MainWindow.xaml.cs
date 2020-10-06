@@ -319,6 +319,8 @@ namespace HitomiViewer
                     break;
             }
         }
+
+        #region Events
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             new Config().GetConfig().Save();
@@ -489,7 +491,7 @@ namespace HitomiViewer
                 MainPanel.Children.Add(new HitomiPanel(h));
             };
             parser.end = () => label.Visibility = Visibility.Collapsed;
-            await parser.LoadCompre(favs);
+            //await parser.LoadCompre(favs);
             label.Visibility = Visibility.Collapsed;
         }
         private void Encrypt_Click(object sender, RoutedEventArgs e)
@@ -541,76 +543,19 @@ namespace HitomiViewer
             }
             MessageBox.Show("전체 복호화 완료");
         }
-        private async void ExportNumber_Click(object sender, RoutedEventArgs e)
+        private void ExportNumber_Click(object sender, RoutedEventArgs e)
         {
-            /*
-            JArray export = new JArray();
-            foreach (string item in Directory.GetDirectories(path))
-            {
-                if (File.Exists($"{item}/info.json"))
-                {
-                    JObject j = JObject.Parse(File.ReadAllText($"{item}/info.json"));
-                    JObject obj = new JObject();
-                    obj["id"] = j["id"];
-                    obj["type"] = int.Parse(j["type"].ToString());
-                    export.Add(obj);
-                }
-                else if (File.Exists($"{item}/info.txt"))
-                {
-                    JObject obj = new JObject();
-                    HitomiInfoOrg info = InfoLoader.parseTXT(File.ReadAllText($"{item}/info.txt"));
-                    obj["id"] = info.Number;
-                    bool result = await new InternetP(index: int.Parse(info.Number)).isHiyobi();
-                    if (result) obj["type"] = (int)Hitomi.Type.Hiyobi;
-                    else obj["type"] = (int)Hitomi.Type.Hitomi;
-                    export.Add(obj);
-                }
-            }
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "번호 파일|*.json";
-            if (!sfd.ShowDialog() ?? false) return;
-            File.WriteAllText(sfd.FileName, export.ToString());
-            */
+            
         }
-        private async void ImportNumber_Click(object sender, RoutedEventArgs e)
+        private void ImportNumber_Click(object sender, RoutedEventArgs e)
         {
-            /*
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "번호 파일|*.json";
-            if (!ofd.ShowDialog() ?? false) return;
-            string s = ofd.FileName;
-            try
-            {
-                MainPanel.Children.Clear();
-                JArray arr = JArray.Parse(File.ReadAllText(s));
-                List<string> hiyobiList = new List<string>();
-                List<int> hitomiList = new List<int>();
-                foreach (JToken item in arr)
-                {
-                    string id = item["id"].ToString();
-                    Hitomi.Type type = (Hitomi.Type)int.Parse(item["type"].ToString());
-                    if (type == Hitomi.Type.Hiyobi)
-                        hiyobiList.Add(id);
-                    else if (type == Hitomi.Type.Hitomi)
-                        hitomiList.Add(int.Parse(id));
-                }
-                HiyobiLoader hiyobi = new HiyobiLoader();
-                hiyobi.Default();
-                await hiyobi.Parser(hiyobiList.ToArray());
-                HitomiLoader hitomi = new HitomiLoader();
-                hitomi.Default();
-                await hitomi.Parser(hitomiList.ToArray());
-            }
-            catch
-            {
-                MessageBox.Show("잘못된 형식 입니다.");
-            }
-            */
+            
         }
         private void CacheDownload_Click(object sender, RoutedEventArgs e)
         {
             Task.Factory.StartNew(new Cache().TagCache);
         }
+        #endregion
 
         #region Hiyobi
         public void HiyobiMain(int index)
@@ -725,31 +670,51 @@ namespace HitomiViewer
             }
             return result;
         }
-        private async void PixivFollow_Click(object sender, RoutedEventArgs e)
+        private async void FollowIllust()
         {
-            /*
             if (Global.Account.Pixiv == null)
                 if (await Login() == false)
                     return;
-            MainPanel.Children.Clear();
             JObject data = await Global.Account.Pixiv.illustFollow();
-            PixivLoader loader = new PixivLoader();
-            loader.Default()
-                .Parser(data);
-            */
+            PixivLoaders.Illust loader = new PixivLoaders.Illust();
+            loader.Default();
+            loader.Parser(data);
         }
-        private async void PixivRecommend_Click(object sender, RoutedEventArgs e)
+        private async void RecommendIllust()
         {
-            /*
+            if (Global.Account.Pixiv == null)
+                if (await Login() == false)
+                    return;
+            JObject data = await Global.Account.Pixiv.illustRecommended();
+            PixivLoaders.Illust loader = new PixivLoaders.Illust();
+            loader.Default();
+            loader.Parser(data);
+        }
+        private async void UserSearch()
+        {
+            if (Global.Account.Pixiv == null)
+                if (await Login() == false)
+                    return;
+            JObject data = await Global.Account.Pixiv.searchUser(PixivUser_Search_Text.Text);
+            PixivLoaders.User loader = new PixivLoaders.User();
+            loader.Default();
+            loader.Parser(data);
+        }
+        private async void PixivFollowIllust_Click(object sender, RoutedEventArgs e)
+        {
             if (Global.Account.Pixiv == null)
                 if (await Login() == false)
                     return;
             MainPanel.Children.Clear();
-            JObject data = await Global.Account.Pixiv.illustRecommended();
-            PixivLoader loader = new PixivLoader();
-            loader.Default()
-                .Parser(data);
-            */
+            FollowIllust();
+        }
+        private async void PixivRecommendIllust_Click(object sender, RoutedEventArgs e)
+        {
+            if (Global.Account.Pixiv == null)
+                if (await Login() == false)
+                    return;
+            MainPanel.Children.Clear();
+            RecommendIllust();
         }
         private void PixivUser_Search_Text_KeyDown(object sender, KeyEventArgs e)
         {
@@ -761,15 +726,11 @@ namespace HitomiViewer
         }
         public async void PixivUser_Search_Button_Click(object sender, RoutedEventArgs e)
         {
-            /*
             if (Global.Account.Pixiv == null)
                 if (await Login() == false)
                     return;
             MainPanel.Children.Clear();
-            JObject data = await Global.Account.Pixiv.searchUser(PixivUser_Search_Text.Text);
-            PixivLoader loader = new PixivLoader();
-            loader.UserDefault().UserParser(data);
-            */
+            
         }
         private void PixivIllust_Search_Text_KeyDown(object sender, KeyEventArgs e)
         {

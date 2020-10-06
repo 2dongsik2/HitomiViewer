@@ -43,6 +43,8 @@ namespace HitomiViewer.Processor
             h.name = name.InnerText;
             HtmlNode image = doc.DocumentNode.SelectSingleNode("//div[@class=\"dj-img1\"]/picture/img");
             image = image ?? doc.DocumentNode.SelectSingleNode("//div[@class=\"cg-img1\"]/picture/img");
+            image = image ?? doc.DocumentNode.SelectSingleNode("//div[@class=\"dj-img1\"]/img");
+            image = image ?? doc.DocumentNode.SelectSingleNode("//div[@class=\"cg-img1\"]/img");
             h.thumbnail.preview_url = image.GetAttributeValue("src", "");
             if (!(h.thumbnail.preview_url.StartsWith("https:") || h.thumbnail.preview_url.StartsWith("http:")))
                 h.thumbnail.preview_url = "https:" + h.thumbnail.preview_url;

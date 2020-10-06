@@ -66,6 +66,8 @@ namespace HitomiViewer.UserControls
         {
             if (h.thumbnail.preview_img == null)
                 h.thumbnail.preview_img = await ImageProcessor.LoadWebImageAsync(h.thumbnail.preview_url.https());
+            if (h.files == null)
+                h.files = new Hitomi.HFile[0];
             thumbNail.Source = h.thumbnail.preview_img;
             thumbBrush.ImageSource = h.thumbnail.preview_img;
             nameLabel.Content = h.name;
@@ -169,9 +171,12 @@ namespace HitomiViewer.UserControls
             thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
             this.nameLabel.Content = h.name + " (로딩중)";
             InternetP parser = new InternetP();
-            h = await parser.HitomiData2(h, int.Parse(h.id));
+            parser.index = int.Parse(h.id);
+            h = await parser.HitomiData();
+            //h = await parser.HitomiData2(h, int.Parse(h.id));
             if (Global.OriginThumb && h.files != null && h.files.Length >= 1 && h.files[0] != null)
             {
+                this.pageLabel.Content = h.files.Length;
                 this.nameLabel.Content = h.name + " (썸네일 로딩중)";
                 ImageProcessor.ProcessEncryptAsync(h.files[0].url).then((BitmapImage image) =>
                 {
@@ -183,7 +188,6 @@ namespace HitomiViewer.UserControls
             }
             else
                 this.nameLabel.Content = h.name;
-            this.pageLabel.Content = h.files.Length;
             Init();
         }
 

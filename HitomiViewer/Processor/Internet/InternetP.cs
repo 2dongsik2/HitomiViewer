@@ -44,62 +44,8 @@ namespace HitomiViewer.Processor
 
         
         
-        public async Task<List<Hitomi>> LoadCompre(List<string> items)
+        public List<Hitomi> LoadCompre(List<string> items)
         {
-            /*
-            List<Hitomi> res = new List<Hitomi>();
-            start(items.Count);
-            foreach (string item in items)
-            {
-                if (item.isUrl())
-                {
-                    Uri uri = new Uri(item);
-                    if (uri.Host == "hiyobi.me")
-                    {
-                        /*
-                        string id = Path.GetFileNameWithoutExtension(uri.AbsolutePath);
-                        Hitomi h = await new HiyobiLoader(text: id).Parser();
-                        res.Add(h);
-                        update(h, items.IndexOf(item), items.Count);
-                        /
-                    }
-                    if (uri.Host == "hitomi.la")
-                    {
-                        string id = Path.GetFileNameWithoutExtension(uri.AbsolutePath);
-                        this.url = $"https://ltn.hitomi.la/galleryblock/{id}.html";
-                        this.index = int.Parse(id);
-                        Hitomi h = await HitomiData();
-                        this.url = $"https://ltn.hitomi.la/galleries/{id}.js";
-                        JObject info = await HitomiGalleryInfo();
-                        h.tags = Hitomi.HTag.Parse(info);
-                        h.files = HitomiFiles(info).ToArray();
-                        h.page = h.files.Length;
-                        h.thumb = await ImageProcessor.LoadWebImageAsync("https:" + h.thumbpath);
-                        update(h, items.IndexOf(item), items.Count);
-                    }
-                }
-                else
-                {
-                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".lock" };
-                    string[] innerFiles = Directory.GetFiles(item).Where(file => allowedExtensions.Any(file.ToLower().EndsWith)).ToArray().ESort();
-                    if (innerFiles.Length <= 0) continue;
-                    Hitomi h = new Hitomi
-                    {
-                        name = item.Split(Path.DirectorySeparatorChar).Last(),
-                        dir = item,
-                        page = innerFiles.Length,
-                        files = innerFiles,
-                        thumb = await ImageProcessor.ProcessEncryptAsync(innerFiles.First()),
-                        type = Hitomi.Type.Folder,
-                        FolderByte = File2.GetFolderByte(item),
-                        SizePerPage = File2.GetSizePerPage(item)
-                    };
-                    update(h, items.IndexOf(item), items.Count);
-                }
-            }
-            end();
-            return res;
-            */
             return null;
         }
 

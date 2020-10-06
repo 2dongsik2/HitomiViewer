@@ -59,10 +59,38 @@ namespace HitomiViewer
 
         protected virtual void Image_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter) PreLoadAll(0);
+            if (e.Key == Key.F11)
+            {
+                if (base.WindowStyle == WindowStyle.None && base.WindowState == WindowState.Maximized)
+                {
+                    base.WindowStyle = WindowStyle.SingleBorderWindow;
+                    base.WindowState = WindowState.Normal;
+                }
+                else if (base.WindowStyle == WindowStyle.SingleBorderWindow && base.WindowState == WindowState.Normal)
+                {
+                    base.WindowStyle = WindowStyle.None;
+                    base.WindowState = WindowState.Maximized;
+                }
+                else if (base.WindowStyle == WindowStyle.SingleBorderWindow && base.WindowState == WindowState.Maximized)
+                {
+                    base.WindowStyle = WindowStyle.None;
+                    base.WindowState = WindowState.Normal;
+                    base.WindowState = WindowState.Maximized;
+                }
+            }
+            if (e.Key == Key.Escape)
+            {
+                if (base.WindowStyle == WindowStyle.None && base.WindowState == WindowState.Maximized)
+                {
+                    base.WindowStyle = WindowStyle.SingleBorderWindow;
+                    base.WindowState = WindowState.Normal;
+                }
+            }
+            if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.C)
+                Clipboard.SetImage((BitmapSource)this.image.Source);
         }
 
-        protected virtual async void PreLoadAll(int start)
+        protected virtual void PreLoadAll(int start)
         {
             
         }

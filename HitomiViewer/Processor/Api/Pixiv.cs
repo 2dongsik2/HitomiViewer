@@ -290,38 +290,6 @@ namespace HitomiViewer.Api
             public bool is_bookmarked;
             public bool visible;
             public bool is_muted;
-
-            public Illust Parse(JToken data)
-            {
-                id = data.IntValue("id") ?? 0;
-                title = data.StringValue("title");
-                type = data.StringValue("type");
-                image_urls = new Image_urls().Parse(data["image_urls"]);
-                caption = data.StringValue("caption");
-                restrict = data.IntValue("restrict") ?? 0;
-                user = new User().Parse(data["user"]);
-                JArray jtags = data["tags"] as JArray;
-                List<Tag> taglist = new List<Tag>();
-                for (int i = 0; i < jtags.Count; i++)
-                {
-                    taglist.Add(new Tag().Parse(jtags[i]));
-                }
-                tags = taglist.ToArray();
-                create_date = data.StringValue("create_date");
-                page_count = data.IntValue("page_count") ?? 0;
-                width = data.IntValue("width") ?? 0;
-                height = data.IntValue("height") ?? 0;
-                sanity_level = data.IntValue("sanity_level") ?? 0;
-                x_restrict = data.IntValue("x_restrict") ?? 0;
-                meta_single_page = new Image_urls().Parse(data["meta_single_page"]);
-                meta_pages = data["meta_pages"].Select(x => new Image_urls().Parse(x)).ToArray();
-                total_view = data.IntValue("total_view") ?? 0;
-                total_bookmarks = data.IntValue("total_bookmarks") ?? 0;
-                is_bookmarked = data.BoolValue("is_bookmarked") ?? false;
-                visible = data.BoolValue("visible") ?? false;
-                is_muted = data.BoolValue("is_muted") ?? false;
-                return this;
-            }
         }
         public class Novel
         {
@@ -336,12 +304,27 @@ namespace HitomiViewer.Api
             public string original_image_url; //meta_single_page
             public Image_urls Parse(JToken data)
             {
-                this.square_medium = data.StringValue("square_medium");
-                this.medium = data.StringValue("medium");
-                this.large = data.StringValue("large");
-                this.original = data.StringValue("original");
-                this.original_image_url = data.StringValue("original_image_url");
-                return this;
+                Image_urls obj = data.ToObject<Image_urls>();
+                this.square_medium = obj.square_medium;
+                this.medium = obj.medium;
+                this.large = obj.large;
+                this.original = obj.original;
+                this.original_image_url = obj.original_image_url;
+                return data.ToObject<Image_urls>();
+            }
+            public string LargestSizeUrl()
+            {
+                if (original_image_url != null)
+                    return original_image_url;
+                if (original != null)
+                    return original;
+                if (large != null)
+                    return large;
+                if (medium != null)
+                    return medium;
+                if (square_medium != null)
+                    return medium;
+                return null;
             }
         }
         public class Tag
@@ -369,16 +352,6 @@ namespace HitomiViewer.Api
             public string account;
             public Image_urls profile_image_urls;
             public bool is_followed;
-
-            public User Parse(JToken data)
-            {
-                id = data.IntValue("id") ?? 0;
-                name = data.StringValue("name");
-                account = data.StringValue("account");
-                profile_image_urls = new Image_urls().Parse(data["profile_image_urls"]);
-                is_followed = data.BoolValue("is_followed") ?? false;
-                return this;
-            }
         }
     }
     public partial class PixivUgoira
