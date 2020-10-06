@@ -66,6 +66,7 @@ namespace HitomiViewer
         public List<IReader> Readers = new List<IReader>();
         public MainWindow()
         {
+            new Logger();
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(ResolveAssembly);
             PluginHandler.LoadPlugins();
             Global.dispatcher = Dispatcher;

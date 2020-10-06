@@ -21,6 +21,7 @@ namespace PluginExample
         {
             base.OnInit(main);
             main.DarkMode.IsChecked = true;
+            System.Diagnostics.Debug.WriteLine("hello!");
         }
     }
 }

@@ -161,6 +161,7 @@
     <Compile Include="Scripts\Config.cs" />
     <Compile Include="Scripts\File.cs" />
     <Compile Include="Scripts\Invoker.cs" />
+    <Compile Include="Scripts\Logger.cs" />
     <Compile Include="Scripts\Random.cs" />
     <Compile Include="Processor\Hiyobi\Tags.cs" />
     <Compile Include="Structs\Images.cs" />

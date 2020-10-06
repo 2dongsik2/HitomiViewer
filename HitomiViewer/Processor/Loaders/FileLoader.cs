@@ -53,8 +53,8 @@ namespace HitomiViewer.Processor.Loaders
             for (; i < files.Length; i++)
             {
                 string folder = files[i];
-                if (!File.Exists(Path.Combine(folder, "info.json"))) continue;
                 Console.WriteLine("{0}: {1}", i, folder);
+                if (!File.Exists(Path.Combine(folder, "info.json"))) continue;
                 var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif", ".lock" };
                 IEnumerable<string> innerFiles = Directory.GetFiles(folder);
                 innerFiles = innerFiles.Where(file => allowedExtensions.Any(file.ToLower().EndsWith)).ESort();
