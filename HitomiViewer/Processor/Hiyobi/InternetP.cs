@@ -92,6 +92,7 @@ namespace HitomiViewer.Processor
             HiyobiGallery h = HiyobiParse(obj);
             return h;
         }
+        public async Task<JObject> HiyobiSearch<T>(int? index = null, List<string> keyword = null) where T : JObject => JObject.Parse(await HiyobiSearch(index, keyword));
         public async Task<string> HiyobiSearch(int? index = null, List<string> keyword = null)
         {
             HttpClient client = new HttpClient();

@@ -112,8 +112,11 @@ namespace HitomiViewer.UserControls.Reader
                     }
                     if (image == null)
                     {
-                        MessageBox.Show($"{i + 1}번 이미지를 불러오는데 실패했습니다.\nexcept.log 에 정보가 기록됩니다.\n{hiyobi.files[i].url}\n{task.Exception.InnerException.Message}");
-                        System.IO.File.WriteAllText("except.log", Newtonsoft.Json.Linq.JObject.FromObject(hiyobi.files[i]).ToString() + "\n" + task.Exception.InnerException.Message + "\n" + task.Exception.InnerException.StackTrace);
+                        if (task.IsFaulted)
+                        {
+                            MessageBox.Show($"{i + 1}번 이미지를 불러오는데 실패했습니다.\nexcept.log 에 정보가 기록됩니다.\n{hiyobi.files[i].url}\n{task.Exception.InnerException.Message}");
+                            System.IO.File.WriteAllText("except.log", Newtonsoft.Json.Linq.JObject.FromObject(hiyobi.files[i]).ToString() + "\n" + task.Exception.InnerException.Message + "\n" + task.Exception.InnerException.StackTrace);
+                        }
                     }
                     else
                     {
@@ -130,10 +133,11 @@ namespace HitomiViewer.UserControls.Reader
             if (CLMRunner != null && !CLMRunner.IsCompleted) return;
             CLMRunner = Task.Factory.StartNew(() =>
             {
-                BitmapImage[] notnullimages = images.Where(x => x != null).ToArray();
-                long size = notnullimages.Select(x => ImageProcessor.Image2Bytes(x).LongLength).Sum() / notnullimages.LongLength;
-                double byteperimage = ((double)size) / 1024 / 1024;
-                averageSize = byteperimage;
+                //BitmapImage[] notnullimages = images.Where(x => x != null).ToArray();
+                //if (notnullimages.Length < 1) return;
+                //long size = notnullimages.Select(x => ImageProcessor.Image2Bytes(x).LongLength).Sum() / notnullimages.LongLength;
+                double byteperimage = 10;//((double)size) / 1024 / 1024;
+                //averageSize = byteperimage;
                 for (int i = 0; i < page; i++)
                 {
                     if (byteperimage == 0) byteperimage = 10;

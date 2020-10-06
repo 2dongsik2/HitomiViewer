@@ -198,7 +198,7 @@ namespace HitomiViewer.Processor
                 }
                 else
                 {
-                    runner = LoadWebImageAsync(url);
+                    runner = LoadWebImageAsyncException(url);
                     BitmapImage result = await runner;
                     if (runner.IsFaulted)
                         throw runner.Exception;
@@ -308,6 +308,20 @@ namespace HitomiViewer.Processor
             {
                 return null;
             }
+        }
+        public static async Task<BitmapImage> LoadWebImageAsyncException(string url)
+        {
+            if (string.IsNullOrEmpty(url))
+                return null;
+            System.Net.WebClient wc = new System.Net.WebClient();
+            wc.Headers.Add("Referer", "https://" + new Uri(url).Host);
+            Byte[] MyData = await wc.DownloadDataTaskAsync(url);
+            wc.Dispose();
+            BitmapImage bimgTemp = new BitmapImage();
+            bimgTemp.BeginInit();
+            bimgTemp.StreamSource = new MemoryStream(MyData);
+            bimgTemp.EndInit();
+            return bimgTemp;
         }
         public static BitmapImage LoadWebWebPImage(string url)
         {

@@ -135,10 +135,18 @@ namespace HitomiViewer.Processor
             if (url.Last() == '/') url = url.Remove(url.Length - 1);
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Range = new System.Net.Http.Headers.RangeHeaderValue(index * 4, (index + Count) * 4 - 1);
-            var response = await client.GetAsync(url);
-            var MaxRange = response.Content.Headers.ContentRange.Length;
-            var pageContents = await response.Content.ReadAsByteArrayAsync();
-            return new Tuple<byte[], long?>(pageContents, MaxRange);
+            try
+            {
+                var response = await client.GetAsync(url);
+                var MaxRange = response.Content.Headers.ContentRange.Length;
+                var pageContents = await response.Content.ReadAsByteArrayAsync();
+                return new Tuple<byte[], long?>(pageContents, MaxRange);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                return null;
+            }
         }
         public async Task<byte[]> LoadNozomiTag(string type, string tag, bool range = true, int? start = null, int? end = null)
         {

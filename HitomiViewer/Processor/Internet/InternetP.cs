@@ -13,6 +13,7 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace HitomiViewer.Processor
 {
@@ -114,8 +115,16 @@ namespace HitomiViewer.Processor
             url = url ?? this.url;
             if (url.Last() == '/') url = url.Remove(url.Length - 1);
             HttpClient client = new HttpClient();
-            HttpResponseMessage response = await client.GetAsync(url);
-            return await response.Content.ReadAsStringAsync();
+            try
+            {
+                HttpResponseMessage response = await client.GetAsync(url);
+                return await response.Content.ReadAsStringAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                return null;
+            }
         }
         public async Task<string> LoadRange(int start, int end, string url = null)
         {

@@ -627,7 +627,16 @@ namespace HitomiViewer
         }
         public void HiyobiSearch(List<string> keyword, int index)
         {
-            
+            InternetP parser = new InternetP();
+            HiyobiLoader hiyobi = new HiyobiLoader();
+            hiyobi.Default();
+            hiyobi.pagination = hiyobi.SetSearch((int i) =>
+            {
+                MainPanel.Children.Clear();
+                LabelSetup();
+                HiyobiMain(i);
+            }).SetPagination(index);
+            parser.HiyobiSearch<JObject>(index, keyword).TaskCallback(hiyobi.Parser);
         }
         private void MenuHiyobi_Click(object sender, RoutedEventArgs e)
         {
