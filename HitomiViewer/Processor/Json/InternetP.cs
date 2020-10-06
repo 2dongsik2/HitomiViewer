@@ -13,12 +13,14 @@ namespace HitomiViewer.Processor
         public async Task<JObject> LoadJObject(string url = null)
         {
             string html = await Load(url ?? this.url);
+            if (html == null) return null;
             return JObject.Parse(html);
         }
         public async void LoadJArray(Action<JArray> callback) => callback(await LoadJArray());
         public async Task<JArray> LoadJArray()
         {
             string html = await Load(url);
+            if (html == null) return null;
             return JArray.Parse(html);
         }
 

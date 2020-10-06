@@ -30,7 +30,7 @@ namespace HitomiViewer.Processor.Loaders
         /// <param name="obj"></param>
         public void Parser(JObject obj)
         {
-            base.Parser();
+            if (obj == null) return;
             start(obj["list"].Count());
             JArray arr = obj["list"] as JArray;
             for (int i = 0; i < arr.Count; i++)

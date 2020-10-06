@@ -47,7 +47,8 @@ namespace HitomiViewer.UserControls.Panels
             nameLabel.Content = h.name;
             pageLabel.Content = h.files.Length;
             sizeLabel.Content = Scripts.File2.SizeStr(h.FileInfo.size);
-            sizeperpageLabel.Content = Scripts.File2.SizeStr(h.FileInfo.size / h.files.Length);
+            if (h.files.Length > 0)
+                sizeperpageLabel.Content = Scripts.File2.SizeStr(h.FileInfo.size / h.files.Length);
         }
         public override void InitEvent()
         {

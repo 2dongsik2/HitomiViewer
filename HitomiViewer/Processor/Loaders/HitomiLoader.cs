@@ -26,6 +26,7 @@ namespace HitomiViewer.Processor.Loaders
             parser.Count = count;
             parser.url = "https://ltn.hitomi.la/index-all.nozomi";
             Tuple<byte[], long?> result = await parser.LoadNozomiAndRangeMax();
+            if (result == null) return;
             int[] ids = parser.ByteArrayToIntArray(result.Item1);
             await Parser(ids);
             int pages = (int)Math.Ceiling((result.Item2 ?? 0) / ((double)count));
