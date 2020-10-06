@@ -22,25 +22,5 @@ namespace PluginExample
             base.OnInit(main);
             main.DarkMode.IsChecked = true;
         }
-
-        public override void OnHitomiPanelInit(HitomiPanel panel)
-        {
-            base.OnHitomiPanelInit(panel);
-            if (!panel.large) return;
-        }
-
-        public override void OnHitomiPanelDelayInit(HitomiPanel panel)
-        {
-            base.OnHitomiPanelDelayInit(panel);
-        }
-
-        public override void OnHitomiChangeColor(HitomiPanel panel)
-        {
-            base.OnHitomiChangeColor(panel);
-            if (!parodysDict.ContainsKey(panel)) return;
-            StackPanel parodysStack = parodysDict[panel];
-            (parodysStack.Children[0] as DockPanel).Background = new SolidColorBrush(Global.Menuground);
-            ((parodysStack.Children[0] as DockPanel).Children[0] as Label).Foreground = new SolidColorBrush(Global.fontscolor);
-        }
     }
 }
