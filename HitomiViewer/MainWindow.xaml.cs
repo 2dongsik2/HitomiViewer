@@ -666,7 +666,14 @@ namespace HitomiViewer
                 if (login.remember)
                     Account.Save("pixiv", login.username, login.password);
                 Pixiv pixiv = new Pixiv();
-                Global.Account.Pixiv = await pixiv.AuthChain(login.username, login.password, true);
+                await pixiv.Auth(login.username, login.password, true);
+                if (!pixiv.authStatus)
+                {
+                    MessageBox.Show("로그인에 실패했습니다.");
+                    return false;
+                }
+                else
+                    Global.Account.Pixiv = pixiv;
             }
             return result;
         }

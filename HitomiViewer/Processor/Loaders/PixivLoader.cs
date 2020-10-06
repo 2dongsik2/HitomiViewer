@@ -37,7 +37,7 @@ namespace HitomiViewer.Processor.Loaders
                 {
                     //x_restrict == R-18
 
-                    Pixiv.Illust h = items.ToObject<Pixiv.Illust>();
+                    Pixiv.Illust h = items[i].ToObject<Pixiv.Illust>();
                     update(h, i, items.Count);
                 }
                 end();

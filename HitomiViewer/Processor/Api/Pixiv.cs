@@ -52,6 +52,15 @@ namespace HitomiViewer.Api
         private bool rememberPassword = false;
         private string username;
         private string password;
+        public bool authStatus { get => !auth.Value<bool>("has_error"); }
+        public string error
+        {
+            get
+            {
+                if (authStatus) return null;
+                return auth.Value<string>("error");
+            }
+        }
 
         public enum SearchTarget
         {
@@ -275,7 +284,7 @@ namespace HitomiViewer.Api
             public int restrict;
             public User user;
             public Tag[] tags;
-            public string tools = null;
+            public object[] tools = null;
             public string create_date;
             public int page_count;
             public int width;
