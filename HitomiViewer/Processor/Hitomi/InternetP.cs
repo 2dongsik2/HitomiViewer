@@ -87,20 +87,7 @@ namespace HitomiViewer.Processor
         public async Task<Hitomi> HitomiGalleryData(Hitomi org)
         {
             JObject jObject = await HitomiGalleryInfo();
-            List<Hitomi.HFile> files = new List<Hitomi.HFile>();
-            foreach (JToken tag1 in jObject["files"])
-            {
-                files.Add(new Hitomi.HFile
-                {
-                    hash = tag1["hash"].ToString(),
-                    name = tag1["name"].ToString(),
-                    width = tag1.IntValue("width") ?? 0,
-                    height = tag1.IntValue("height") ?? 0,
-                    hasavif = Convert.ToBoolean(int.Parse(tag1["hasavif"].ToString())),
-                    hasavifsmalltn = Convert.ToBoolean(int.Parse(tag1["hasavifsmalltn"].ToString())),
-                    haswebp = Convert.ToBoolean(int.Parse(tag1["haswebp"].ToString()))
-                });
-            }
+            List<Hitomi.HFile> files = HitomiFiles(jObject);
             org.language = jObject.StringValue("language");
             org.id = jObject.StringValue("id");
             org.type = Hitomi.HType.Find(jObject.StringValue("type"));
@@ -118,7 +105,9 @@ namespace HitomiViewer.Processor
             List<Hitomi.HFile> files = new List<Hitomi.HFile>();
             foreach (JToken tk in jObject["files"])
             {
-                files.Add(tk.ToObject<Hitomi.HFile>());
+                Newtonsoft.Json.JsonSerializer serializer = new Newtonsoft.Json.JsonSerializer();
+                serializer.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+                files.Add(tk.ToObject<Hitomi.HFile>(serializer));
             }
             return files;
         }
@@ -339,13 +328,14 @@ namespace HitomiViewer.Processor
             return galleryids.ToArray();
         }
 
+        public static string GetDirFromHFileS(Hitomi.HFile file) => new InternetP().GetDirFromHFile(file);
         public string GetDirFromHFile(Hitomi.HFile file)
         {
             //if (file.hasavif)
             //    return "avif";
             if (file.haswebp)
                 return "webp";
-            return null;
+            return "jpg";
         }
         public string UrlFromUrlFromHash(Hitomi.HFile file)
         {
