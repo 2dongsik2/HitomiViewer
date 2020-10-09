@@ -14,7 +14,7 @@ using System.Windows.Media;
 
 namespace PluginExample
 {
-    public class Main : Plugin
+    public class Main : Plugin  
     {
         private Dictionary<HitomiPanel, StackPanel> parodysDict = new Dictionary<HitomiPanel, StackPanel>();
 
