@@ -33,7 +33,7 @@ using System.Windows.Threading;
 using Path = System.IO.Path;
 
 #pragma warning disable CS0618 // 형식 또는 멤버는 사용되지 않습니다.
-namespace HitomiViewer.UserControls
+namespace HitomiViewer.UserControls.Panels
 {
     /// <summary>
     /// HitomiPanel.xaml에 대한 상호 작용 논리

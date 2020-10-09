@@ -134,6 +134,7 @@
     </Compile>
     <Compile Include="Processor\Cache\Cache.cs" />
     <Compile Include="Processor\Hiyobi\HiyobiTags.cs" />
+    <Compile Include="Processor\Loaders\Defaults.cs" />
     <Compile Include="Processor\Loaders\FileLoader.cs" />
     <Compile Include="Processor\Loaders\SearchLoader.cs" />
     <Compile Include="Processor\Plugin\Plugin.cs" />

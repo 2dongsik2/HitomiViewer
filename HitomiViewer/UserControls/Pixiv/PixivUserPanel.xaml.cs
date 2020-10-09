@@ -21,7 +21,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 
-namespace HitomiViewer.UserControls
+namespace HitomiViewer.UserControls.Panels
 {
     /// <summary>
     /// PixivUser.xaml에 대한 상호 작용 논리

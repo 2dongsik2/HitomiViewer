@@ -24,7 +24,7 @@ namespace HitomiViewer.Processor.Loaders
             this.hitomiupdate = (Hitomi h, int index, int max) =>
             {
                 Global.MainWindow.label.Content = $"{index}/{max}";
-                Global.MainWindow.MainPanel.Children.Add(new UserControls.HitomiPanel(h, true));
+                Global.MainWindow.MainPanel.Children.Add(new UserControls.Panels.HitomiPanel(h, true));
             };
             this.hiyobiupdate = (HiyobiGallery h, int index, int max) =>
             {

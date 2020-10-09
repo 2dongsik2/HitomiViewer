@@ -27,6 +27,7 @@ using Path = System.IO.Path;
 using HitomiViewerLibrary.Loaders;
 using HitomiViewerLibrary;
 using HitomiViewerLibrary.Structs;
+using HitomiViewer.UserControls.Panels;
 
 namespace HitomiViewer
 {
@@ -564,6 +565,7 @@ namespace HitomiViewer
             InternetP parser = new InternetP(url: "https://api.hiyobi.me/list/" + index);
             HiyobiLoader hiyobi = new HiyobiLoader();
             hiyobi.Default();
+            Defaults.Hiyobis.Setup(hiyobi);
             hiyobi.pagination = hiyobi.SetSearch((int i) =>
             {
                 MainPanel.Children.Clear();
@@ -577,6 +579,7 @@ namespace HitomiViewer
             InternetP parser = new InternetP();
             HiyobiLoader hiyobi = new HiyobiLoader();
             hiyobi.Default();
+            Defaults.Hiyobis.Setup(hiyobi);
             hiyobi.pagination = hiyobi.SetSearch((int i) =>
             {
                 MainPanel.Children.Clear();
@@ -619,6 +622,7 @@ namespace HitomiViewer
             loader.index = index;
             loader.count = (int)Page_itemCount;
             loader.Default();
+            Defaults.Hitomis.Setup(loader);
             loader.Parser();
         }
         public void HitomiSearch(string[] tags, int index)
@@ -686,6 +690,7 @@ namespace HitomiViewer
             JObject data = await Global.Account.Pixiv.illustFollow();
             PixivLoaders.Illust loader = new PixivLoaders.Illust();
             loader.Default();
+            Defaults.Pixivs.Setup(loader);
             loader.Parser(data);
         }
         private async void RecommendIllust()
@@ -696,6 +701,7 @@ namespace HitomiViewer
             JObject data = await Global.Account.Pixiv.illustRecommended();
             PixivLoaders.Illust loader = new PixivLoaders.Illust();
             loader.Default();
+            Defaults.Pixivs.Setup(loader);
             loader.Parser(data);
         }
         private async void UserSearch()
@@ -706,6 +712,7 @@ namespace HitomiViewer
             JObject data = await Global.Account.Pixiv.searchUser(PixivUser_Search_Text.Text);
             PixivLoaders.User loader = new PixivLoaders.User();
             loader.Default();
+            Defaults.Pixivs.Setup(loader);
             loader.Parser(data);
         }
         private async void IllustSearch()
@@ -713,6 +720,7 @@ namespace HitomiViewer
             JObject data = await Global.Account.Pixiv.searchIllust(PixivIllust_Search_Text.Text);
             PixivLoaders.Illust loader = new PixivLoaders.Illust();
             loader.Default();
+            Defaults.Pixivs.Setup(loader);
             loader.Parser(data);
         }
 
@@ -734,6 +742,7 @@ namespace HitomiViewer
             });
         }
         #endregion
+        #region Click
         private async void PixivFollowIllust_Click(object sender, RoutedEventArgs e)
         {
             if (Global.Account.Pixiv == null)
@@ -766,6 +775,7 @@ namespace HitomiViewer
             MainPanel.Children.Clear();
             IllustSearch();
         }
+        #endregion
         #endregion
     }
 }
