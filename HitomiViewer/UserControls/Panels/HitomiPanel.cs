@@ -63,19 +63,17 @@ namespace HitomiViewer.UserControls
                     reader.Show();
             };
         }
-        public override async void Init()
+        public override void Init()
         {
-            if (h.thumbnail.preview_img == null)
-                h.thumbnail.preview_img = await ImageProcessor.LoadWebImageAsync(h.thumbnail.preview_url.https());
             if (h.files == null)
                 h.files = new Hitomi.HFile[0];
             thumbNail.Source = h.thumbnail.preview_img;
             thumbBrush.ImageSource = h.thumbnail.preview_img;
             nameLabel.Content = h.name;
             pageLabel.Content = h.files.Length;
-            sizeLabel.Content = File2.SizeStr(h.FileInfo.size);
+            sizeLabel.Content = CF.File.SizeStr(h.FileInfo.size);
             if (h.files.Length > 0)
-                sizeperpageLabel.Content = File2.SizeStr(h.FileInfo.size / h.files.Length);
+                sizeperpageLabel.Content = CF.File.SizeStr(h.FileInfo.size / h.files.Length);
         }
 
         public override void ContextSetup()
@@ -188,7 +186,11 @@ namespace HitomiViewer.UserControls
                 }, null, sourceName: MethodBase.GetCurrentMethod().FullName());
             }
             else
+            {
+                h.thumbnail.preview_img = await ImageProcessor.ProcessEncryptAsync(h.thumbnail.preview_url).@catch(null, MethodBase.GetCurrentMethod().FullName());
                 this.nameLabel.Content = h.name;
+            }
+            thumbNail.MouseEnter += (object _, MouseEventArgs __) => thumbNail.ToolTip = GetToolTip(panel.Height);
             Init();
         }
 
@@ -208,7 +210,7 @@ namespace HitomiViewer.UserControls
         {
             Task.Factory.StartNew(() =>
             {
-                string filename = File2.GetDownloadTitle(File2.SaftyFileName(h.name));
+                string filename = CF.File.GetDownloadTitle(CF.File.SaftyFileName(h.name));
                 if (!Directory.Exists($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}"))
                     Directory.CreateDirectory($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}");
                 Directory.CreateDirectory($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}");

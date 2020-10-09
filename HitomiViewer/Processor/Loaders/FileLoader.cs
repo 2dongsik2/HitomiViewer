@@ -61,10 +61,10 @@ namespace HitomiViewer.Processor.Loaders
                 IEnumerable<string> innerFiles = Directory.GetFiles(folder);
                 innerFiles = innerFiles.Where(file => allowedExtensions.Any(file.ToLower().EndsWith)).ESort();
                 JObject data = JObject.Parse(File.ReadAllText(Path.Combine(folder, "info.json")));
-                CheckType(data, i, files.Length);
+                CheckType(data, folder, i, files.Length);
             }
         }
-        private void CheckType(JObject data, int index, int length)
+        private void CheckType(JObject data, string path, int index, int length)
         {
             if (data["thumb"] != null)
             {
@@ -75,10 +75,14 @@ namespace HitomiViewer.Processor.Loaders
             switch (type)
             {
                 case (int)IHitomi.HFileType.Hitomi:
-                    
+                    Hitomi hitomi = data.ToObject<Hitomi>();
+                    hitomi.FileInfo.dir = path;
+                    hitomiupdate(hitomi, index, length);
                     break;
                 case (int)IHitomi.HFileType.Hiyobi:
-                    hiyobiupdate(data.ToObject<HiyobiGallery>(), index, length);
+                    HiyobiGallery hiyobi = data.ToObject<HiyobiGallery>();
+                    hiyobi.FileInfo.dir = path;
+                    hiyobiupdate(hiyobi, index, length);
                     break;
                 default:
                     PluginHandler.FireUnknownFileLoaded(type ?? 0, data);

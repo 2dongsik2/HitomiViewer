@@ -158,7 +158,7 @@ namespace HitomiViewer
         public void LoadHitomi(string path)
         {
             if (Global.DownloadFolder != "hitomi_downloaded")
-                LoadHitomi(File2.GetDirectories(root: "", path, rootDir + Global.DownloadFolder));
+                LoadHitomi(CF.File.GetDirectories(root: "", path, rootDir + Global.DownloadFolder));
             else
                 LoadHitomi(Directory.GetDirectories(path));
         }
@@ -459,7 +459,7 @@ namespace HitomiViewer
         private void File_Search_Button_Click(object sender, RoutedEventArgs e)
         {
             string SearchText = Search_Text.Text;
-            string[] files = File2.GetDirectories(root: "", path, rootDir + Global.DownloadFolder).Where(x => x.RemoveSpace().Contains(SearchText.RemoveSpace())).ToArray();
+            string[] files = CF.File.GetDirectories(root: "", path, rootDir + Global.DownloadFolder).Where(x => x.RemoveSpace().Contains(SearchText.RemoveSpace())).ToArray();
             new TaskFactory().StartNew(() => LoadHitomi(files));
         }
         private void Search_Text_KeyDown(object sender, KeyEventArgs e)
@@ -467,7 +467,7 @@ namespace HitomiViewer
             if (e.Key == Key.Enter)
             {
                 string SearchText = Search_Text.Text;
-                string[] files = File2.GetDirectories(root: "", path, rootDir + Global.DownloadFolder).Where(x => x.RemoveSpace().Contains(SearchText.RemoveSpace())).ToArray();
+                string[] files = CF.File.GetDirectories(root: "", path, rootDir + Global.DownloadFolder).Where(x => x.RemoveSpace().Contains(SearchText.RemoveSpace())).ToArray();
                 new TaskFactory().StartNew(() => LoadHitomi(files));
             }
         }
@@ -497,7 +497,7 @@ namespace HitomiViewer
         }
         private void Encrypt_Click(object sender, RoutedEventArgs e)
         {
-            foreach (string item in File2.GetDirectories(root: "", path, rootDir + Global.DownloadFolder))
+            foreach (string item in CF.File.GetDirectories(root: "", path, rootDir + Global.DownloadFolder))
             {
                 if (File.Exists($"{item}/info.json"))
                 {
@@ -521,7 +521,7 @@ namespace HitomiViewer
         }
         private void Decrypt_Click(object sender, RoutedEventArgs e)
         {
-            foreach (string item in File2.GetDirectories(root: "", path, rootDir + Global.DownloadFolder))
+            foreach (string item in CF.File.GetDirectories(root: "", path, rootDir + Global.DownloadFolder))
             {
                 if (File.Exists($"{path}/info.json"))
                 {

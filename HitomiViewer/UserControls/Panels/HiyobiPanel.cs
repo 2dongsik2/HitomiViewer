@@ -4,9 +4,13 @@ using HitomiViewer.Processor.Loaders;
 using HitomiViewer.UserControls.Reader;
 using HitomiViewerLibrary;
 using HitomiViewerLibrary.Structs;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -50,9 +54,9 @@ namespace HitomiViewer.UserControls.Panels
             thumbBrush.ImageSource = h.thumbnail.preview_img;
             nameLabel.Content = h.name;
             pageLabel.Content = h.files.Length;
-            sizeLabel.Content = Scripts.File2.SizeStr(h.FileInfo.size);
+            sizeLabel.Content = CF.File.SizeStr(h.FileInfo.size);
             if (h.files.Length > 0)
-                sizeperpageLabel.Content = Scripts.File2.SizeStr(h.FileInfo.size / h.files.Length);
+                sizeperpageLabel.Content = CF.File.SizeStr(h.FileInfo.size / h.files.Length);
         }
         public override void InitEvent()
         {
@@ -118,6 +122,38 @@ namespace HitomiViewer.UserControls.Panels
         {
             base.HitomiPanel_Loaded(sender, e);
             thumbNail.MouseEnter += (object _, MouseEventArgs __) => thumbNail.ToolTip = GetToolTip(panel.Height);
+        }
+
+        public override void DownloadData_Click(object sender, RoutedEventArgs e)
+        {
+            base.DownloadData_Click(sender, e);
+            JObject export = JObject.FromObject(h);
+            export["thumbnail"]["preview_img"] = null;
+            export.Remove("Values");    
+            string filename = CF.File.GetDownloadTitle(CF.File.SaftyFileName(h.name));
+            string root = Path.Combine(Global.rootDir, Global.DownloadFolder);
+            Directory.CreateDirectory(Path.Combine(root, filename));
+            File.WriteAllText(Path.Combine(root, filename, "info.json"), export.ToString());
+            Process.Start(Path.Combine(root, filename));
+        }
+        public override void DownloadImage_Click(object sender, RoutedEventArgs e)
+        {
+            base.DownloadImage_Click(sender, e);
+            string filename = CF.File.GetDownloadTitle(CF.File.SaftyFileName(h.name));
+            for (int i = 0; i < h.files.Length; i++)
+            {
+                Hitomi.HFile file = h.files[i];
+                WebClient wc = new WebClient();
+                wc.Headers.Add("referer", "https://hitomi.la/");
+                if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/{i}.jpg"))
+                {
+                    h.FileInfo.encrypted = Global.AutoFileEn;
+                    string path = $"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/{file.name}.{InternetP.GetDirFromHFileS(file)}.lock";
+                    if (Global.AutoFileEn)
+                        FileEncrypt.DownloadAsync(wc, new Uri(file.url), path + ".lock");
+                    else wc.DownloadFileAsync(new Uri(file.url), path);
+                }
+            }
         }
     }
 }
