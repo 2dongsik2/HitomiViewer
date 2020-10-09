@@ -1,6 +1,7 @@
 ﻿using HitomiViewer.Scripts;
-using HitomiViewer.Structs;
 using HitomiViewer.UserControls;
+using HitomiViewerLibrary;
+using HitomiViewerLibrary.Structs;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -30,7 +31,7 @@ namespace HitomiViewer.Processor.Cache
                 HiyobiTags.LoadTags();
             try
             {
-                List<Tag> tags = HiyobiTags.Tags;
+                List<Hitomi.HTag> tags = HiyobiTags.Tags;
                 Dispatcher patcher = Global.dispatcher;
                 ProgressBox progressBox = null;
                 patcher.Invoke(() => {
@@ -41,16 +42,13 @@ namespace HitomiViewer.Processor.Cache
                 });
                 for (int i = 0; i < tags.Count; i++)
                 {
-                    Tag tag = tags[i];
+                    Hitomi.HTag tag = tags[i];
                     Thread th = new Thread(new ThreadStart(async () =>
                     {
                         try
                         {
-                            if (tag.name == "defloration")
-                                Console.WriteLine("here!");
-                            if (!tag.Hitomi) return;
-                            string dir = Path.Combine(rootDir, tag.types.ToString());
-                            string file = Path.Combine(dir, tag.name + ".json");
+                            string dir = Path.Combine(rootDir, tag.type.ToString());
+                            string file = Path.Combine(dir, tag.tag + ".json");
                             if (!Directory.Exists(dir))
                                 Directory.CreateDirectory(dir);
                             if (File.Exists(file))
@@ -59,7 +57,7 @@ namespace HitomiViewer.Processor.Cache
                                 return;
                             }
                             InternetP parser = new InternetP();
-                            int[] ids = parser.ByteArrayToIntArray(await parser.LoadNozomiTag(tag.types.ToString(), tag.name, false, 0, 9999));
+                            int[] ids = parser.ByteArrayToIntArray(await parser.LoadNozomiTag(tag.type.ToString(), tag.tag, false, 0, 9999));
                             JArray arr = JArray.FromObject(ids);
                             File.WriteAllText(file, arr.ToString());
                             Console.WriteLine("{0}/{1}: {2}", i, tags.Count, tag.full);
@@ -86,11 +84,11 @@ namespace HitomiViewer.Processor.Cache
         }
         public async void Test()
         {
-            Tag tag = Tag.Parse("artist:2gou");
+            Hitomi.HTag tag = Hitomi.HTag.Parse("artist:2gou");
             InternetP parser = new InternetP();
-            byte[] data = await parser.LoadNozomiTag(tag.types.ToString(), tag.name, false, 0, 9999);
+            byte[] data = await parser.LoadNozomiTag(tag.type.ToString(), tag.tag, false, 0, 9999);
             int[] ids;
-            if (tag.types == Tag.Types.artist)
+            if (tag.type == Hitomi.HTag.TType.artists.Name)
                 ids = parser.ByteArrayToIntArrayBig(data);
             else
                 ids = parser.ByteArrayToIntArray(data);

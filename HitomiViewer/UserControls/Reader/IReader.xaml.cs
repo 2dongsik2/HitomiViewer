@@ -1,6 +1,7 @@
 ﻿using ExtensionMethods;
 using HitomiViewer.Processor;
 using HitomiViewer.Scripts;
+using HitomiViewerLibrary.Structs;
 using System;
 using System.Collections.Generic;
 using System.Drawing;

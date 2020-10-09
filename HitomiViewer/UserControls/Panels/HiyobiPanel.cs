@@ -2,6 +2,8 @@
 using HitomiViewer.Processor;
 using HitomiViewer.Processor.Loaders;
 using HitomiViewer.UserControls.Reader;
+using HitomiViewerLibrary;
+using HitomiViewerLibrary.Structs;
 using System;
 using System.Collections.Generic;
 using System.Linq;

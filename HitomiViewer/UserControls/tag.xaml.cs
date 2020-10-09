@@ -1,4 +1,4 @@
-﻿using HitomiViewer.Structs;
+﻿using HitomiViewerLibrary.Structs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,9 +21,9 @@ namespace HitomiViewer.UserControls
     /// </summary>
     public partial class tag : UserControl
     {
-        public Tag.Types TagType
+        public Hitomi.HTag.TType TagType
         {
-            get { return (Tag.Types)GetValue(TagTypeProperty); }
+            get { return (Hitomi.HTag.TType)GetValue(TagTypeProperty); }
             set { SetValue(TagTypeProperty, value); }
         }
         public string TagName
@@ -45,9 +45,9 @@ namespace HitomiViewer.UserControls
         public static readonly DependencyProperty TagTypeProperty
             = DependencyProperty.Register(
                 "TagType",
-                typeof(Tag.Types),
+                typeof(Hitomi.HTag.TType),
                 typeof(tag),
-                new PropertyMetadata(Structs.Tag.Types.tag)
+                new PropertyMetadata(Hitomi.HTag.TType.tag)
             );
         public static readonly DependencyProperty TagNameProperty
             = DependencyProperty.Register(

@@ -1,5 +1,7 @@
 ﻿using ExtensionMethods;
-using HitomiViewer.Structs;
+using HitomiViewerLibrary;
+using HitomiViewerLibrary.Loaders;
+using HitomiViewerLibrary.Structs;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -88,8 +90,8 @@ namespace HitomiViewer.Processor.Loaders
                 Dispatcher dispatcher = Dispatcher.CurrentDispatcher;
                 foreach (string tag in tags)
                 {
-                    Tag tag2 = Structs.Tag.Parse(tag);
-                    string path = Path.Combine(Global.rootDir, "Cache", tag2.types.ToString(), tag2.name + ".json");
+                    Hitomi.HTag tag2 = Hitomi.HTag.Parse(tag);
+                    string path = Path.Combine(Global.rootDir, "Cache", tag2.type, tag2.tag + ".json");
                     if (Global.CacheSearch)
                     {
                         if (File.Exists(path))
@@ -111,7 +113,7 @@ namespace HitomiViewer.Processor.Loaders
                         {
                             try
                             {
-                                ids = parser.ByteArrayToIntArray(await parser.LoadNozomiTag(tag2.types.ToString(), tag2.name, range: !Global.CacheSearch, start: 0, end: 99));
+                                ids = parser.ByteArrayToIntArray(await parser.LoadNozomiTag(tag2.type.ToString(), tag2.tag, range: !Global.CacheSearch, start: 0, end: 99));
                             }
                             catch
                             {

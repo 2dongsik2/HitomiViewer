@@ -1,4 +1,5 @@
-﻿using HitomiViewer.Api;
+﻿using HitomiViewerLibrary;
+using HitomiViewerLibrary.Structs;
 using System;
 using System.Collections.Generic;
 using System.Linq;

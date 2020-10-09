@@ -1,6 +1,8 @@
 ﻿using ExtensionMethods;
 using HitomiViewer.Plugin;
 using HitomiViewer.Scripts;
+using HitomiViewerLibrary.Loaders;
+using HitomiViewerLibrary.Structs;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;

@@ -88,11 +88,9 @@
   <ItemGroup>
     <Reference Include="HtmlAgilityPack, Version=1.11.24.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
       <HintPath>..\packages\HtmlAgilityPack.1.11.24\lib\Net45\HtmlAgilityPack.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -117,7 +115,6 @@
     <Reference Include="WindowsFormsIntegration" />
     <Reference Include="WpfAnimatedGif, Version=2.0.0.0, Culture=neutral, PublicKeyToken=9e7cd3b544a090dc, processorArchitecture=MSIL">
       <HintPath>..\packages\WpfAnimatedGif.2.0.0\lib\net40\WpfAnimatedGif.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="WpfControls">
       <HintPath>C:\Users\rmagu\Downloads\wpfautocomplete\WpfControls.CS\bin\Debug\WpfControls.dll</HintPath>
@@ -136,19 +133,11 @@
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Processor\Cache\Cache.cs" />
-    <Compile Include="Processor\Hitomi\InternetP.cs" />
-    <Compile Include="Processor\Hiyobi\InternetP.cs" />
-    <Compile Include="Processor\Hiyobi\JParser.cs" />
+    <Compile Include="Processor\Hiyobi\HiyobiTags.cs" />
     <Compile Include="Processor\Loaders\FileLoader.cs" />
-    <Compile Include="Processor\Loaders\HitomiLoader.cs" />
-    <Compile Include="Processor\Loaders\HiyobiLoader.cs" />
-    <Compile Include="Processor\Loaders\ILoader.cs" />
-    <Compile Include="Processor\Loaders\PixivLoader.cs" />
-    <Compile Include="Processor\Json\InternetP.cs" />
-    <Compile Include="Processor\Api\Pixiv.cs" />
+    <Compile Include="Processor\Loaders\SearchLoader.cs" />
     <Compile Include="Processor\Plugin\Plugin.cs" />
     <Compile Include="Processor\Plugin\PluginHandler.cs" />
-    <Compile Include="Processor\Search\Loaders.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -163,9 +152,6 @@
     <Compile Include="Scripts\Invoker.cs" />
     <Compile Include="Scripts\Logger.cs" />
     <Compile Include="Scripts\Random.cs" />
-    <Compile Include="Processor\Hiyobi\Tags.cs" />
-    <Compile Include="Structs\Images.cs" />
-    <Compile Include="Structs\Hiyobi.cs" />
     <Compile Include="UserControls\CountBox.cs" />
     <Compile Include="Scripts\FileEncryptDecrypt.cs" />
     <Compile Include="Processor\Internet\Github.cs" />
@@ -180,7 +166,6 @@
     </Compile>
     <Compile Include="Scripts\ExtensionMethods.cs" />
     <Compile Include="Scripts\Global.cs" />
-    <Compile Include="Structs\Hitomi.cs" />
     <Compile Include="UserControls\InputBox.cs" />
     <Compile Include="UserControls\Pixiv\PixivIllustPanel.cs" />
     <Compile Include="UserControls\Reader\HitomiReader.cs" />
@@ -188,9 +173,7 @@
     <Compile Include="UserControls\Reader\IReader.xaml.cs">
       <DependentUpon>IReader.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Processor\Internet\InternetP.cs" />
     <Compile Include="Scripts\LoginClass.cs" />
-    <Compile Include="Structs\Tag.cs" />
     <Compile Include="UserControls\Login.xaml.cs">
       <DependentUpon>Login.xaml</DependentUpon>
     </Compile>
@@ -232,10 +215,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="UserControls\Reader\IReader.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Style\Style1.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -321,6 +300,10 @@
     <Resource Include="Resources\loading2.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Modules\HitomiViewerLibrary\HitomiViewerLibrary.csproj">
+      <Project>{7E82A384-5B85-44AB-920E-95C8CC6FDCAF}</Project>
+      <Name>HitomiViewerLibrary</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Modules\WebP-wrapper\WebPTest\WebPTest.csproj">
       <Project>{38700B2B-939E-439F-A975-E6FA91703BDB}</Project>
       <Name>WebPTest</Name>
@@ -377,6 +360,12 @@
     <Resource Include="Resources\loading2.gif" />
     <EmbeddedResource Include="Libs\WpfAnimatedGif.dll" />
     <Content Include="WpfControls.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Api\" />
+    <Folder Include="Processor\Hitomi\" />
+    <Folder Include="Processor\Json\" />
+    <Folder Include="Processor\Search\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

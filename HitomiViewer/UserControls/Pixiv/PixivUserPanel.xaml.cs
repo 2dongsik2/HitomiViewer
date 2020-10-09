@@ -1,7 +1,7 @@
 ﻿using ExtensionMethods;
-using HitomiViewer.Api;
 using HitomiViewer.Processor;
 using HitomiViewer.Processor.Loaders;
+using HitomiViewerLibrary;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -20,7 +20,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using static HitomiViewer.Api.Pixiv;
 
 namespace HitomiViewer.UserControls
 {

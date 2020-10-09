@@ -1,12 +1,10 @@
 ﻿using ExtensionMethods;
-using HitomiViewer.Api;
 using HitomiViewer.Encryption;
 using HitomiViewer.Processor;
 using HitomiViewer.Processor.Cache;
 using HitomiViewer.Processor.Loaders;
 using HitomiViewer.Plugin;
 using HitomiViewer.Scripts;
-using HitomiViewer.Structs;
 using HitomiViewer.UserControls;
 using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
@@ -26,6 +24,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Path = System.IO.Path;
+using HitomiViewerLibrary.Loaders;
+using HitomiViewerLibrary;
+using HitomiViewerLibrary.Structs;
 
 namespace HitomiViewer
 {

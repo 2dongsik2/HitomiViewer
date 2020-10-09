@@ -1,5 +1,5 @@
-﻿using HitomiViewer.Api;
-using HitomiViewer.Scripts;
+﻿using HitomiViewer.Scripts;
+using HitomiViewerLibrary;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -51,7 +51,7 @@ namespace HitomiViewer
         }
         public class Account
         {
-            public static Api.Pixiv Pixiv;
+            public static Pixiv Pixiv;
         }
 
         public static void Setup()

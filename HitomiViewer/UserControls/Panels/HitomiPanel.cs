@@ -1,12 +1,13 @@
 ﻿using ExtensionMethods;
-using HitomiViewer.Api;
 using HitomiViewer.Encryption;
 using HitomiViewer.Plugin;
 using HitomiViewer.Processor;
 using HitomiViewer.Processor.Loaders;
 using HitomiViewer.Scripts;
-using HitomiViewer.Structs;
 using HitomiViewer.UserControls.Reader;
+using HitomiViewerLibrary;
+using HitomiViewerLibrary.Loaders;
+using HitomiViewerLibrary.Structs;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;

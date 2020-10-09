@@ -1,11 +1,10 @@
 ﻿using ExtensionMethods;
-using HitomiViewer.Api;
 using HitomiViewer.Encryption;
 using HitomiViewer.Plugin;
 using HitomiViewer.Processor;
 using HitomiViewer.Processor.Loaders;
 using HitomiViewer.Scripts;
-using HitomiViewer.Structs;
+using HitomiViewerLibrary.Structs;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -29,7 +28,6 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using Path = System.IO.Path;
 
-#pragma warning disable CS0618 // 형식 또는 멤버는 사용되지 않습니다.
 namespace HitomiViewer.UserControls
 {
     /// <summary>
@@ -132,4 +130,3 @@ namespace HitomiViewer.UserControls
         public virtual void AtHitomi_Click(object sender, RoutedEventArgs e) { }
     }
 }
-#pragma warning restore CS0618 // 형식 또는 멤버는 사용되지 않습니다.

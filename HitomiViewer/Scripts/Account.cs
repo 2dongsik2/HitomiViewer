@@ -1,5 +1,5 @@
 ﻿using ExtensionMethods;
-using HitomiViewer.Api;
+using HitomiViewerLibrary;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
