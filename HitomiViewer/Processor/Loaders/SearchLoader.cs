@@ -157,7 +157,7 @@ namespace HitomiViewer.Processor.Loaders
                 {
                     HitomiLoader hitomi = new HitomiLoader();
                     hitomi.Default();
-                    Defaults.Hitomis.Setup(hitomi);
+                    LoaderDefaults.Hitomis.Setup(hitomi);
                     hitomi.Parser(new_idlist.ToArray());
                 });
             });

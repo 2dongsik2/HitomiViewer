@@ -1,4 +1,5 @@
-﻿using HitomiViewerLibrary;
+﻿using HitomiViewer.UserControls;
+using HitomiViewerLibrary;
 using HitomiViewerLibrary.Loaders;
 using HitomiViewerLibrary.Structs;
 using System;
@@ -6,11 +7,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace HitomiViewer.Processor.Loaders
 {
-    public class Defaults
+    public class LoaderDefaults
     {
+        public Action<int> search = null;
         public static void Start(int count)
         {
             Global.MainWindow.label.Content = "0/" + count;
@@ -80,7 +84,25 @@ namespace HitomiViewer.Processor.Loaders
                 Global.MainWindow.label.Content = $"{index}/{max}";
                 Global.MainWindow.MainPanel.Children.Add(new UserControls.Panels.PixivUserPanel(h));
             }
+            #endregion
         }
-        #endregion
+        public LoaderDefaults SetSearch(Action<int> search)
+        {
+            this.search = search;
+            return this;
+        }
+        public Action<int> SetPagination(int page)
+        {
+            return (int pages) =>
+            {
+                Pagination pagination = new Pagination(page, pages);
+                pagination.btnFirs_Clk = (object sender, RoutedEventArgs e) => search(1);
+                pagination.btnPrev_Clk = (object sender, RoutedEventArgs e) => search(page - 1);
+                pagination.btnNext_Clk = (object sender, RoutedEventArgs e) => search(page + 1);
+                pagination.btnLast_Clk = (object sender, RoutedEventArgs e) => search(pages);
+                pagination.cbNumberOfRecords_SelectionChanged1 = (object sender, SelectionChangedEventArgs e) => search((int)e.AddedItems[0]);
+                Global.MainWindow.MainPanel.Children.Add(pagination);
+            };
+        }
     }
 }

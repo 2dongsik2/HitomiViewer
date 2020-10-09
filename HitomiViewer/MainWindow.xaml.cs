@@ -170,7 +170,7 @@ namespace HitomiViewer
             loader.Default();
             loader.Parser(files);
             label.Visibility = Visibility.Hidden;
-            var pagination = new ILoader().SetSearch((int ind) =>
+            var pagination = new LoaderDefaults().SetSearch((int ind) =>
             {
                 MainPanel.Children.Clear();
                 LabelSetup();
@@ -325,7 +325,7 @@ namespace HitomiViewer
         #region Events
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            new Config().GetConfig().Save();
+            new ConfigFile().GetConfig().Save();
             LabelSetup();
             this.Background = new SolidColorBrush(Global.background);
             MainPanel.Children.Clear();
@@ -481,9 +481,10 @@ namespace HitomiViewer
             MainPanel.Children.Clear();
             label.Visibility = Visibility.Visible;
             label.FontSize = 100;
-            Config cfg = new Config();
+            ConfigFile cfg = new ConfigFile();
+            ConfigFileData data = cfg.config;
             cfg.Load();
-            List<string> favs = cfg.ArrayValue<string>(Settings.favorites).ToList();
+            List<string> favs = data.favorites.Get<List<string>>();
             favs = favs.Where(x => Directory.Exists(x) || x.isUrl()).Distinct().ToList();
             InternetP parser = new InternetP();
             parser.start = (int count) => label.Content = "0/" + count;
@@ -565,8 +566,8 @@ namespace HitomiViewer
             InternetP parser = new InternetP(url: "https://api.hiyobi.me/list/" + index);
             HiyobiLoader hiyobi = new HiyobiLoader();
             hiyobi.Default();
-            Defaults.Hiyobis.Setup(hiyobi);
-            hiyobi.pagination = hiyobi.SetSearch((int i) =>
+            LoaderDefaults.Hiyobis.Setup(hiyobi);
+            hiyobi.pagination = new LoaderDefaults().SetSearch((int i) =>
             {
                 MainPanel.Children.Clear();
                 LabelSetup();
@@ -579,8 +580,8 @@ namespace HitomiViewer
             InternetP parser = new InternetP();
             HiyobiLoader hiyobi = new HiyobiLoader();
             hiyobi.Default();
-            Defaults.Hiyobis.Setup(hiyobi);
-            hiyobi.pagination = hiyobi.SetSearch((int i) =>
+            LoaderDefaults.Hiyobis.Setup(hiyobi);
+            hiyobi.pagination = new LoaderDefaults().SetSearch((int i) =>
             {
                 MainPanel.Children.Clear();
                 LabelSetup();
@@ -622,7 +623,7 @@ namespace HitomiViewer
             loader.index = index;
             loader.count = (int)Page_itemCount;
             loader.Default();
-            Defaults.Hitomis.Setup(loader);
+            LoaderDefaults.Hitomis.Setup(loader);
             loader.Parser();
         }
         public void HitomiSearch(string[] tags, int index)
@@ -690,7 +691,7 @@ namespace HitomiViewer
             JObject data = await Global.Account.Pixiv.illustFollow();
             PixivLoaders.Illust loader = new PixivLoaders.Illust();
             loader.Default();
-            Defaults.Pixivs.Setup(loader);
+            LoaderDefaults.Pixivs.Setup(loader);
             loader.Parser(data);
         }
         private async void RecommendIllust()
@@ -701,7 +702,7 @@ namespace HitomiViewer
             JObject data = await Global.Account.Pixiv.illustRecommended();
             PixivLoaders.Illust loader = new PixivLoaders.Illust();
             loader.Default();
-            Defaults.Pixivs.Setup(loader);
+            LoaderDefaults.Pixivs.Setup(loader);
             loader.Parser(data);
         }
         private async void UserSearch()
@@ -712,7 +713,7 @@ namespace HitomiViewer
             JObject data = await Global.Account.Pixiv.searchUser(PixivUser_Search_Text.Text);
             PixivLoaders.User loader = new PixivLoaders.User();
             loader.Default();
-            Defaults.Pixivs.Setup(loader);
+            LoaderDefaults.Pixivs.Setup(loader);
             loader.Parser(data);
         }
         private async void IllustSearch()
@@ -720,7 +721,7 @@ namespace HitomiViewer
             JObject data = await Global.Account.Pixiv.searchIllust(PixivIllust_Search_Text.Text);
             PixivLoaders.Illust loader = new PixivLoaders.Illust();
             loader.Default();
-            Defaults.Pixivs.Setup(loader);
+            LoaderDefaults.Pixivs.Setup(loader);
             loader.Parser(data);
         }
 

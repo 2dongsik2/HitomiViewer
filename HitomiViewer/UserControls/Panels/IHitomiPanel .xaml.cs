@@ -52,7 +52,7 @@ namespace HitomiViewer.UserControls
 
         public virtual ToolTip GetToolTip(double height)
         {
-            if (h.thumbnail.preview_img == null) return null;
+            //if (h.thumbnail.preview_img == null) return null;
             if (!thumbNail.IsVisible) return null;
             //b = 비율
             //Magnif = 배율

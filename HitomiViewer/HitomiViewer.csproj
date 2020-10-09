@@ -147,8 +147,8 @@
     <Compile Include="Encryption\AES128.cs" />
     <Compile Include="Processor\Image\BlurEffect.cs" />
     <Compile Include="Processor\Internet\CheckUpdate.cs" />
-    <Compile Include="Scripts\Account.cs" />
-    <Compile Include="Scripts\Config.cs" />
+    <Compile Include="File\Account.cs" />
+    <Compile Include="File\Config.cs" />
     <Compile Include="Scripts\File.cs" />
     <Compile Include="Scripts\Invoker.cs" />
     <Compile Include="Scripts\Logger.cs" />
@@ -367,7 +367,6 @@
     <Content Include="WpfControls.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Api\" />
     <Folder Include="Processor\Hitomi\" />
     <Folder Include="Processor\Json\" />
     <Folder Include="Processor\Search\" />

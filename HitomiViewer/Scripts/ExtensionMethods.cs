@@ -23,6 +23,13 @@ namespace ExtensionMethods
 {
     public static partial class Extensions
     {
-
+        public static T ToObjectExceptNull<T>(this JObject obj) where T : class
+        {
+            Newtonsoft.Json.JsonSerializer serializer = new Newtonsoft.Json.JsonSerializer
+            {
+                NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore
+            };
+            return obj.ToObject<T>(serializer);
+        }
     }
 }
