@@ -48,7 +48,7 @@ namespace HitomiViewer.UserControls.Panels
             this.file = file;
             this.blur = blur;
             this.h = h;
-            base.h = h;
+            base.h = this.h;
             InitializeComponent();
             Init();
             InitEvent();
@@ -101,9 +101,9 @@ namespace HitomiViewer.UserControls.Panels
                 DownloadImage.Visibility = Visibility.Collapsed;
                 CopyNumber.Visibility = Visibility.Collapsed;
             }
-            Config cfg = new Config();
-            JObject obj = cfg.Load();
-            List<string> favs = cfg.ArrayValue<string>(Settings.favorites).ToList();
+            ConfigFile cfg = new ConfigFile();
+            ConfigFileData obj = cfg.config;
+            List<string> favs = obj.favorites.Get<List<string>>();
             if (favs.Contains(h.id))
             {
                 Favorite.Visibility = Visibility.Collapsed;
@@ -167,7 +167,6 @@ namespace HitomiViewer.UserControls.Panels
 
         public override async void HitomiPanel_Loaded(object sender, RoutedEventArgs e)
         {
-            thumbNail.MouseEnter += (object sender2, MouseEventArgs e2) => thumbNail.ToolTip = GetToolTip(panel.Height);
             this.nameLabel.Content = h.name + " (로딩중)";
             InternetP parser = new InternetP();
             parser.index = int.Parse(h.id);
@@ -180,6 +179,7 @@ namespace HitomiViewer.UserControls.Panels
                 ImageProcessor.ProcessEncryptAsync(h.files[0].url).then((BitmapImage image) =>
                 {
                     h.thumbnail.preview_img = image;
+                    base.h = this.h;
                     thumbNail.Source = image;
                     thumbBrush.ImageSource = image;
                     this.nameLabel.Content = h.name;

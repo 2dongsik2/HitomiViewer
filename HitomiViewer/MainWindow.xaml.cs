@@ -325,7 +325,7 @@ namespace HitomiViewer
         #region Events
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            new Config().GetConfig().Save();
+            new ConfigFile().GetConfig().Save();
             LabelSetup();
             this.Background = new SolidColorBrush(Global.background);
             MainPanel.Children.Clear();
@@ -481,10 +481,10 @@ namespace HitomiViewer
             MainPanel.Children.Clear();
             label.Visibility = Visibility.Visible;
             label.FontSize = 100;
-            Config cfg = new Config();
-            JObject data = cfg.Load();
+            ConfigFile cfg = new ConfigFile();
+            ConfigFileData data = cfg.Load();
             cfg.Load();
-            List<string> favs = data.ArrayValue<string>(Settings.favorites).ToList();
+            List<string> favs = data.favorites.Get<List<string>>();
             favs = favs.Where(x => Directory.Exists(x) || x.isUrl()).Distinct().ToList();
             InternetP parser = new InternetP();
             parser.start = (int count) => label.Content = "0/" + count;

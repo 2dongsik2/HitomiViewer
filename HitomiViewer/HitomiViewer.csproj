@@ -129,6 +129,7 @@
     <Compile Include="AutoComplete\SuggestionProvider.cs" />
     <Compile Include="Encryption\Base64.cs" />
     <Compile Include="Encryption\MD5.cs" />
+    <Compile Include="File\Config.cs" />
     <Compile Include="LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
@@ -148,7 +149,6 @@
     <Compile Include="Processor\Image\BlurEffect.cs" />
     <Compile Include="Processor\Internet\CheckUpdate.cs" />
     <Compile Include="File\Account.cs" />
-    <Compile Include="Scripts\Config.cs" />
     <Compile Include="Scripts\File.cs" />
     <Compile Include="Scripts\Invoker.cs" />
     <Compile Include="Scripts\Logger.cs" />

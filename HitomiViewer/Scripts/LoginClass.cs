@@ -50,10 +50,8 @@ namespace HitomiViewer.Scripts
         /// </summary>
         private void Plain()
         {
-            JObject config = new Config().Load();
-            if (config == null) return;
-
-            if (config[Settings.password] != null)
+            ConfigFileData config = new ConfigFile().Load();
+            if (config.password.Get<string>() != null)
             {
                 LoginWindow lw = new LoginWindow();
                 lw.CheckPassword = CheckPassword2;
@@ -64,7 +62,7 @@ namespace HitomiViewer.Scripts
 
         private bool CheckPassword2(string password)
         {
-            return SHA256.Hash(password) == new Config().Load()[Settings.password].ToString();
+            return SHA256.Hash(password) == new ConfigFile().Load().password.Get<string>();
         }
 
         private bool CheckPassword1(string password)

@@ -40,6 +40,7 @@ namespace HitomiViewer
         public static bool RandomTitle = false;
         public static bool CacheSearch = false;
         public static bool OriginThumb = false;
+        public static ConfigFileData config = new ConfigFileData();
         public static Dispatcher dispatcher;
         public static BitmapImage NoImage { private get; set; }
         public static Func<string[], string[]> FolderSort;
