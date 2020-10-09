@@ -1,6 +1,7 @@
 ﻿using ExtensionMethods;
 using HitomiViewer.Processor;
 using HitomiViewer.Processor.Loaders;
+using HitomiViewer.Scripts;
 using HitomiViewer.UserControls.Reader;
 using HitomiViewerLibrary;
 using HitomiViewerLibrary.Structs;
