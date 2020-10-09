@@ -1,6 +1,7 @@
 ﻿using HitomiViewer;
 using HitomiViewer.Plugin;
 using HitomiViewer.UserControls;
+using HitomiViewer.UserControls.Panels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
