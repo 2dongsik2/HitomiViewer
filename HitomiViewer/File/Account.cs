@@ -14,7 +14,7 @@ namespace HitomiViewer.Scripts
     {
         public static void Load()
         {
-            if (Global.OriginPassword == null) return;
+            if (Global.Password == null) return;
             if (!File.Exists("Account.lock")) return;
             byte[] data = File.ReadAllBytes("Account.lock");
             data = FileDecrypt.Default(data);
@@ -30,7 +30,7 @@ namespace HitomiViewer.Scripts
         }
         public static void Save(string parent, string username, string password)
         {
-            if (Global.OriginPassword == null) return;
+            if (Global.Password == null) return;
             JObject obj = new JObject();
             JToken token = new JObject();
             token["username"] = username;

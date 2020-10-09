@@ -30,17 +30,8 @@ namespace HitomiViewer
         public static Color artistsclr = Colors.Blue;
         public const int Magnif = 4;
         public const int RandomStringLength = 16;
-        //[Obsolete("Password is deprecated, please use OriginPassword instead.", true)]
-        public static string Password = null;
-        public static string OriginPassword = null;
-        public static string DownloadFolder = null;
-        public static bool FileEn = false;
-        public static bool AutoFileEn = false;
-        public static bool EncryptTitle = false;
-        public static bool RandomTitle = false;
-        public static bool CacheSearch = false;
-        public static bool OriginThumb = false;
-        public static ConfigFileData config = new ConfigFileData();
+        public static string Password;
+        public static ConfigFileData config = new ConfigFile().Load();
         public static Dispatcher dispatcher;
         public static BitmapImage NoImage { private get; set; }
         public static Func<string[], string[]> FolderSort;

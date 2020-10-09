@@ -28,7 +28,7 @@ namespace HitomiViewer.Processor
                 else
                     return LoadWebImage(url);
             }
-            if (Global.FileEn)
+            if (Global.config.file_encrypt.Get<bool>())
             {
                 try
                 {
@@ -79,7 +79,7 @@ namespace HitomiViewer.Processor
                     return LoadWebImage(url);
                 }
             }
-            else if (Global.FileEn)
+            else if (Global.config.file_encrypt.Get<bool>())
             {
                 try
                 {
@@ -141,7 +141,7 @@ namespace HitomiViewer.Processor
                     return result;
                 }
             }
-            else if (Global.FileEn)
+            else if (Global.config.file_encrypt.Get<bool>())
             {
                 try
                 {

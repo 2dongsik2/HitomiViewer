@@ -158,8 +158,8 @@ namespace HitomiViewer
 
         public void LoadHitomi(string path)
         {
-            if (Global.DownloadFolder != "hitomi_downloaded")
-                LoadHitomi(CF.File.GetDirectories(root: "", path, rootDir + Global.DownloadFolder));
+            if (Global.config.download_folder.Get<string>() != "hitomi_downloaded")
+                LoadHitomi(CF.File.GetDirectories(root: "", path, rootDir + Global.config.download_folder.Get<string>()));
             else
                 LoadHitomi(Directory.GetDirectories(path));
         }
@@ -441,110 +441,36 @@ namespace HitomiViewer
         {
             LoadHitomi(path);
         }
-        private async void Search_Button_Click(object sender, RoutedEventArgs e)
-        {
-            string SearchText = Search_Text.Text;
-            int number = 0;
-            if (int.TryParse(SearchText, out number))
-            {
-                MainPanel.Children.Clear();
-                InternetP parser = new InternetP(index: number);
-                Tuple<bool, HiyobiGallery> data = await parser.isHiyobiData();
-                bool result = data.Item1;
-                HiyobiGallery h = data.Item2;
-                if (!result)
-                    MainPanel.Children.Add(new HitomiPanel(await parser.HitomiData(), true));
-            }
-            else File_Search_Button_Click(sender, e);
-        }
         private void File_Search_Button_Click(object sender, RoutedEventArgs e)
         {
+            MainPanel.Children.Clear();
             string SearchText = Search_Text.Text;
-            string[] files = CF.File.GetDirectories(root: "", path, rootDir + Global.DownloadFolder).Where(x => x.RemoveSpace().Contains(SearchText.RemoveSpace())).ToArray();
-            new TaskFactory().StartNew(() => LoadHitomi(files));
+            string[] files = CF.File.GetDirectories(root: "", path, rootDir + Global.config.download_folder.Get<string>()).Where(x => x.RemoveSpace().Contains(SearchText.RemoveSpace())).ToArray();
+            LoadHitomi(files);
         }
         private void Search_Text_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
+            if (e.Key == Key.Enter) Task.Factory.StartNew(() =>
             {
-                string SearchText = Search_Text.Text;
-                string[] files = CF.File.GetDirectories(root: "", path, rootDir + Global.DownloadFolder).Where(x => x.RemoveSpace().Contains(SearchText.RemoveSpace())).ToArray();
-                new TaskFactory().StartNew(() => LoadHitomi(files));
-            }
+                Thread.Sleep(500);
+                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => File_Search_Button_Click(null, null)));
+            });
         }
         private void OpenSetting_Click(object sender, RoutedEventArgs e)
         {
-            new Settings().Show();
+            new Settings().ShowDialog();
         }
         private void FavoriteBtn_Click(object sender, RoutedEventArgs e)
         {
-            MainPanel.Children.Clear();
-            label.Visibility = Visibility.Visible;
-            label.FontSize = 100;
-            ConfigFile cfg = new ConfigFile();
-            ConfigFileData data = cfg.Load();
-            cfg.Load();
-            List<string> favs = data.favorites.Get<List<string>>();
-            favs = favs.Where(x => Directory.Exists(x) || x.isUrl()).Distinct().ToList();
-            InternetP parser = new InternetP();
-            parser.start = (int count) => label.Content = "0/" + count;
-            parser.update = (Hitomi h, int index, int max) =>
-            {
-                label.Content = $"{index}/{max}";
-                MainPanel.Children.Add(new HitomiPanel(h));
-            };
-            parser.end = () => label.Visibility = Visibility.Collapsed;
-            //await parser.LoadCompre(favs);
-            label.Visibility = Visibility.Collapsed;
+
         }
         private void Encrypt_Click(object sender, RoutedEventArgs e)
         {
-            foreach (string item in CF.File.GetDirectories(root: "", path, rootDir + Global.DownloadFolder))
-            {
-                if (File.Exists($"{item}/info.json"))
-                {
-                    JObject j = JObject.Parse(File.ReadAllText($"{item}/info.json"));
-                    j["encrypted"] = true;
-                    File.WriteAllText($"{item}/info.json", j.ToString());
-                }
-                string[] files = Directory.GetFiles(item);
-                foreach (string file in files)
-                {
-                    if (Path.GetFileName(file) == "info.json") continue;
-                    if (Path.GetFileName(file) == "info.txt") continue;
-                    if (Path.GetExtension(file) == ".lock") continue;
-                    byte[] org = File.ReadAllBytes(file);
-                    byte[] enc = FileEncrypt.Default(org);
-                    File.Delete(file);
-                    File.WriteAllBytes(file + ".lock", enc);
-                }
-            }
-            MessageBox.Show("전체 암호화 완료");
+            
         }
         private void Decrypt_Click(object sender, RoutedEventArgs e)
         {
-            foreach (string item in CF.File.GetDirectories(root: "", path, rootDir + Global.DownloadFolder))
-            {
-                if (File.Exists($"{path}/info.json"))
-                {
-                    JObject j = JObject.Parse(File.ReadAllText($"{path}/info.json"));
-                    j["encrypted"] = false;
-                    File.WriteAllText($"{path}/info.json", j.ToString());
-                }
-                string[] files = Directory.GetFiles(item);
-                foreach (string file in files)
-                {
-                    try
-                    {
-                        byte[] org = File.ReadAllBytes(file);
-                        byte[] enc = FileDecrypt.Default(org);
-                        File.Delete(file);
-                        File.WriteAllBytes(Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file)), enc);
-                    }
-                    catch { }
-                }
-            }
-            MessageBox.Show("전체 복호화 완료");
+            
         }
         private void ExportNumber_Click(object sender, RoutedEventArgs e)
         {
@@ -556,7 +482,7 @@ namespace HitomiViewer
         }
         private void CacheDownload_Click(object sender, RoutedEventArgs e)
         {
-            Task.Factory.StartNew(new Cache().TagCache);
+            
         }
         #endregion
 
@@ -777,6 +703,7 @@ namespace HitomiViewer
             IllustSearch();
         }
         #endregion
+
         #endregion
     }
 }

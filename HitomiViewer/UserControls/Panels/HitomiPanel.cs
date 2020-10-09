@@ -89,7 +89,7 @@ namespace HitomiViewer.UserControls.Panels
             if (file)
             {
                 Folder_Remove.Visibility = Visibility.Visible;
-                if (Global.Password != null)
+                if (Global.config.password.Get<string>() != null)
                 {
                     Encrypt.Visibility = Visibility.Visible;
                     Decrypt.Visibility = Visibility.Visible;
@@ -172,7 +172,7 @@ namespace HitomiViewer.UserControls.Panels
             parser.index = int.Parse(h.id);
             h = await parser.HitomiData();
             //h = await parser.HitomiData2(h, int.Parse(h.id));
-            if (Global.OriginThumb && h.files != null && h.files.Length >= 1 && h.files[0] != null)
+            if (Global.config.origin_thumb.Get<bool>() && h.files != null && h.files.Length >= 1 && h.files[0] != null)
             {
                 this.pageLabel.Content = h.files.Length;
                 this.nameLabel.Content = h.name + " (썸네일 로딩중)";
@@ -188,6 +188,7 @@ namespace HitomiViewer.UserControls.Panels
             else
             {
                 h.thumbnail.preview_img = await ImageProcessor.ProcessEncryptAsync(h.thumbnail.preview_url).@catch(null, MethodBase.GetCurrentMethod().FullName());
+                base.h = this.h;
                 this.nameLabel.Content = h.name;
             }
             thumbNail.MouseEnter += (object _, MouseEventArgs __) => thumbNail.ToolTip = GetToolTip(panel.Height);
@@ -196,41 +197,16 @@ namespace HitomiViewer.UserControls.Panels
 
         public override void Folder_Remove_Click(object sender, RoutedEventArgs e)
         {
-            if (!file) return;
-            //Global.MainWindow.MainPanel.Children.Remove(this);
-            //Directory.Delete(h.dir, true);
+            
         }
         public override void Folder_Open_Click(object sender, RoutedEventArgs e)
         {
-            if (!file) return;
-            //Process.Start(h.dir);
+            
         }
         public override void CopyNumber_Click(object sender, RoutedEventArgs e) => Clipboard.SetText(h.id);
         public override void Hitomi_Download_Click(object sender, RoutedEventArgs e)
         {
-            Task.Factory.StartNew(() =>
-            {
-                string filename = CF.File.GetDownloadTitle(CF.File.SaftyFileName(h.name));
-                if (!Directory.Exists($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}"))
-                    Directory.CreateDirectory($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}");
-                Directory.CreateDirectory($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}");
-                h.FileInfo.dir = $"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}";
-                h.Save($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/info.json");
-                for (int i = 0; i < h.files.Length; i++)
-                {
-                    string file = h.files[i].url;
-                    WebClient wc = new WebClient();
-                    wc.Headers.Add("referer", "https://hitomi.la/");
-                    if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/{i}.jpg"))
-                    {
-                        h.FileInfo.encrypted = Global.AutoFileEn;
-                        if (Global.AutoFileEn)
-                            FileEncrypt.DownloadAsync(wc, new Uri(file), $"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/{i}.jpg.lock");
-                        else wc.DownloadFileAsync(new Uri(file), $"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/{i}.jpg");
-                    }
-                }
-                Process.Start($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}");
-            });
+            
         }
         public override void Encrypt_Click(object sender, RoutedEventArgs e)
         {

@@ -53,11 +53,11 @@ namespace HitomiViewer.Scripts
                 .Replace("\\", "／");
             public static string GetDownloadTitle(string t)
             {
-                if (Global.EncryptTitle)
+                if (Global.config.encrypt_title.Get<bool>())
                 {
                     return Base64.Encrypt(t);
                 }
-                else if (Global.RandomTitle)
+                else if (Global.config.random_title.Get<bool>())
                 {
                     return Random2.RandomString(Global.RandomStringLength);
                 }

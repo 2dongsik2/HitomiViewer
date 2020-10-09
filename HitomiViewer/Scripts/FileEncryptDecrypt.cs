@@ -21,7 +21,7 @@ namespace HitomiViewer.Scripts
         public static byte[] Default(byte[] data) => Encrypt(data, FilePassword.Password);
         public static void AutoFe(string url)
         {
-            if (Global.AutoFileEn)
+            if (Global.config.download_file_encrypt.Get<bool>())
             {
                 Files(url);
             }
@@ -107,7 +107,7 @@ namespace HitomiViewer.Scripts
     }
     class FilePassword
     {
-        public static string Password => Default(Global.OriginPassword);
+        public static string Password => Default(Global.Password);
         public static string Default(string org) => SHA256.Hash(org);
     }
 }

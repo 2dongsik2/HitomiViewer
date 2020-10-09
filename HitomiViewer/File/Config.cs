@@ -54,7 +54,7 @@ namespace HitomiViewer.Scripts
             string path = encrypt ? Global.Config.encryptpath : Global.Config.path;
             byte[] bytes = Encoding.UTF8.GetBytes(JObject.FromObject(config).ToString());
             if (encrypt)
-                bytes = FileEncrypt.Encrypt(bytes, Global.OriginPassword);
+                bytes = FileEncrypt.Encrypt(bytes, Global.Password);
             File.WriteAllBytes(path, bytes);
             return true;
         }
@@ -74,7 +74,7 @@ namespace HitomiViewer.Scripts
     {
         public readonly ConfigFileType password = new ConfigFileType(null, "password");
         public readonly ConfigFileType favorites = new ConfigFileType(null, "favorites");
-        public readonly ConfigFileType block_tags = new ConfigFileType(null, "block-tags");
+        public readonly ConfigFileType block_tags = new ConfigFileType(null, "block-tags", false);
         public readonly ConfigFileType except_tags = new ConfigFileType(null, "except-tags");
         public readonly ConfigFileType cache_search = new ConfigFileType(null, "cachesearch", false);
         public readonly ConfigFileType file_encrypt = new ConfigFileType(null, "file-encrypt", false);

@@ -132,7 +132,7 @@ namespace HitomiViewer.UserControls.Panels
             export["thumbnail"]["preview_img"] = null;
             export.Remove("Values");    
             string filename = CF.File.GetDownloadTitle(CF.File.SaftyFileName(h.name));
-            string root = Path.Combine(Global.rootDir, Global.DownloadFolder);
+            string root = Path.Combine(Global.rootDir, Global.config.download_folder.Get<string>());
             Directory.CreateDirectory(Path.Combine(root, filename));
             File.WriteAllText(Path.Combine(root, filename, "info.json"), export.ToString());
             Process.Start(Path.Combine(root, filename));
@@ -146,11 +146,13 @@ namespace HitomiViewer.UserControls.Panels
                 Hitomi.HFile file = h.files[i];
                 WebClient wc = new WebClient();
                 wc.Headers.Add("referer", "https://hitomi.la/");
-                if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/{i}.jpg"))
+                string folder = Global.config.download_folder.Get<string>();
+                if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory}/{folder}/{filename}/{i}.jpg"))
                 {
-                    h.FileInfo.encrypted = Global.AutoFileEn;
-                    string path = $"{AppDomain.CurrentDomain.BaseDirectory}/{Global.DownloadFolder}/{filename}/{file.name}.{InternetP.GetDirFromHFileS(file)}.lock";
-                    if (Global.AutoFileEn)
+                    bool fileen = Global.config.download_file_encrypt.Get<bool>();
+                    h.FileInfo.encrypted = fileen;
+                    string path = $"{AppDomain.CurrentDomain.BaseDirectory}/{folder}/{filename}/{file.name}.{InternetP.GetDirFromHFileS(file)}.lock";
+                    if (fileen)
                         FileEncrypt.DownloadAsync(wc, new Uri(file.url), path + ".lock");
                     else wc.DownloadFileAsync(new Uri(file.url), path);
                 }

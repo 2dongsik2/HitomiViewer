@@ -84,7 +84,8 @@ namespace HitomiViewer
 
             BlockTags.IsChecked = config.block_tags.Get<bool>();
             List<string> tags = config.except_tags.Get<List<string>>();
-            foreach (string tag in tags) ExceptTagList.Add(tag);
+            if (tags != null)
+                foreach (string tag in tags) ExceptTagList.Add(tag);
             TagList2ListBox();
         }
 
@@ -138,9 +139,11 @@ namespace HitomiViewer
         {
 
         }
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-
+            ConfigFileData data = Global.config;
+            
         }
     }
 }

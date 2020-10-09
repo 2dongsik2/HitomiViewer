@@ -92,7 +92,7 @@ namespace HitomiViewer.Processor.Loaders
                 {
                     Hitomi.HTag tag2 = Hitomi.HTag.Parse(tag);
                     string path = Path.Combine(Global.rootDir, "Cache", tag2.type, tag2.tag + ".json");
-                    if (Global.CacheSearch)
+                    if (Global.config.cache_search.Get<bool>())
                     {
                         if (File.Exists(path))
                         {
@@ -113,7 +113,7 @@ namespace HitomiViewer.Processor.Loaders
                         {
                             try
                             {
-                                ids = parser.ByteArrayToIntArray(await parser.LoadNozomiTag(tag2.type.ToString(), tag2.tag, range: !Global.CacheSearch, start: 0, end: 99));
+                                ids = parser.ByteArrayToIntArray(await parser.LoadNozomiTag(tag2.type.ToString(), tag2.tag, range: !Global.config.cache_search.Get<bool>(), start: 0, end: 99));
                             }
                             catch
                             {
@@ -124,7 +124,7 @@ namespace HitomiViewer.Processor.Loaders
                         {
                             ids = await parser.LoadQuery(tag);
                         }
-                        if (Global.CacheSearch && !File.Exists(path))
+                        if (Global.config.cache_search.Get<bool>() && !File.Exists(path))
                         {
                             if (!Directory.Exists(Path.GetDirectoryName(path)))
                                 Directory.CreateDirectory(Path.GetDirectoryName(path));
