@@ -55,11 +55,6 @@ namespace HitomiViewer
             InitTags(config);
         }
 
-        private void Update()
-        {
-            
-        }
-
         private void InitFolderName(ConfigFileData config)
         {
             FolderName.Content = config.download_folder.Get<string>();

@@ -72,34 +72,47 @@ namespace HitomiViewer.Scripts
 
     public class ConfigFileData
     {
-        public readonly ConfigFileType password = new ConfigFileType(null, "password");
-        public readonly ConfigFileType favorites = new ConfigFileType(null, "favorites");
-        public readonly ConfigFileType block_tags = new ConfigFileType(null, "block-tags", false);
-        public readonly ConfigFileType except_tags = new ConfigFileType(null, "except-tags");
-        public readonly ConfigFileType cache_search = new ConfigFileType(null, "cachesearch", false);
-        public readonly ConfigFileType file_encrypt = new ConfigFileType(null, "file-encrypt", false);
-        public readonly ConfigFileType random_title = new ConfigFileType(null, "random-title", false);
-        public readonly ConfigFileType encrypt_title = new ConfigFileType(null, "encrypt-title", false);
-        public readonly ConfigFileType origin_thumb = new ConfigFileType(null, "originalthumbnail", false);
-        public readonly ConfigFileType download_file_encrypt = new ConfigFileType(null, "download-file-encrypt", false);
-        public readonly ConfigFileType download_folder = new ConfigFileType(null, "download-file", "hitomi_downloaded");
+        public readonly ConfigFileType password = new ConfigFileType(null, "password", typeof(string));
+        public readonly ConfigFileType favorites = new ConfigFileType(null, "favorites", typeof(Array));
+        public readonly ConfigFileType block_tags = new ConfigFileType(null, "block-tags", typeof(bool), false);
+        public readonly ConfigFileType except_tags = new ConfigFileType(null, "except-tags", typeof(Array));
+        public readonly ConfigFileType cache_search = new ConfigFileType(null, "cachesearch", typeof(bool), false);
+        public readonly ConfigFileType file_encrypt = new ConfigFileType(null, "file-encrypt", typeof(bool), false);
+        public readonly ConfigFileType random_title = new ConfigFileType(null, "random-title", typeof(bool), false);
+        public readonly ConfigFileType encrypt_title = new ConfigFileType(null, "encrypt-title", typeof(bool), false);
+        public readonly ConfigFileType origin_thumb = new ConfigFileType(null, "originalthumbnail", typeof(bool), false);
+        public readonly ConfigFileType download_file_encrypt = new ConfigFileType(null, "download-file-encrypt", typeof(bool), false);
+        public readonly ConfigFileType download_folder = new ConfigFileType(null, "download-file", typeof(string), "hitomi_downloaded");
     }
     public class ConfigFileType
     {
         public object Data { get; set; }
+        public Type Type { get; set; }
         public string Name { get; private set; }
         public object Default { get; private set; }
 
-        public ConfigFileType(object data, string name, object Default = null) => (Data, Name, this.Default) = (data, name, Default);
+        public ConfigFileType(object data, string name, Type type, object Default = null) => (Data, Name, Type, this.Default) = (data, name, type, Default);
         public T Get<T>()
         {
             if (Data == null)
                 return (T)Default;
+            if (Type != typeof(T))
+                throw new InvalidCastException();
             if (Data.GetType() != typeof(T))
                 throw new InvalidCastException();
             if (Data.GetType() == typeof(string) && (string)Data == "")
                 return (T)Default;
             return (T)(Data ?? Default);
+        }
+        public void Set(object data)
+        {
+            if (data == null || Data == null)
+                Data = data;
+            if (Type != data.GetType())
+                throw new InvalidCastException();
+            if (Data.GetType() != data.GetType())
+                throw new InvalidCastException();
+            Data = data;
         }
     }
 }
