@@ -65,7 +65,7 @@ namespace HitomiViewer.UserControls.Panels
             foreach (Hitomi.DisplayValue value in h.tags)
             {
                 Hitomi.HTag htag = Hitomi.HTag.Parse(value.Value);
-                tag tagElem = new tag
+                TagControl tagElem = new TagControl
                 {
                     TagName = value.Display
                 };

@@ -188,8 +188,8 @@
     <Compile Include="UserControls\ProgressBox.xaml.cs">
       <DependentUpon>ProgressBox.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\tag.xaml.cs">
-      <DependentUpon>tag.xaml</DependentUpon>
+    <Compile Include="UserControls\TagControl.xaml.cs">
+      <DependentUpon>TagControl.xaml</DependentUpon>
     </Compile>
     <Page Include="LoginWindow.xaml">
       <SubType>Designer</SubType>
@@ -239,7 +239,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UserControls\tag.xaml">
+    <Page Include="UserControls\TagControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

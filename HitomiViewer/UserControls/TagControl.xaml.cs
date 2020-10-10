@@ -19,7 +19,7 @@ namespace HitomiViewer.UserControls
     /// <summary>
     /// tag.xaml에 대한 상호 작용 논리
     /// </summary>
-    public partial class tag : UserControl
+    public partial class TagControl : UserControl
     {
         public Hitomi.HTag.TType TagType
         {
@@ -36,7 +36,14 @@ namespace HitomiViewer.UserControls
             set { SetValue(TagColorProperty, value); }
         }
 
-        public tag()
+        private string searchName = null;
+        public string SearchName
+        {
+            get => searchName ?? TagName;
+            set => searchName = value;
+        }
+
+        public TagControl()
         {
             InitializeComponent();
             DataContext = this;
@@ -46,21 +53,21 @@ namespace HitomiViewer.UserControls
             = DependencyProperty.Register(
                 "TagType",
                 typeof(Hitomi.HTag.TType),
-                typeof(tag),
+                typeof(TagControl),
                 new PropertyMetadata(Hitomi.HTag.TType.tag)
             );
         public static readonly DependencyProperty TagNameProperty
             = DependencyProperty.Register(
                 "TagName",
                 typeof(string),
-                typeof(tag),
+                typeof(TagControl),
                 new PropertyMetadata("태그없음")
             );
         public static readonly DependencyProperty TagColorProperty
             = DependencyProperty.Register(
                 "TagColor",
                 typeof(Brush),
-                typeof(tag),
+                typeof(TagControl),
                 new PropertyMetadata(new SolidColorBrush(Color.FromRgb(255, 94, 94)))
             );
     }
