@@ -216,8 +216,8 @@ namespace HitomiViewer
                 reader.ChangeMode();
             foreach (UIElement hitomiPanel in MainPanel.Children)
             {
-                if ((hitomiPanel as HitomiPanel) != null)
-                    (hitomiPanel as HitomiPanel).ChangeColor();
+                if ((hitomiPanel as IHitomiPanel) != null)
+                    (hitomiPanel as IHitomiPanel).ChangeColor();
             }
         }
         private void SetFolderSort(FolderSorts sorts)
@@ -511,7 +511,7 @@ namespace HitomiViewer
             {
                 MainPanel.Children.Clear();
                 LabelSetup();
-                HiyobiMain(i);
+                HiyobiSearch(keyword, i);
             }).SetPagination(index);
             parser.HiyobiSearch<JObject>(index, keyword).TaskCallback(hiyobi.Parser);
         }
@@ -550,6 +550,12 @@ namespace HitomiViewer
             loader.count = (int)Page_itemCount;
             loader.Default();
             LoaderDefaults.Hitomis.Setup(loader);
+            loader.pagination = new LoaderDefaults().SetSearch((int i) =>
+            {
+                MainPanel.Children.Clear();
+                LabelSetup();
+                HitomiMain(i);
+            }).SetPagination(index);
             loader.Parser();
         }
         public void HitomiSearch(string[] tags, int index)
@@ -558,8 +564,13 @@ namespace HitomiViewer
             loader.tags = tags;
             loader.itemCount = (int)Page_itemCount;
             loader.index = index;
-            loader.Default()
-                  .HitomiSearch();
+            loader.pagination = new LoaderDefaults().SetSearch((int i) =>
+            {
+                MainPanel.Children.Clear();
+                LabelSetup();
+                HitomiMain(i);
+            }).SetPagination(index);
+            loader.DefaultChain().HitomiSearch();
         }
         private void MenuHitomi_Click(object sender, RoutedEventArgs e)
         {

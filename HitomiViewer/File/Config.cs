@@ -23,7 +23,7 @@ namespace HitomiViewer.Scripts
             if (!File.Exists(path))
                 return EncryptLoad();
             JObject data = JObject.Parse(File.ReadAllText(Global.Config.path));
-            return data.ToObjectExceptNull<ConfigFileData>();
+            return Parse(data);
         }
         public ConfigFileData EncryptLoad()
         {
@@ -34,7 +34,21 @@ namespace HitomiViewer.Scripts
             byte[] Decrypt = FileDecrypt.Default(BOrigin);
             string SOrigin = Encoding.UTF8.GetString(Decrypt);
             JObject data = JObject.Parse(SOrigin);
-            return data.ToObjectExceptNull<ConfigFileData>();
+            return Parse(data);
+        }
+        public ConfigFileData Parse(JObject obj)
+        {
+            ConfigFileData data = new ConfigFileData();
+            var items = typeof(ConfigFileData).GetFields()
+                .ToList();
+            foreach (var item in items)
+            {
+                ConfigFileType type = (ConfigFileType)item.GetValue(new ConfigFileData());
+                type.Data = obj.Value(type.Name);
+                if (JValue.CreateNull().Equals(type.Data)) type.Data = null;
+                item.SetValue(data, type);
+            }
+            return data;
         }
         public ConfigFile GetConfig()
         {
@@ -52,11 +66,23 @@ namespace HitomiViewer.Scripts
                 Global.MainWindow.Decrypt.Visibility = visibility;
             }
             string path = encrypt ? Global.Config.encryptpath : Global.Config.path;
-            byte[] bytes = Encoding.UTF8.GetBytes(JObject.FromObject(config).ToString());
+            byte[] bytes = Encoding.UTF8.GetBytes(ToJObject().ToString());//JObject.FromObject(config).ToString());
             if (encrypt)
                 bytes = FileEncrypt.Encrypt(bytes, Global.Password);
             File.WriteAllBytes(path, bytes);
             return true;
+        }
+        public JObject ToJObject()
+        {
+            JObject data = new JObject();
+            var items = typeof(ConfigFileData).GetFields()
+                .ToList();
+            foreach (var item in items)
+            {
+                ConfigFileType type = (ConfigFileType)item.GetValue(this.config);
+                data[type.GetName()] = (JToken)type.GetDynamic();
+            }
+            return data;
         }
         public bool Save(JObject data)
         {
@@ -86,7 +112,7 @@ namespace HitomiViewer.Scripts
     }
     public class ConfigFileType
     {
-        public object Data { get; set; }
+        public dynamic Data { get; set; }
         public Type Type { get; set; }
         public string Name { get; private set; }
         public object Default { get; private set; }
@@ -104,6 +130,8 @@ namespace HitomiViewer.Scripts
                 return (T)Default;
             return (T)(Data ?? Default);
         }
+        public dynamic GetDynamic() => Data ?? Default;
+        public string GetName() => Name;
         public void Set(object data)
         {
             if (data == null || Data == null)

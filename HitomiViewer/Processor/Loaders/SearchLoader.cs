@@ -14,22 +14,15 @@ using System.Windows.Threading;
 
 namespace HitomiViewer.Processor.Loaders
 {
-    partial class SearchLoader
+    partial class SearchLoader : ILoader
     {
         /// <summary>
         /// 0. int => index
         /// 1. int => count
         /// </summary>
         public Action<int, int> update = null;
-        /// <summary>
-        /// 0. int => index
-        /// 1. int => count
-        /// </summary>
-        public Action<int> start = null;
-        public Action end = null;
         public string[] tags = null;
         public int itemCount = 0;
-        public int index = 1;
 
         private const bool search_range = false;
         private const int search_count = 1000;
@@ -51,7 +44,7 @@ namespace HitomiViewer.Processor.Loaders
             this.index = index ?? 0;
         }
 
-        public SearchLoader Default()
+        public override void Default()
         {
             this.start = (int count) =>
             {
@@ -69,6 +62,11 @@ namespace HitomiViewer.Processor.Loaders
                 Global.MainWindow.label.Visibility = System.Windows.Visibility.Collapsed;
                 Global.MainWindow.Searching(false);
             };
+        }
+
+        public SearchLoader DefaultChain()
+        {
+            Default();
             return this;
         }
 

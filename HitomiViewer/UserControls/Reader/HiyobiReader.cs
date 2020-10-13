@@ -128,6 +128,7 @@ namespace HitomiViewer.UserControls.Reader
                         MessageBox.Show($"{i + 1}번 이미지를 불러오는데 실패했습니다.\nexcept.log 에 정보가 기록됩니다.\n{hiyobi.files[i].url}\n{task.Exception.InnerException.Message}");
                         System.Reflection.MethodBase current = System.Reflection.MethodBase.GetCurrentMethod();
                         task.Exception.InnerException.WriteExcept(sourceName: current.FullName());
+                        return;
                     }
                     else
                     {

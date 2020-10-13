@@ -137,20 +137,7 @@ namespace HitomiViewer.UserControls.Panels
 
         public override void ChangeColor()
         {
-            panel.Background = new SolidColorBrush(Global.background);
-            border.Background = new SolidColorBrush(Global.imagecolor);
-            InfoPanel.Background = new SolidColorBrush(Global.Menuground);
-            bottomPanel.Background = new SolidColorBrush(Global.Menuground);
-            authorsPanel.Background = new SolidColorBrush(Global.Menuground);
-            nameLabel.Foreground = new SolidColorBrush(Global.fontscolor);
-            sizeLabel.Foreground = new SolidColorBrush(Global.fontscolor);
-            pageLabel.Foreground = new SolidColorBrush(Global.fontscolor);
-            sizeperpageLabel.Foreground = new SolidColorBrush(Global.fontscolor);
-            //authorsPanel.Children.Cast<UIElement>().Select(x => (x as Label).Foreground = new SolidColorBrush(Global.artistsclr));
-            foreach (UIElement elem in authorsPanel.Children)
-                (elem as Label).Foreground = new SolidColorBrush(Global.artistsclr);
-            (authorsPanel.Children[0] as Label).Foreground = new SolidColorBrush(Global.fontscolor);
-            tagPanel.Background = new SolidColorBrush(Global.Menuground);
+            base.ChangeColor();
         }
 
         public override async void HitomiPanel_Loaded(object sender, RoutedEventArgs e)
