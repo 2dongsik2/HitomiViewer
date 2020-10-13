@@ -23,7 +23,7 @@ namespace HitomiViewer.Scripts
             if (!File.Exists(path))
                 return EncryptLoad();
             JObject data = JObject.Parse(File.ReadAllText(Global.Config.path));
-            return data.ToObjectExceptNull<ConfigFileData>();
+            return Parse(data);
         }
         public ConfigFileData EncryptLoad()
         {
@@ -34,7 +34,21 @@ namespace HitomiViewer.Scripts
             byte[] Decrypt = FileDecrypt.Default(BOrigin);
             string SOrigin = Encoding.UTF8.GetString(Decrypt);
             JObject data = JObject.Parse(SOrigin);
-            return data.ToObjectExceptNull<ConfigFileData>();
+            return Parse(data);
+        }
+        public ConfigFileData Parse(JObject obj)
+        {
+            ConfigFileData data = new ConfigFileData();
+            var items = typeof(ConfigFileData).GetFields()
+                .ToList();
+            foreach (var item in items)
+            {
+                ConfigFileType type = (ConfigFileType)item.GetValue(new ConfigFileData());
+                type.Data = obj.Value(type.Name);
+                if (JValue.CreateNull().Equals(type.Data)) type.Data = null;
+                item.SetValue(data, type);
+            }
+            return data;
         }
         public ConfigFile GetConfig()
         {

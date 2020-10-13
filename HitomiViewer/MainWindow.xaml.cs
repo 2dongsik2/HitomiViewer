@@ -216,8 +216,8 @@ namespace HitomiViewer
                 reader.ChangeMode();
             foreach (UIElement hitomiPanel in MainPanel.Children)
             {
-                if ((hitomiPanel as HitomiPanel) != null)
-                    (hitomiPanel as HitomiPanel).ChangeColor();
+                if ((hitomiPanel as IHitomiPanel) != null)
+                    (hitomiPanel as IHitomiPanel).ChangeColor();
             }
         }
         private void SetFolderSort(FolderSorts sorts)
