@@ -137,8 +137,14 @@ namespace HitomiViewer
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            ConfigFile config = new ConfigFile();
             ConfigFileData data = Global.config;
-            
+            config.config = data;
+            string pwd = null;
+            if (Password.IsChecked ?? false)
+                pwd = FilePassword.Default(new InputBox("비밀번호를 입력해주세요.", "비밀번호 설정", "").ShowDialog());
+            data.password.Set(pwd);
+            config.Save();
         }
     }
 }
