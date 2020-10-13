@@ -59,9 +59,11 @@ namespace HitomiViewer.UserControls.Panels
             if (h.files.Length > 0)
                 sizeperpageLabel.Content = CF.File.SizeStr(h.FileInfo.size / h.files.Length);
             TagsInit();
+            ChangeColor();
         }
         private void TagsInit()
         {
+            if (h.tags == null) return;
             foreach (Hitomi.DisplayValue value in h.tags)
             {
                 Hitomi.HTag htag = Hitomi.HTag.Parse(value.Value);
