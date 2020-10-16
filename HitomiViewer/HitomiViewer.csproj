@@ -370,6 +370,9 @@
     <Folder Include="Processor\Json\" />
     <Folder Include="Processor\Search\" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="WpfControls.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
