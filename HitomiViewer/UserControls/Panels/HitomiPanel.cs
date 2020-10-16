@@ -77,7 +77,24 @@ namespace HitomiViewer.UserControls.Panels
             TagsInit();
             ChangeColor();
         }
-
+        private void TagsInit()
+        {
+            if (h.tags == null) return;
+            foreach (Hitomi.HTag value in h.tags)
+            {
+                TagControl tagElem = new TagControl
+                {
+                    TagName = value.full
+                };
+                if (value.ttype == Hitomi.HTag.TType.female)
+                    tagElem.TagColor = new SolidColorBrush(Color.FromRgb(255, 94, 94));
+                else if (value.ttype == Hitomi.HTag.TType.male)
+                    tagElem.TagColor = new SolidColorBrush(Color.FromRgb(65, 149, 244));
+                else
+                    tagElem.TagColor = new SolidColorBrush(Color.FromRgb(153, 153, 153));
+                tagPanel.Children.Add(tagElem);
+            }
+        }
         public override void ContextSetup()
         {
             Folder_Remove.Visibility = Visibility.Collapsed;
@@ -118,58 +135,9 @@ namespace HitomiViewer.UserControls.Panels
             }
         }
 
-        private void TagsInit()
-        {
-            if (h.tags == null) return;
-            foreach (Hitomi.HTag htag in h.tags)
-            {
-                TagControl tagElem = new TagControl
-                {
-                    TagName = htag.full
-                };
-                if (htag.ttype == Hitomi.HTag.TType.female)
-                    tagElem.TagColor = new SolidColorBrush(Color.FromRgb(255, 94, 94));
-                else if (htag.ttype == Hitomi.HTag.TType.male)
-                    tagElem.TagColor = new SolidColorBrush(Color.FromRgb(65, 149, 244));
-                else
-                    tagElem.TagColor = new SolidColorBrush(Color.FromRgb(153, 153, 153));
-                tagPanel.Children.Add(tagElem);
-            }
-        }
         public override void ChangeColor()
         {
             base.ChangeColor();
-        }
-        public static void ChangeColor(HitomiPanel hpanel)
-        {
-            DockPanel panel = hpanel.panel as DockPanel;
-
-            Border border = panel.Children[0] as Border;
-            DockPanel InfoPanel = panel.Children[1] as DockPanel;
-
-            StackPanel bottomPanel = InfoPanel.Children[1] as StackPanel;
-            StackPanel authorsStackPanel = InfoPanel.Children[2] as StackPanel;
-
-            DockPanel authorsPanel = authorsStackPanel.Children[0] as DockPanel;
-
-            Label nameLabel = InfoPanel.Children[0] as Label;
-
-            Label sizeLabel = bottomPanel.Children[0] as Label;
-            Label pageLabel = bottomPanel.Children[2] as Label;
-            Label sizeperpageLabel = bottomPanel.Children[4] as Label;
-
-            StackPanel tagPanel = InfoPanel.Children[2] as StackPanel;
-
-            panel.Background = new SolidColorBrush(Global.background);
-            border.Background = new SolidColorBrush(Global.imagecolor);
-            InfoPanel.Background = new SolidColorBrush(Global.Menuground);
-            bottomPanel.Background = new SolidColorBrush(Global.Menuground);
-            nameLabel.Foreground = new SolidColorBrush(Global.fontscolor);
-            sizeLabel.Foreground = new SolidColorBrush(Global.fontscolor);
-            pageLabel.Foreground = new SolidColorBrush(Global.fontscolor);
-            sizeperpageLabel.Foreground = new SolidColorBrush(Global.fontscolor);
-            authorsPanel.Children.Cast<UIElement>().Select(x => (x as Label).Foreground = new SolidColorBrush(Global.artistsclr));
-            tagPanel.Background = new SolidColorBrush(Global.Menuground);
         }
 
         public override async void HitomiPanel_Loaded(object sender, RoutedEventArgs e)
