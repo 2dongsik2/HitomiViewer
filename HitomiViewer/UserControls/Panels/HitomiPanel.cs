@@ -74,6 +74,8 @@ namespace HitomiViewer.UserControls.Panels
             sizeLabel.Content = CF.File.SizeStr(h.FileInfo.size);
             if (h.files.Length > 0)
                 sizeperpageLabel.Content = CF.File.SizeStr(h.FileInfo.size / h.files.Length);
+            TagsInit();
+            ChangeColor();
         }
 
         public override void ContextSetup()
@@ -116,6 +118,24 @@ namespace HitomiViewer.UserControls.Panels
             }
         }
 
+        private void TagsInit()
+        {
+            if (h.tags == null) return;
+            foreach (Hitomi.HTag htag in h.tags)
+            {
+                TagControl tagElem = new TagControl
+                {
+                    TagName = htag.full
+                };
+                if (htag.ttype == Hitomi.HTag.TType.female)
+                    tagElem.TagColor = new SolidColorBrush(Color.FromRgb(255, 94, 94));
+                else if (htag.ttype == Hitomi.HTag.TType.male)
+                    tagElem.TagColor = new SolidColorBrush(Color.FromRgb(65, 149, 244));
+                else
+                    tagElem.TagColor = new SolidColorBrush(Color.FromRgb(153, 153, 153));
+                tagPanel.Children.Add(tagElem);
+            }
+        }
         public override void ChangeColor()
         {
             base.ChangeColor();

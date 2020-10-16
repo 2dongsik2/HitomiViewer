@@ -74,6 +74,7 @@ namespace HitomiViewer
             Global.dispatcher = Dispatcher;
             //new LoginClass().Run();
             //new Config().GetConfig().Save();
+            new Cache().Test();
             CheckUpdate.Auto();
             HiyobiTags.LoadTags();
             Global.Setup();
@@ -445,7 +446,11 @@ namespace HitomiViewer
         {
             MainPanel.Children.Clear();
             string SearchText = Search_Text.Text;
-            string[] files = CF.File.GetDirectories(root: "", path, rootDir + Global.config.download_folder.Get<string>()).Where(x => x.RemoveSpace().Contains(SearchText.RemoveSpace())).ToArray();
+            List<string> dirs = new string[] { path }.ToList();
+            string configPath = rootDir + Global.config.download_folder.Get<string>();
+            if (!dirs.Contains(configPath))
+                dirs.Add(configPath);
+            string[] files = CF.File.GetDirectories(root: "", dirs.ToArray()).Where(x => x.RemoveSpace().Contains(SearchText.RemoveSpace())).ToArray();
             LoadHitomi(files);
         }
         private void Search_Text_KeyDown(object sender, KeyEventArgs e)

@@ -95,6 +95,10 @@ namespace HitomiViewer
         {
             
         }
+        protected virtual void PreLoadAll(int start = 0, int? max = null)
+        {
+
+        }
 
         protected virtual void SetImage(Uri link) { }
 

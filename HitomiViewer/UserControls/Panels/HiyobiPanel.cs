@@ -63,6 +63,7 @@ namespace HitomiViewer.UserControls.Panels
         }
         private void TagsInit()
         {
+            if (h.tags == null) return;
             foreach (Hitomi.DisplayValue value in h.tags)
             {
                 Hitomi.HTag htag = Hitomi.HTag.Parse(value.Value);
