@@ -30,7 +30,7 @@
                             <GradientStop x:Name="MainMenuBackground" Offset="0" Color="#F0F0F0" />
                         </LinearGradientBrush>
                     </Menu.Background>
-                    <MenuItem Header="설정" x:Name="SettingMenu" Background="White" x:FieldModifier="Public">
+                    <MenuItem Header="설정" x:Name="SettingMenu" Background="White" x:FieldModifier="public">
                         <MenuItem x:Name="OpenSetting" Header="설정창 열기" Click="OpenSetting_Click"></MenuItem>
                         <MenuItem x:Name="DarkMode" Header="_야간모드" IsCheckable="True" IsChecked="False" Checked="MenuItem_Checked" Unchecked="DarkMode_Unchecked" x:FieldModifier="public"/>
                         <MenuItem x:Name="MenuPage" Header="페이지">
