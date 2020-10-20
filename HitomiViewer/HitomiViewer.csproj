@@ -85,6 +85,7 @@
   <PropertyGroup />
   <PropertyGroup />
   <PropertyGroup />
+  <PropertyGroup />
   <ItemGroup>
     <Reference Include="HtmlAgilityPack, Version=1.11.24.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
       <HintPath>..\packages\HtmlAgilityPack.1.11.24\lib\Net45\HtmlAgilityPack.dll</HintPath>
@@ -364,12 +365,14 @@
   <ItemGroup>
     <Resource Include="Resources\loading2.gif" />
     <EmbeddedResource Include="Libs\WpfAnimatedGif.dll" />
-    <Content Include="WpfControls.dll" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Processor\Hitomi\" />
     <Folder Include="Processor\Json\" />
     <Folder Include="Processor\Search\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="WpfControls.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -1,5 +1,6 @@
 ﻿using ExtensionMethods;
 using HitomiViewer.Processor;
+using HitomiViewer.Scripts;
 using HitomiViewerLibrary.Structs;
 using System;
 using System.Collections.Generic;
@@ -105,13 +106,53 @@ namespace HitomiViewer.UserControls.Reader
                 ClearMemory();
             }
         }
-        protected override async void PreLoadAll(int start)
+        protected override async void PreLoad()
+        {
+            base.PreLoad();
+            if (page + 1 >= hiyobi.files.Length) return;
+            int loadpage = page + 1;
+            if (images == null || images.Length < hiyobi.files.Length)
+                images = new BitmapImage[hiyobi.files.Length];
+            if (images[loadpage] != null) return;
+            Hitomi.HFile file = hiyobi.files[loadpage];
+            BitmapImage image = null;
+            Task<BitmapImage> task = null;
+            for (int m = 0; m < 10 && image == null; m++)
+            {
+                task = ImageProcessor.ProcessEncryptAsync(file.url);
+                try { image = await task; } catch { }
+            }
+            if (image == null && task.IsFaulted)
+            {
+                MessageBox.Show($"{loadpage + 1}번 이미지를 불러오는데 실패했습니다.\nlatest.log 에 정보가 기록됩니다.\n{file.url}\n{task.Exception.InnerException.ToString()}");
+                System.Reflection.MethodBase current = System.Reflection.MethodBase.GetCurrentMethod();
+                task.Exception.InnerException.WriteExcept(sourceName: current.FullName());
+            }
+            else
+            {
+                image.Freeze();
+                if (images.Length == hiyobi.files.Length)
+                    images[loadpage] = image;
+            }
+        }
+        protected override void PreLoadAll(int start)
+        {
+            PreLoadAll(start, null);
+        }
+        protected override async void PreLoadAll(int start = 0, int? max = null)
         {
             base.PreLoadAll(start);
             this.Title = hiyobi.name + " 0/" + (hiyobi.files.Length - 1);
-            for (int i = start; i < hiyobi.files.Length; i++)
+            int end = max ?? hiyobi.files.Length;
+            for (int i = start; i < end; i++)
             {
-                this.Title = hiyobi.name + " " + i + "/" + (hiyobi.files.Length - 1);
+                if (this.IsClosed)
+                {
+                    images = images.Select(x => x = null).ToArray();
+                    GC.Collect();
+                    return;
+                }
+                this.Title = hiyobi.name + " " + i + "/" + (end - 1);
                 if (images == null || images.Length < hiyobi.files.Length)
                     images = new BitmapImage[hiyobi.files.Length];
                 if (images[i] == null)
@@ -145,18 +186,19 @@ namespace HitomiViewer.UserControls.Reader
             if (CLMRunner != null && !CLMRunner.IsCompleted) return;
             CLMRunner = Task.Factory.StartNew(() =>
             {
-                //BitmapImage[] notnullimages = images.Where(x => x != null).ToArray();
-                //if (notnullimages.Length < 1) return;
-                //long size = notnullimages.Select(x => ImageProcessor.Image2Bytes(x).LongLength).Sum() / notnullimages.LongLength;
-                double byteperimage = 10;//((double)size) / 1024 / 1024;
-                //averageSize = byteperimage;
+                if (page % 10 == 0)
+                {
+                    BitmapImage[] notnullimages = images.Where(x => x != null).ToArray();
+                    if (notnullimages.Length < 1) return;
+                    long size = notnullimages.Select(x => ImageProcessor.Image2Bytes(x).LongLength).Sum() / notnullimages.LongLength;
+                    hiyobi.FileInfo.size = size;
+                }
+                double byteperimage = ((double)hiyobi.FileInfo.size) / 1024 / 1024;
                 for (int i = 0; i < page; i++)
                 {
-                    if (byteperimage == 0) byteperimage = 10;
-                    if (page - (1024 * 0.7 / byteperimage) > i)
-                    {
+                    if (byteperimage == 0) byteperimage = 20;
+                    if (page - (1024 * 0.5 / byteperimage) >= i)
                         images[i] = null;
-                    }
                 }
                 GC.Collect();
             });
@@ -180,7 +222,19 @@ namespace HitomiViewer.UserControls.Reader
                 PreLoad();
                 SetImage(hiyobi.files[page]);
             }
-            if (e.Key == Key.Enter) PreLoadAll(0);
+            if (e.Key == Key.Enter)
+            {
+                if (Keyboard.Modifiers == ModifierKeys.Shift)
+                {
+                    CountBox countBox = new CountBox("페이지", "원하는 페이지 수", 1);
+                    int page = (int)countBox.ShowDialog();
+                    bool success = countBox.success;
+                    if (success)
+                        PreLoadAll(0, page);
+                }
+                else
+                    PreLoadAll(base.page);
+            }
             if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.C)
                 Clipboard.SetImage((BitmapSource)this.image.Source);
         }
