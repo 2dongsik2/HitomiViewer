@@ -29,7 +29,7 @@ namespace HitomiViewer.Scripts
         {
             if (File.Exists(path))
                 return Load();
-            if (!File.Exists(encryptpath)) throw new FileNotFoundException();
+            if (!File.Exists(encryptpath)) return new ConfigFileData();
             byte[] BOrigin = File.ReadAllBytes(encryptpath);
             byte[] Decrypt = FileDecrypt.Default(BOrigin);
             string SOrigin = Encoding.UTF8.GetString(Decrypt);

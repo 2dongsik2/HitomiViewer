@@ -111,7 +111,7 @@ namespace HitomiViewer.Processor.Loaders
                         {
                             try
                             {
-                                ids = parser.ByteArrayToIntArray(await parser.LoadNozomiTag(tag2.type.ToString(), tag2.tag, range: !Global.config.cache_search.Get<bool>(), start: 0, end: 99));
+                                ids = parser.ByteArrayToIntArrayBig(await parser.LoadNozomiTag(tag2.type.ToString(), tag2.tag, range: !Global.config.cache_search.Get<bool>(), start: 0, end: 99));
                             }
                             catch
                             {
