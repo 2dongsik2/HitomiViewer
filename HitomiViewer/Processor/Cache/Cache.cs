@@ -57,7 +57,7 @@ namespace HitomiViewer.Processor.Cache
                                 return;
                             }
                             InternetP parser = new InternetP();
-                            int[] ids = parser.ByteArrayToIntArray(await parser.LoadNozomiTag(tag.type.ToString(), tag.tag, false, 0, 9999));
+                            int[] ids = parser.ByteArrayToIntArrayBig(await parser.LoadNozomiTag(tag.type.ToString(), tag.tag, false, 0, 9999));
                             JArray arr = JArray.FromObject(ids);
                             File.WriteAllText(file, arr.ToString());
                             Console.WriteLine("{0}/{1}: {2}", i, tags.Count, tag.full);
@@ -91,7 +91,7 @@ namespace HitomiViewer.Processor.Cache
             if (tag.type == Hitomi.HTag.TType.artists.Name)
                 ids = parser.ByteArrayToIntArrayBig(data);
             else
-                ids = parser.ByteArrayToIntArray(data);
+                ids = parser.ByteArrayToIntArrayBig(data);
             Console.WriteLine(ids);
         }
     }
