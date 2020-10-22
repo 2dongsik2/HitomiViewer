@@ -19,6 +19,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace HitomiViewer.UserControls.Panels
 {
@@ -128,10 +129,40 @@ namespace HitomiViewer.UserControls.Panels
             tagPanel.Background = new SolidColorBrush(Global.Menuground);
         }
 
-        public override void HitomiPanel_Loaded(object sender, RoutedEventArgs e)
+        public override async void HitomiPanel_Loaded(object sender, RoutedEventArgs e)
         {
-            base.HitomiPanel_Loaded(sender, e);
-            thumbNail.MouseEnter += (object _, MouseEventArgs __) => thumbNail.ToolTip = GetToolTip(panel.Height);
+            try
+            {
+                base.HitomiPanel_Loaded(sender, e);
+                this.nameLabel.Content = h.name + " (로딩중)";
+                InternetP parser = new InternetP();
+                parser.index = int.Parse(h.id);
+                h.files = (await parser.HiyobiFiles()).ToArray();
+                if (Global.config.origin_thumb.Get<bool>() && h.files != null && h.files.Length >= 1 && h.files[0] != null)
+                {
+                    this.pageLabel.Content = h.files.Length;
+                    this.nameLabel.Content = h.name + " (썸네일 로딩중)";
+                    ImageProcessor.ProcessEncryptAsync(h.files[0].url).then((BitmapImage image) =>
+                    {
+                        h.thumbnail.preview_img = image;
+                        base.h = this.h;
+                        thumbNail.Source = image;
+                        thumbBrush.ImageSource = image;
+                        this.nameLabel.Content = h.name;
+                    }, null, sourceName: MethodBase.GetCurrentMethod().FullName());
+                }
+                else
+                {
+                    h.thumbnail.preview_img = await ImageProcessor.ProcessEncryptAsync(h.thumbnail.preview_url).@catch(null, MethodBase.GetCurrentMethod().FullName());
+                    base.h = this.h;
+                    this.nameLabel.Content = h.name;
+                }
+                thumbNail.MouseEnter += (object _, MouseEventArgs __) => thumbNail.ToolTip = GetToolTip(panel.Height);
+            }
+            catch (Exception ex)
+            {
+                ex.WriteExcept(MethodBase.GetCurrentMethod().FullName());
+            }
         }
 
         public override void DownloadData_Click(object sender, RoutedEventArgs e)
