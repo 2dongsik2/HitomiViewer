@@ -39,7 +39,7 @@ namespace HitomiViewer.UserControls.Reader
             {
                 window.Readers.Remove(this);
             };
-            this.image.Source = hiyobi.thumbnail.preview_img;
+            this.image.Source = hiyobi.thumbnail.preview_img.ToImage();
             this.Title = hiyobi.name;
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
             if (hiyobi.files == null || hiyobi.files.Length <= 0)
@@ -47,9 +47,10 @@ namespace HitomiViewer.UserControls.Reader
                 MessageBox.Show("이미지를 불러올 수 없습니다.");
                 Close();
             }
-            new TaskFactory().StartNew(() => {
+            new TaskFactory().StartNew(async () => {
                 while (hiyobi.files == null || hiyobi.files.Length <= 0) { }
-                if (hiyobi.thumbnail.preview_img == null) this.image.Source = ImageProcessor.ProcessEncrypt(hiyobi.files[0].url);
+                if (hiyobi.thumbnail.preview_img == null)
+                    this.image.Source = (await ImageProcessor.ProcessAsync(hiyobi.files[0].url)).ToImage();
                 System.Threading.Thread.Sleep(100);
                 this.Dispatcher.Invoke(() =>
                 {
@@ -75,11 +76,11 @@ namespace HitomiViewer.UserControls.Reader
             if (images[copypage] == null)
             {
                 BitmapImage image = null;
-                Task<BitmapImage> task = null;
+                Task<byte[]> task = null;
                 for (int m = 0; m < 10 && image == null; m++)
                 {
-                    task = ImageProcessor.ProcessEncryptAsync(file.url);
-                    try { image = await task; } catch { }
+                    task = ImageProcessor.ProcessAsync(file.url);
+                    try { image = (await task).ToImage(); } catch { }
                 }
                 if (image == null && task.IsFaulted)
                 {
@@ -116,11 +117,11 @@ namespace HitomiViewer.UserControls.Reader
             if (images[loadpage] != null) return;
             Hitomi.HFile file = hiyobi.files[loadpage];
             BitmapImage image = null;
-            Task<BitmapImage> task = null;
+            Task<byte[]> task = null;
             for (int m = 0; m < 10 && image == null; m++)
             {
-                task = ImageProcessor.ProcessEncryptAsync(file.url);
-                try { image = await task; } catch { }
+                task = ImageProcessor.ProcessAsync(file.url);
+                try { image = (await task).ToImage(); } catch { }
             }
             if (image == null && task.IsFaulted)
             {
@@ -158,11 +159,11 @@ namespace HitomiViewer.UserControls.Reader
                 if (images[i] == null)
                 {
                     BitmapImage image = null;
-                    Task<BitmapImage> task = null;
+                    Task<byte[]> task = null;
                     for (int m = 0; m < 10 && image == null; m++)
                     {
-                        task = ImageProcessor.ProcessEncryptAsync(hiyobi.files[i].url);
-                        try { image = await task; } catch { }
+                        task = ImageProcessor.ProcessAsync(hiyobi.files[i].url);
+                        try { image = (await task).ToImage(); } catch { }
                     }
                     if (image == null && task.IsFaulted)
                     {

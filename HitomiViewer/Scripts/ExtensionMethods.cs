@@ -18,6 +18,7 @@ using System.Collections.Specialized;
 using System.Web;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using HitomiViewer.Processor;
 
 namespace ExtensionMethods
 {

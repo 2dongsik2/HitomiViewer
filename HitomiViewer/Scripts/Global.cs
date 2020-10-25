@@ -1,4 +1,5 @@
-﻿using HitomiViewer.Scripts;
+﻿using HitomiViewer.Processor;
+using HitomiViewer.Scripts;
 using HitomiViewerLibrary;
 using Newtonsoft.Json.Linq;
 using System;
@@ -48,7 +49,7 @@ namespace HitomiViewer
 
         public static void Setup()
         {
-            NoImage = Processor.ImageProcessor.FromResource("NoImage.jpg");
+            NoImage = Processor.ImageProcessor.FromResource("NoImage.jpg").ToImage();
         }
     }
 }

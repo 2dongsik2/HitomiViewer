@@ -73,7 +73,7 @@ namespace HitomiViewer.UserControls
             {
                 image.SetValue(Image.HeightProperty, size);
                 image.SetValue(Image.HorizontalAlignmentProperty, HorizontalAlignment.Left);
-                image.SetValue(Image.SourceProperty, h.thumbnail.preview_img);
+                image.SetValue(Image.SourceProperty, h.thumbnail.preview_img.ToImage());
             }
             FrameworkElementFactory elemborder = new FrameworkElementFactory(typeof(Border));
             {

@@ -47,10 +47,10 @@ namespace HitomiViewer.UserControls.Panels
             else
                 follow.Content = "팔로우 중이 아닙니다.";
             Dispatcher dispatcher = this.Dispatcher;
-            ImageProcessor.PixivImage(user.user.profile_image_urls.medium).then((BitmapImage profileImage) => dispatcher.Invoke(() =>
+            ImageProcessor.PixivImage(user.user.profile_image_urls.medium).then((byte[] profileImage) => dispatcher.Invoke(() =>
             {
-                userImage.Source = profileImage;
-                thumbBrush.ImageSource = profileImage;
+                userImage.Source = profileImage.ToImage();
+                thumbBrush.ImageSource = profileImage.ToImage();
             }), null, sourceName: MethodBase.GetCurrentMethod().FullName());
 
             Global.Account.Pixiv.userDetail(user.user.id.ToString()).then((JObject detail) => dispatcher.Invoke(() =>
@@ -66,9 +66,9 @@ namespace HitomiViewer.UserControls.Panels
                 return;
             if (!image.IsMouseOver)
                 return;
-            if (ugoiraImage.index >= ugoiraImage.bytesofimages.Count)
+            if (ugoiraImage.index >= ugoiraImage.images.Count)
                 ugoiraImage.index = 0;
-            image.Source = ImageProcessor.Bytes2Image2(ugoiraImage.bytesofimages[ugoiraImage.index]);
+            image.Source = ImageProcessor.Bytes2Image2(ugoiraImage.images[ugoiraImage.index]);
             Thread.Sleep(ugoiraImage.delays[ugoiraImage.index++]);
             Ugoira(dispatcher, ugoiraImage, image);
         }

@@ -67,8 +67,9 @@ namespace HitomiViewer.UserControls.Panels
         {
             if (h.files == null)
                 h.files = new Hitomi.HFile[0];
-            thumbNail.Source = h.thumbnail.preview_img;
-            thumbBrush.ImageSource = h.thumbnail.preview_img;
+            BitmapImage image = h.thumbnail.preview_img.ToImage();
+            thumbNail.Source = image;
+            thumbBrush.ImageSource = image;
             nameLabel.Content = h.name;
             pageLabel.Content = h.files.Length;
             sizeLabel.Content = CF.File.SizeStr(h.FileInfo.size);
@@ -151,21 +152,23 @@ namespace HitomiViewer.UserControls.Panels
             {
                 this.pageLabel.Content = h.files.Length;
                 this.nameLabel.Content = h.name + " (썸네일 로딩중)";
-                ImageProcessor.ProcessEncryptAsync(h.files[0].url).then((BitmapImage image) =>
+                ImageProcessor.ProcessAsync(h.files[0].url).then((byte[] image) =>
                 {
                     h.thumbnail.preview_img = image;
                     base.h = this.h;
-                    thumbNail.Source = image;
-                    thumbBrush.ImageSource = image;
                     this.nameLabel.Content = h.name;
                 }, null, sourceName: MethodBase.GetCurrentMethod().FullName());
             }
             else
             {
-                h.thumbnail.preview_img = await ImageProcessor.ProcessEncryptAsync(h.thumbnail.preview_url).@catch(null, MethodBase.GetCurrentMethod().FullName());
+                var preview_image = await ImageProcessor.ProcessAsync(h.thumbnail.preview_url).@catch(null, MethodBase.GetCurrentMethod().FullName());
+                h.thumbnail.preview_img = preview_image;
                 base.h = this.h;
                 this.nameLabel.Content = h.name;
             }
+            BitmapImage image = h.thumbnail.preview_img.ToImage();
+            thumbNail.Source = image;
+            thumbBrush.ImageSource = image;
             thumbNail.MouseEnter += (object _, MouseEventArgs __) => thumbNail.ToolTip = GetToolTip(panel.Height);
             Init();
         }
@@ -214,7 +217,7 @@ namespace HitomiViewer.UserControls.Panels
         public override async void ImageDownloadCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
         {
             h.thumbnail.preview_url = h.files.First().url;
-            h.thumbnail.preview_img = await ImageProcessor.ProcessEncryptAsync(h.thumbnail.preview_url).@catch(null, sourceName: MethodBase.GetCurrentMethod().FullName());
+            h.thumbnail.preview_img = await ImageProcessor.ProcessAsync(h.thumbnail.preview_url).@catch(null, sourceName: MethodBase.GetCurrentMethod().FullName());
             Init();
         }
         public override void tagScroll_MouseWheel(object sender, MouseWheelEventArgs e)

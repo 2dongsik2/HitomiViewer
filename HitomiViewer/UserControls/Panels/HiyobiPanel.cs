@@ -46,14 +46,14 @@ namespace HitomiViewer.UserControls.Panels
                 if (h.thumbnail.preview_url == null)
                     h.thumbnail.preview_img = ImageProcessor.FromResource("NoImage.jpg");
                 else
-                    h.thumbnail.preview_img = await ImageProcessor.ProcessEncryptAsync(h.thumbnail.preview_url).@catch(null, sourceName: MethodBase.GetCurrentMethod().FullName());
+                    h.thumbnail.preview_img = await ImageProcessor.ProcessAsync(h.thumbnail.preview_url).@catch(null, sourceName: MethodBase.GetCurrentMethod().FullName());
             }
             if (h.files == null)
             {
                 h.files = (await new InternetP().HiyobiFiles(int.Parse(h.id))).ToArray();
             }
-            thumbNail.Source = h.thumbnail.preview_img;
-            thumbBrush.ImageSource = h.thumbnail.preview_img;
+            thumbNail.Source = h.thumbnail.preview_img.ToImage();
+            thumbBrush.ImageSource = h.thumbnail.preview_img.ToImage();
             nameLabel.Content = h.name;
             pageLabel.Content = h.files.Length;
             sizeLabel.Content = CF.File.SizeStr(h.FileInfo.size);
@@ -142,21 +142,21 @@ namespace HitomiViewer.UserControls.Panels
                 {
                     this.pageLabel.Content = h.files.Length;
                     this.nameLabel.Content = h.name + " (썸네일 로딩중)";
-                    ImageProcessor.ProcessEncryptAsync(h.files[0].url).then((BitmapImage image) =>
+                    ImageProcessor.ProcessAsync(h.files[0].url).then((byte[] image) =>
                     {
                         h.thumbnail.preview_img = image;
                         base.h = this.h;
-                        thumbNail.Source = image;
-                        thumbBrush.ImageSource = image;
                         this.nameLabel.Content = h.name;
                     }, null, sourceName: MethodBase.GetCurrentMethod().FullName());
                 }
                 else
                 {
-                    h.thumbnail.preview_img = await ImageProcessor.ProcessEncryptAsync(h.thumbnail.preview_url).@catch(null, MethodBase.GetCurrentMethod().FullName());
+                    h.thumbnail.preview_img = await ImageProcessor.ProcessAsync(h.thumbnail.preview_url).@catch(null, MethodBase.GetCurrentMethod().FullName());
                     base.h = this.h;
                     this.nameLabel.Content = h.name;
                 }
+                thumbNail.Source = h.thumbnail.preview_img.ToImage();
+                thumbBrush.ImageSource = h.thumbnail.preview_img.ToImage();
                 thumbNail.MouseEnter += (object _, MouseEventArgs __) => thumbNail.ToolTip = GetToolTip(panel.Height);
             }
             catch (Exception ex)

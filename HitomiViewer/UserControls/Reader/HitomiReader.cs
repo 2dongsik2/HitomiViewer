@@ -37,7 +37,7 @@ namespace HitomiViewer.UserControls.Reader
             {
                 window.Readers.Remove(this);
             };
-            this.image.Source = hitomi.thumbnail.preview_img;
+            this.image.Source = hitomi.thumbnail.preview_img.ToImage();
             this.Title = hitomi.name;
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
             if (hitomi.files == null || hitomi.files.Length <= 0)
@@ -47,7 +47,7 @@ namespace HitomiViewer.UserControls.Reader
             }
             new TaskFactory().StartNew(() => {
                 while (hitomi.files == null || hitomi.files.Length <= 0) { }
-                if (hitomi.thumbnail.preview_img == null) this.image.Source = ImageProcessor.ProcessEncrypt(hitomi.files[0].url);
+                if (hitomi.thumbnail.preview_img == null) this.image.Source = ImageProcessor.ProcessAsync(hitomi.files[0].url).Result.ToImage();
                 System.Threading.Thread.Sleep(100);
                 this.Dispatcher.Invoke(() =>
                 {
@@ -73,11 +73,11 @@ namespace HitomiViewer.UserControls.Reader
             if (images[copypage] == null)
             {
                 BitmapImage image = null;
-                Task<BitmapImage> task = null;
+                Task<byte[]> task = null;
                 for (int m = 0; m < 10 && image == null; m++)
                 {
-                    task = ImageProcessor.ProcessEncryptAsync(file.url);
-                    try { image = await task; } catch { }
+                    task = ImageProcessor.ProcessAsync(file.url);
+                    try { image = (await task).ToImage(); } catch { }
                 }
                 if (image == null && task.IsFaulted)
                 {
@@ -116,11 +116,11 @@ namespace HitomiViewer.UserControls.Reader
                 if (images[i] == null)
                 {
                     BitmapImage image = null;
-                    Task<BitmapImage> task = null;
+                    Task<byte[]> task = null;
                     for (int m = 0; m < 10 && image == null; m++)
                     {
-                        task = ImageProcessor.ProcessEncryptAsync(hitomi.files[i].url);
-                        try { image = await task; } catch { }
+                        task = ImageProcessor.ProcessAsync(hitomi.files[i].url);
+                        try { image = (await task).ToImage(); } catch { }
                     }
                     if (image == null && task.IsFaulted)
                     {
