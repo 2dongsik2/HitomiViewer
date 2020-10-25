@@ -120,19 +120,26 @@ namespace HitomiViewer.Processor
         }
         public static Byte[] Image2Bytes(BitmapImage image)
         {
-            byte[] bytes = null;
-            var bitmapSource = image as BitmapSource;
-            var encoder = new BmpBitmapEncoder();
-            if (bitmapSource != null)
+            try
             {
-                encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
-                using (var stream = new System.IO.MemoryStream())
+                byte[] bytes = null;
+                var bitmapSource = image as BitmapSource;
+                var encoder = new BmpBitmapEncoder();
+                if (bitmapSource != null)
                 {
-                    encoder.Save(stream);
-                    bytes = stream.ToArray();
+                    encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
+                    using (var stream = new System.IO.MemoryStream())
+                    {
+                        encoder.Save(stream);
+                        bytes = stream.ToArray();
+                    }
                 }
+                return bytes;
             }
-            return bytes;
+            catch
+            {
+                return new byte[0];
+            }
         }
         public static async Task<byte[]> PixivImage(string url)
         {
