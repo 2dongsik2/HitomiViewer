@@ -504,7 +504,7 @@ namespace HitomiViewer
                 LabelSetup();
                 HiyobiMain(i);
             }).SetPagination(index);
-            parser.LoadJObject(hiyobi.Parser);
+            parser.LoadJObject(hiyobi.Parser); //err catch
         }
         public void HiyobiSearch(List<string> keyword, int index)
         {
