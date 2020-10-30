@@ -72,7 +72,7 @@ namespace HitomiViewer
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(ResolveAssembly);
             PluginHandler.LoadPlugins();
             Global.dispatcher = Dispatcher;
-            //new LoginClass().Run();
+            new LoginClass().Run();
             //new Config().GetConfig().Save();
             new Cache().Test();
             CheckUpdate.Auto();

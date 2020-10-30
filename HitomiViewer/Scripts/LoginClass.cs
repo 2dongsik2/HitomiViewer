@@ -51,7 +51,7 @@ namespace HitomiViewer.Scripts
         private void Plain()
         {
             ConfigFileData config = new ConfigFile().Load();
-            if (Global.Password != null)
+            if (config.password.Data != null)
             {
                 LoginWindow lw = new LoginWindow();
                 lw.CheckPassword = CheckPassword2;
