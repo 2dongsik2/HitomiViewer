@@ -1,0 +1,6 @@
+[submodule "Modules/WebP-wrapper"]
+	path = Modules/WebP-wrapper
+	url = https://github.com/JosePineiro/WebP-wrapper
+[submodule "Modules/HitomiViewerLibrary"]
+	path = Modules/HitomiViewerLibrary
+	url = https://github.com/rmagur1203/HitomiViewerLibrary

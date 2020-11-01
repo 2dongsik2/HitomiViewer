@@ -46,130 +46,42 @@ namespace HitomiViewer
         public Settings()
         {
             InitializeComponent();
-            Config cfg = new Config();
-            JObject config = cfg.Load();
-            if (oldconfig.Where(x => config[x] != null).Count() > 0) Update();
+            ConfigFile cfg = new ConfigFile();
+            ConfigFileData config = cfg.Load();
             InitFolderName(config);
             InitPassword(config);
             InitEncrypt(config);
             InitTitle(config);
             InitTags(config);
-            SafeData.IsChecked = (!File.Exists(Global.Config.path)) && File.Exists(Global.Config.encryptpath);
-            CacheSearch.IsChecked = config.BoolValue(cache_search) ?? false;
-            UpgradeThumbnail.IsChecked = config.BoolValue(origin_thumb) ?? false;
         }
 
-        private void Update()
+        private void InitFolderName(ConfigFileData config)
         {
-            Config cfg = new Config();
-            JObject oldconfig = cfg.Load();
-            JObject newconfig = new JObject();
-            string[] prev = this.oldconfig;
-            string[] next = this.newconfig;
-            for (int i = 0; i < prev.Length; i++)
-            {
-                newconfig[next[i]] = oldconfig[prev[i]];
-            }
-            cfg.Save(newconfig);
+            FolderName.Content = config.download_folder.Get<string>();
         }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void InitPassword(ConfigFileData config)
         {
-            Config cfg = new Config();
-            JObject config = cfg.Load();
-            CheckPassword(ref config);
-            CheckTitle(ref config);
-            CheckTags(ref config);
-            if (Global.OriginPassword == null)
-                new LoginClass().Run();
-            if (SafeData.IsChecked ?? false)
-                Global.Password = FilePassword.Password;
-
-            Global.CacheSearch = CacheSearch.IsChecked ?? false;
-            Global.OriginThumb = UpgradeThumbnail.IsChecked ?? false;
-            config[cache_search] = Global.CacheSearch;
-            config[origin_thumb] = Global.OriginThumb;
-
-            cfg.encrypt = SafeData.IsChecked ?? false;
-            if (cfg.encrypt) File.Delete(Global.Config.path);
-
-            cfg.Save(config);
-            Close();
-        }
-
-        private void InitFolderName(JObject config)
-        {
-            FolderName.Content = config.StringValue(download_folder);
-        }
-        private void InitPassword(JObject config)
-        {
-            if (config.GetValue(password) != null)
+            if (config.password.Get<string>() != null)
                 Password.IsChecked = true;
         }
-        private void InitEncrypt(JObject config)
+        private void InitEncrypt(ConfigFileData config)
         {
-            if (config.GetValue(file_encrypt) != null)
-                FileEncrypt.IsChecked = config.BoolValue(file_encrypt);
-            if (config.GetValue(download_file_encrypt) != null)
-                AutoEncryption.IsChecked = config.BoolValue(download_file_encrypt);
+            FileEncrypt.IsChecked = config.file_encrypt.Get<bool>();
+            AutoEncryption.IsChecked = config.download_file_encrypt.Get<bool>();
         }
-        private void InitTitle(JObject config)
+        private void InitTitle(ConfigFileData config)
         {
-            if (config.GetValue(encrypt_title) != null)
-                EncryptTitle.IsChecked = config.BoolValue(encrypt_title);
-            if (config.GetValue(random_title) != null)
-                RandomTitle.IsChecked = config.BoolValue(random_title);
+            EncryptTitle.IsChecked = config.encrypt_title.Get<bool>();
+            RandomTitle.IsChecked = config.random_title.Get<bool>();
         }
-        private void InitTags(JObject config)
+        private void InitTags(ConfigFileData config)
         {
-            if (config[block_tags] != null)
-            {
-                BlockTags.IsChecked = config.BoolValue(block_tags);
-            }
-            if (config[except_tags] != null)
-            {
-                List<string> tags = config.ArrayValue<string>(except_tags).ToList();
-                foreach (string tag in tags) ExceptTagList.Add(tag);
-            }
-            TagList2ListBox();
-        }
 
-        private void CheckPassword(ref JObject config)
-        {
-            if (Password.IsChecked.Value)
-            {
-                if (!config.ContainsKey(password))
-                {
-                    Global.OriginPassword = new InputBox("비밀번호를 입력해주세요.", "비밀번호 설정", "").ShowDialog();
-                    config[password] = SHA256.Hash(Global.OriginPassword);
-                }
-                config[file_encrypt] = FileEncrypt.IsChecked.Value;
-                if (FileEncrypt.IsChecked.Value == true)
-                    config[download_file_encrypt] = AutoEncryption.IsChecked.Value;
-            }
-            else
-            {
-                config.Remove(password);
-            }
-            Visibility visibility = Visibility.Visible;
-            if (config[password] == null || config.BoolValue(file_encrypt) == false)
-                visibility = Visibility.Collapsed;
-            Global.MainWindow.Encrypt.Visibility = visibility;
-            Global.MainWindow.Decrypt.Visibility = visibility;
-        }
-        private void CheckTitle(ref JObject config)
-        {
-            config[encrypt_title] = EncryptTitle.IsChecked ?? false;
-            if (!EncryptTitle.IsChecked ?? false)
-                config[random_title] = RandomTitle.IsChecked ?? false;
-        }
-        private void CheckTags(ref JObject config)
-        {
-            config[block_tags] = BlockTags.IsChecked ?? false;
-            if (ExceptTagList.Count > 0)
-            {
-                config[except_tags] = JToken.FromObject(ExceptTagList);
-            }
+            BlockTags.IsChecked = config.block_tags.Get<bool>();
+            List<string> tags = config.except_tags.Get<List<string>>();
+            if (tags != null)
+                foreach (string tag in tags) ExceptTagList.Add(tag);
+            TagList2ListBox();
         }
 
         private void TagList2ListBox()
@@ -202,68 +114,37 @@ namespace HitomiViewer
         private void RandomTitle_Unchecked(object sender, RoutedEventArgs e) => EncryptTitle.IsEnabled = true;
         private void EncryptTitle_Checked(object sender, RoutedEventArgs e) => RandomTitle.IsEnabled = false;
         private void EncryptTitle_Unchecked(object sender, RoutedEventArgs e) => RandomTitle.IsEnabled = true;
-        private void ChangePassword_Click(object sender, RoutedEventArgs e)
+        private void RandomDownloadFolder_Click(object sender, RoutedEventArgs e)
         {
-            Config cfg = new Config();
-            JObject config = cfg.Load();
-            List<string> decs = new List<string>();
-            foreach (string item in Directory.GetDirectories(Global.MainWindow.path))
-            {
-                string[] files = Directory.GetFiles(item);
-                foreach (string file in files)
-                {
-                    try
-                    {
-                        byte[] org = File.ReadAllBytes(file);
-                        byte[] enc = FileDecrypt.Default(org);
-                        File.Delete(file);
-                        File.WriteAllBytes(Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file)), enc);
-                        decs.Add(Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file)));
-                    }
-                    catch { }
-                }
-            }
-            MessageBox.Show("복호화 완료");
-            config[password] = FilePassword.Default(new InputBox("비밀번호를 입력해주세요.", "비밀번호 설정", "").ShowDialog());
-            cfg.Save(config);
-            foreach (string file in decs)
-            {
-                if (Path.GetFileName(file) == "info.json") continue;
-                if (Path.GetFileName(file) == "info.txt") continue;
-                if (Path.GetExtension(file) == ".lock") continue;
-                byte[] org = File.ReadAllBytes(file);
-                byte[] enc = Scripts.FileEncrypt.Default(org);
-                File.Delete(file);
-                File.WriteAllBytes(file + ".lock", enc);
-            }
-            MessageBox.Show("암호화 완료");
+
         }
         private void ChangeDownloadFolder_Click(object sender, RoutedEventArgs e)
         {
-            Config cfg = new Config();
-            JObject config = cfg.Load();
-            config[download_folder] = new InputBox("다운로드 폴더 설정", "설정", "").ShowDialog();
-            cfg.Save(config);
-            FolderName.Content = config.StringValue(download_folder);
-        }
-        private void RandomDownloadFolder_Click(object sender, RoutedEventArgs e)
-        {
-            Config cfg = new Config();
-            JObject config = cfg.Load();
-            config[download_folder] = Random2.RandomString(int.Parse(new InputBox("랜덤 길이 지정", "설정", "").ShowDialog()));
-            cfg.Save(config);
-            FolderName.Content = config.StringValue(download_folder);
-        }
-        private void ExcecptTagsText_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter) ExceptTagsBtn_Click(null, null);
+
         }
         private void ExceptTagsBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (!HiyobiTags.Tags.Select(x => x.full).Contains(ExceptTagsText.Text)) return;
-            ExceptTagList.Add(ExceptTagsText.Text);
-            ExceptTagsText.Text = "";
-            TagList2ListBox();
+
+        }
+        private void ExcecptTagsText_KeyDown(object sender, KeyEventArgs e)
+        {
+
+        }
+        private void ChangePassword_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigFile config = new ConfigFile();
+            ConfigFileData data = Global.config;
+            string pwd = null;
+            if (Password.IsChecked ?? false)
+                pwd = FilePassword.Default(new InputBox("비밀번호를 입력해주세요.", "비밀번호 설정", "").ShowDialog());
+            data.password.Set(pwd);
+            config.config = data;
+            config.Save();
         }
     }
 }

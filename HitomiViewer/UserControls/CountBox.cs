@@ -12,6 +12,7 @@ namespace HitomiViewer.Scripts
         public string text = "";
         public string caption = "";
         public decimal defval = 0;
+        public bool success = false;
         public CountBox(string text, string caption, decimal defval = 0)
         {
             this.text = text;
@@ -38,7 +39,8 @@ namespace HitomiViewer.Scripts
             prompt.Controls.Add(textLabel);
             prompt.AcceptButton = confirmation;
 
-            return prompt.ShowDialog() == DialogResult.OK ? numericBox.Value : defval;
+            success = prompt.ShowDialog() == DialogResult.OK;
+            return success ? numericBox.Value : defval;
         }
     }
 }

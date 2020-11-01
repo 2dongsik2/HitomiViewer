@@ -1,7 +1,7 @@
 ﻿using ExtensionMethods;
 using HitomiViewer.Processor;
 using HitomiViewer.Scripts;
-using HitomiViewer.Structs;
+using HitomiViewerLibrary.Structs;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -16,7 +16,7 @@ namespace HitomiViewer.AutoComplete
     {
         public System.Collections.IEnumerable GetSuggestions(string filter)
         {
-            List<Tag> tags = HiyobiTags.Tags;
+            List<Hitomi.HTag> tags = HiyobiTags.Tags;
             if (tags == null) HiyobiTags.LoadTags();
             if (filter.Split(' ').Length > 1)
             {
@@ -35,7 +35,7 @@ namespace HitomiViewer.AutoComplete
     {
         public System.Collections.IEnumerable GetSuggestions(string filter)
         {
-            List<Tag> tags = HiyobiTags.Tags;
+            List<Hitomi.HTag> tags = HiyobiTags.Tags;
             if (tags == null) HiyobiTags.LoadTags();
             return tags.Select(x => x.full).StartsContains(filter.Split(' ').Last());
         }

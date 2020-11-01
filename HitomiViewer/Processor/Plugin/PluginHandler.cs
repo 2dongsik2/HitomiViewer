@@ -1,4 +1,5 @@
 ﻿using HitomiViewer.UserControls;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -122,51 +123,20 @@ namespace HitomiViewer.Plugin
                 }
             }
         }
-        public static void FireOnHitomiPanelInit(HitomiPanel panel)
+        public static void FireUnknownFileLoaded(int TypeId, JObject data)
         {
             foreach (var plugin in loadedPlugins)
             {
                 try
                 {
-                    plugin.OnHitomiPanelInit(panel);
+                    plugin.UnknownFileLoaded(TypeId, data);
                 }
                 catch (Exception e)
                 {
                     Type type = plugin.GetType();
-                    Console.WriteLine("Error in OnHitomiPanelInit event for " + type.FullName + " (" + type.Assembly.FullName + "), Exception: " + e);
+                    Console.WriteLine("Error in UnknownFileLoaded event for " + type.FullName + " (" + type.Assembly.FullName + "), Exception: " + e);
                 }
             }
         }
-        public static void FireOnHitomiPanelDelayInit(HitomiPanel panel)
-        {
-            foreach (var plugin in loadedPlugins)
-            {
-                try
-                {
-                    plugin.OnHitomiPanelDelayInit(panel);
-                }
-                catch (Exception e)
-                {
-                    Type type = plugin.GetType();
-                    Console.WriteLine("Error in OnHitomiPanelDelayInit event for " + type.FullName + " (" + type.Assembly.FullName + "), Exception: " + e);
-                }
-            }
-        }
-        public static void FireOnHitomiChangeColor(HitomiPanel panel)
-        {
-            foreach (var plugin in loadedPlugins)
-            {
-                try
-                {
-                    plugin.OnHitomiChangeColor(panel);
-                }
-                catch (Exception e)
-                {
-                    Type type = plugin.GetType();
-                    Console.WriteLine("Error in OnHitomiChangeColor event for " + type.FullName + " (" + type.Assembly.FullName + "), Exception: " + e);
-                }
-            }
-        }
-
     }
 }

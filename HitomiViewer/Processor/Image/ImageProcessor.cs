@@ -19,43 +19,32 @@ namespace HitomiViewer.Processor
 {
     class ImageProcessor
     {
-        public static BitmapImage Process(string url)
+        public static async Task<byte[]> ProcessAsync(string url)
         {
             if (url.isUrl())
             {
                 if (url.EndsWith(".webp"))
-                    return LoadWebWebPImage(url);
+                {
+                    return await LoadUrlWebPImageAsync(url);
+                }
                 else
-                    return LoadWebImage(url);
+                {
+                    return await LoadUrlImageAsync(url);
+                }
             }
-            if (Global.FileEn)
+            else if (Global.config.file_encrypt.Get<bool>())
             {
                 try
                 {
                     byte[] org = File.ReadAllBytes(url);
                     byte[] dec = FileDecrypt.Default(org);
-                    using (var ms = new MemoryStream(dec))
-                    {
-                        var image = new BitmapImage();
-                        image.BeginInit();
-                        image.CacheOption = BitmapCacheOption.OnLoad; // here
-                        image.StreamSource = ms;
-                        image.EndInit();
-                        return image;
-                    }
+                    return dec;
                 }
-                catch
-                {
-                    return ProcessFile(url);
-                }
+                catch { }
             }
-            return ProcessFile(url);
-        }
-        public static BitmapImage ProcessFile(string url)
-        {
             try
             {
-                return LoadMemory(url);
+                return LoadFile(url);
             }
             catch (FileNotFoundException)
             {
@@ -66,272 +55,52 @@ namespace HitomiViewer.Processor
                 return FromResource("ErrEncrypted.jpg");
             }
         }
-        public static BitmapImage ProcessEncrypt(string url)
+
+        public static byte[] LoadFile(string url)
         {
-            if (url.isUrl())
-            {
-                if (url.EndsWith(".webp"))
-                {
-                    return LoadWebWebPImage(url);
-                }
-                else
-                {
-                    return LoadWebImage(url);
-                }
-            }
-            else if (Global.FileEn)
-            {
-                try
-                {
-                    byte[] org = File.ReadAllBytes(url);
-                    byte[] dec = FileDecrypt.Default(org);
-                    using (var ms = new MemoryStream(dec))
-                    {
-                        var image = new BitmapImage();
-                        image.BeginInit();
-                        image.CacheOption = BitmapCacheOption.OnLoad; // here
-                        image.StreamSource = ms;
-                        image.EndInit();
-                        return image;
-                    }
-                }
-                catch {
-                    try
-                    {
-                        return LoadMemory(url);
-                    }
-                    catch (FileNotFoundException)
-                    {
-                        return FromResource("NoImage.jpg");
-                    }
-                    catch (NotSupportedException)
-                    {
-                        return FromResource("ErrEncrypted.jpg");
-                    }
-                }
-            }
-            else
-            {
-                try
-                {
-                    return LoadMemory(url);
-                }
-                catch (FileNotFoundException)
-                {
-                    return FromResource("NoImage.jpg");
-                }
-                catch (NotSupportedException)
-                {
-                    return FromResource("ErrEncrypted.jpg");
-                }
-            }
+            return File.ReadAllBytes(url);
         }
-        public static async Task<BitmapImage> ProcessEncryptAsync(string url)
+        public static async Task<byte[]> LoadUrlImageAsync(string url)
         {
-            if (url.isUrl())
-            {
-                if (url.EndsWith(".webp"))
-                    return await LoadWebWebPImageAsync(url);
-                else
-                    return await LoadWebImageAsync(url);
-            }
-            else if (Global.FileEn)
-            {
-                try
-                {
-                    byte[] org = File.ReadAllBytes(url);
-                    byte[] dec = FileDecrypt.Default(org);
-                    using (var ms = new MemoryStream(dec))
-                    {
-                        var image = new BitmapImage();
-                        image.BeginInit();
-                        image.CacheOption = BitmapCacheOption.OnLoad; // here
-                        image.StreamSource = ms;
-                        image.EndInit();
-                        return image;
-                    }
-                }
-                catch
-                {
-                    try
-                    {
-                        return LoadMemory(url);
-                    }
-                    catch (FileNotFoundException)
-                    {
-                        return FromResource("NoImage.jpg");
-                    }
-                    catch (NotSupportedException)
-                    {
-                        return FromResource("ErrEncrypted.jpg");
-                    }
-                }
-            }
-            else
-            {
-                try
-                {
-                    return LoadMemory(url);
-                }
-                catch (FileNotFoundException)
-                {
-                    return FromResource("NoImage.jpg");
-                }
-                catch (NotSupportedException)
-                {
-                    return FromResource("ErrEncrypted.jpg");
-                }
-            }
+            if (string.IsNullOrEmpty(url))
+                return null;
+            System.Net.WebClient wc = new System.Net.WebClient();
+            wc.Headers.Add("Referer", "https://" + new Uri(url).Host);
+            Byte[] Data = await wc.DownloadDataTaskAsync(url);
+            wc.Dispose();
+            return Data;
+        }
+        public static async Task<byte[]> LoadUrlWebPImageAsync(string url)
+        {
+            if (string.IsNullOrEmpty(url))
+                return null;
+            System.Net.WebClient wc = new System.Net.WebClient();
+            wc.Headers.Add("Referer", "https://" + new Uri(url).Host);
+            Byte[] MyData = await wc.DownloadDataTaskAsync(url);
+            wc.Dispose();
+            WebP webP = new WebP();
+            Bitmap bitmap = webP.Decode(MyData);
+            MemoryStream ms = new MemoryStream();
+            bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
+            byte[] data = ms.ToArray();
+            ms.Dispose();
+            return data;
         }
 
-        public static BitmapImage LoadMemory(string url)
-        {
-            var bitmap = new BitmapImage();
-            var stream = File.OpenRead(url);
-
-            bitmap.BeginInit();
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.StreamSource = stream;
-            bitmap.EndInit();
-            stream.Close();
-            stream.Dispose();
-            bitmap.Freeze();
-            return bitmap;
-        }
-        public static BitmapImage LoadWebImage(string url)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(url))
-                    return null;
-                System.Net.WebClient wc = new System.Net.WebClient();
-                Byte[] MyData = wc.DownloadData(url);
-                wc.Dispose();
-                BitmapImage bimgTemp = new BitmapImage();
-                bimgTemp.BeginInit();
-                bimgTemp.StreamSource = new MemoryStream(MyData);
-                bimgTemp.EndInit();
-                return bimgTemp;
-            }
-            catch
-            {
-                return null;
-            }
-        }
-        public static async Task<BitmapImage> LoadWebImageAsync(string url)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(url))
-                    return null;
-                System.Net.WebClient wc = new System.Net.WebClient();
-                Byte[] MyData = await wc.DownloadDataTaskAsync(url);
-                wc.Dispose();
-                BitmapImage bimgTemp = new BitmapImage();
-                bimgTemp.BeginInit();
-                bimgTemp.StreamSource = new MemoryStream(MyData);
-                bimgTemp.EndInit();
-                return bimgTemp;
-            }
-            catch
-            {
-                return null;
-            }
-        }
-        public static BitmapImage LoadWebWebPImage(string url)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(url))
-                    return null;
-                System.Net.WebClient wc = new System.Net.WebClient();
-                wc.Headers.Add("Referer", "https://hitomi.la/");
-                Byte[] MyData = wc.DownloadData(url);
-                wc.Dispose();
-                WebP webP = new WebP();
-                Bitmap bitmap = webP.Decode(MyData);
-                MemoryStream ms = new MemoryStream();
-                bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
-                var bi = new BitmapImage();
-                bi.BeginInit();
-                bi.StreamSource = ms;
-                bi.CacheOption = BitmapCacheOption.OnLoad;
-                bi.EndInit();
-                return bi;
-            }
-            catch
-            {
-                return null;
-            }
-        }
-        public static async Task<BitmapImage> LoadWebWebPImageAsync(string url)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(url))
-                    return null;
-                System.Net.WebClient wc = new System.Net.WebClient();
-                wc.Headers.Add("Referer", "https://hitomi.la/");
-                Byte[] MyData = await wc.DownloadDataTaskAsync(url);
-                wc.Dispose();
-                WebP webP = new WebP();
-                Bitmap bitmap = webP.Decode(MyData);
-                MemoryStream ms = new MemoryStream();
-                bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
-                var bi = new BitmapImage();
-                bi.BeginInit();
-                bi.StreamSource = ms;
-                bi.CacheOption = BitmapCacheOption.OnLoad;
-                bi.EndInit();
-                return bi;
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-        }
-
-        public static BitmapImage FromIncludedResource(string psResourceName)
-        {
-            Uri oUri = new Uri($"pack://siteoforigin:,,,/Resources/{psResourceName}");
-            return new BitmapImage(oUri);
-        }
-        public static BitmapImage FromIncludedResourceWithName(string psAssemblyName, string psResourceName)
-        {
-            Uri oUri = new Uri("pack://application:,,,/" + psAssemblyName + ";component/" + psResourceName, UriKind.RelativeOrAbsolute);
-            return new BitmapImage(oUri);
-        }
-        public static BitmapImage FromResource(string psResourceName)
+        public static byte[] FromResource(string psResourceName)
         {
             Uri oUri = new Uri($"/Resources/{psResourceName}", UriKind.RelativeOrAbsolute);
-            return new BitmapImage(oUri);
+            var info = Application.GetResourceStream(oUri);
+            var memoryStream = new MemoryStream();
+            byte[] data = memoryStream.ToArray();
+            memoryStream.Dispose();
+            return data;
         }
 
-        public static BitmapImage WebPBytes2Image(byte[] data)
-        {
-            using (WebP webP = new WebP())
-            {
-                try
-                {
-                    Bitmap bitmap = webP.Decode(data);
-                    MemoryStream ms = new MemoryStream();
-                    bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
-                    var bi = new BitmapImage();
-                    bi.BeginInit();
-                    bi.StreamSource = ms;
-                    bi.EndInit();
-                    ms.Dispose();
-                    return bi;
-                }
-                catch
-                {
-                    return null;
-                }
-            }
-        }
         public static BitmapImage Bytes2Image(byte[] array)
         {
-            using (MemoryStream ms = new MemoryStream(array))
+            if (array == null || array.Length < 1) return null;
+            using (MemoryStream ms = new MemoryStream((byte[])array.Clone()))
             {
                 BitmapImage image = new BitmapImage();
                 image.BeginInit();
@@ -342,49 +111,48 @@ namespace HitomiViewer.Processor
         }
         public static BitmapImage Bytes2Image2(byte[] array)
         {
+            if (array == null || array.Length < 1) return null;
             BitmapImage bimgTemp = new BitmapImage();
             bimgTemp.BeginInit();
             bimgTemp.StreamSource = new MemoryStream(array);
             bimgTemp.EndInit();
             return bimgTemp;
         }
-        public static BitmapImage Bitmap2BitmapImage(Bitmap bitmap)
+        public static Byte[] Image2Bytes(BitmapImage image)
         {
-            using (MemoryStream ms = new MemoryStream())
+            try
             {
-                bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
-                BitmapImage bi = new BitmapImage();
-                bi.BeginInit();
-                bi.StreamSource = ms;
-                bi.CacheOption = BitmapCacheOption.OnLoad;
-                bi.EndInit();
-                return bi;
+                byte[] bytes = null;
+                var bitmapSource = image as BitmapSource;
+                var encoder = new BmpBitmapEncoder();
+                if (bitmapSource != null)
+                {
+                    encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
+                    using (var stream = new System.IO.MemoryStream())
+                    {
+                        encoder.Save(stream);
+                        bytes = stream.ToArray();
+                    }
+                }
+                return bytes;
+            }
+            catch
+            {
+                return new byte[0];
             }
         }
-        public static BitmapSource Bitmap2BitmapSource(Bitmap bitmap)
-        {
-            return Imaging.CreateBitmapSourceFromHBitmap(bitmap.GetHbitmap(),
-                                      IntPtr.Zero,
-                                      Int32Rect.Empty,
-                                      BitmapSizeOptions.FromEmptyOptions());
-        }
-        public static async Task<BitmapImage> PixivImage(string url)
+        public static async Task<byte[]> PixivImage(string url)
         {
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Add("Referer", "https://www.pixiv.net/");
             HttpResponseMessage response = await client.GetAsync(url);
             byte[] data = await response.Content.ReadAsByteArrayAsync();
-            BitmapImage bimgTemp = new BitmapImage();
-            bimgTemp.BeginInit();
-            bimgTemp.StreamSource = new MemoryStream(data);
-            bimgTemp.EndInit();
-            return bimgTemp;
+            return data;
         }
     }
     public static partial class ExtensionMethods
     {
-        public static BitmapImage ToImage(this byte[] array) => ImageProcessor.Bytes2Image(array);
-        public static BitmapImage ToBitmapImage(this Bitmap bitmap) => ImageProcessor.Bitmap2BitmapImage(bitmap);
-        public static BitmapSource ToBitmapSource(this Bitmap bitmap) => ImageProcessor.Bitmap2BitmapSource(bitmap);
+        public static BitmapImage ToImage(this byte[] array) => ImageProcessor.Bytes2Image2(array);
+        public static byte[] ToByteArray(this BitmapImage bitmapImage) => ImageProcessor.Image2Bytes(bitmapImage);
     }
 }
