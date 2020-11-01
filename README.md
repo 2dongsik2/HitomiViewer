@@ -9,6 +9,10 @@
 
 오류나 개선사항 Issues 에 올려주세요.
 
+# Build
+- [AppVeyor](https://ci.appveyor.com/project/rmagur1203/hitomiviewer)
+- [![Build status](https://ci.appveyor.com/api/projects/status/1688mujamliocw88/branch/master?svg=true)](https://ci.appveyor.com/project/rmagur1203/hitomiviewer/branch/master)
+
 # Framework
 .NET Framework 4.8 - [download](https://dotnet.microsoft.com/download) - [downloads](https://dotnet.microsoft.com/download/visual-studio-sdks?utm_source=getdotnetsdk&utm_medium=referral)
 
