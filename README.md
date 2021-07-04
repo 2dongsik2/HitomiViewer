@@ -1,3 +1,5 @@
+고등학교에 들어가게 되어서 개발 잠시 중단합니다
+
 # HitomiViewer
 
 [![release latest](https://img.shields.io/github/release/rmagur1203/HitomiViewer.svg?logo=github)](https://github.com/rmagur1203/HitomiViewer/releases/latest)
